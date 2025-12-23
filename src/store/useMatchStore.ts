@@ -111,8 +111,10 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
                 },
             };
 
-            if (isAllOut || isMaxOvers) {
-                if (state.currentInnings === 1) {
+            const isTargetReached = state.currentInnings === 2 && newTotalRuns > state.innings1.totalRuns;
+
+            if (state.currentInnings === 1) {
+                if (isAllOut || isMaxOvers) {
                     // Start 2nd Innings
                     nextState = {
                         ...nextState,
@@ -122,7 +124,9 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
                             battingTeam: config.teamB,
                         }
                     };
-                } else {
+                }
+            } else {
+                if (isAllOut || isMaxOvers || isTargetReached) {
                     // Match Ends
                     const runs1 = nextState.innings1.totalRuns;
                     const runs2 = nextState.innings2.totalRuns;

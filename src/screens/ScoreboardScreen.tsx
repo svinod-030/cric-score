@@ -40,6 +40,17 @@ export default function ScoreboardScreen({ navigation }: any) {
                     <Text className="text-xl text-gray-400 mt-2">
                         Overs: {innings.overs.length}.{currentOverValidBalls}
                     </Text>
+
+                    {state.currentInnings === 2 && (
+                        <View className="mt-4 bg-gray-800 px-4 py-2 rounded-lg">
+                            <Text className="text-yellow-500 font-bold text-lg text-center">
+                                Target: {state.innings1.totalRuns + 1}
+                            </Text>
+                            <Text className="text-gray-300 text-sm text-center mt-1">
+                                Need {state.innings1.totalRuns + 1 - innings.totalRuns} runs in {(state.overs * 6) - (innings.overs.length * 6 + currentOverValidBalls)} balls
+                            </Text>
+                        </View>
+                    )}
                 </View>
 
                 <View className="mb-4">
