@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
 import { ExtraType } from '../types/match';
+import { BowlerSelectionModal } from '../components/BowlerSelectionModal';
 
 export default function ScoreboardScreen({ navigation }: any) {
     const { state, recordBall, resetMatch, setBowler } = useMatchStore();
@@ -190,30 +191,11 @@ export default function ScoreboardScreen({ navigation }: any) {
                 </View>
             </ScrollView>
 
-            {/* Bowler Selection Modal */}
-            <Modal
+            <BowlerSelectionModal
                 visible={isBowlerModalVisible}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => { }} // Block back button
-            >
-                <View className="flex-1 bg-black/80 justify-end">
-                    <View className="bg-gray-900 rounded-t-3xl p-6 h-2/3">
-                        <Text className="text-white text-xl font-bold mb-4 text-center">Select Bowler</Text>
-                        <ScrollView>
-                            {bowlingTeamPlayers.map(player => (
-                                <TouchableOpacity
-                                    key={player.id}
-                                    className="p-4 border-b border-gray-800 active:bg-gray-800"
-                                    onPress={() => setBowler(player.id)}
-                                >
-                                    <Text className="text-white text-lg">{player.name}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-                    </View>
-                </View>
-            </Modal>
+                players={bowlingTeamPlayers}
+                onSelect={setBowler}
+            />
         </SafeAreaView>
     );
 }
