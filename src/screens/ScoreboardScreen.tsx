@@ -4,10 +4,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
 import { ExtraType } from '../types/match';
 
-export default function ScoreboardScreen() {
+export default function ScoreboardScreen({ navigation }: any) {
     const { state, recordBall, resetMatch } = useMatchStore();
     const innings = state.currentInnings === 1 ? state.innings1 : state.innings2;
     const currentOverValidBalls = innings.currentOver.filter(b => b.isValidBall).length;
+
+    React.useEffect(() => {
+        if (!state.isPlaying && state.matchResult) {
+            navigation.replace('MatchResult');
+        }
+    }, [state.isPlaying, state.matchResult]);
 
     const handleScore = (runs: number) => {
         recordBall(runs, 'none', false);

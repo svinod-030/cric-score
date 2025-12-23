@@ -1,38 +1,5 @@
 import { create } from 'zustand';
-import { MatchConfig } from '../types/match';
-
-type ExtraType = 'none' | 'wide' | 'no-ball' | 'leg-bye' | 'bye';
-
-interface Ball {
-    runs: number;
-    extraType: ExtraType;
-    isWicket: boolean;
-    isValidBall: boolean; // True if it counts towards the over
-}
-
-interface Over {
-    balls: Ball[];
-    bowlerName: string; // Placeholder for now
-}
-
-interface InningsState {
-    battingTeam: string;
-    totalRuns: number;
-    totalWickets: number;
-    overs: Over[];
-    currentOver: Ball[];
-    strikerId: string; // Player ID
-    nonStrikerId: string; // Player ID
-    // Add other innings-specific state like partnerships, fall of wickets, etc.
-}
-
-interface MatchState extends MatchConfig {
-    isPlaying: boolean;
-    currentInnings: 1 | 2;
-    innings1: InningsState;
-    innings2: InningsState;
-    // Add other match-specific state like target, result, etc.
-}
+import { MatchConfig, MatchState, InningsState, ExtraType } from '../types/match';
 
 interface MatchStore {
     config: MatchConfig;
@@ -69,6 +36,7 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
     state: {
         ...INITIAL_CONFIG,
         isPlaying: false,
+        matchResult: null,
         currentInnings: 1,
         innings1: INITIAL_INNINGS,
         innings2: INITIAL_INNINGS,
@@ -83,6 +51,7 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
             state: {
                 ...config,
                 isPlaying: true,
+                matchResult: null,
                 currentInnings: 1,
                 innings1: { ...INITIAL_INNINGS, battingTeam: config.teamA },
                 innings2: { ...INITIAL_INNINGS, battingTeam: config.teamB },
@@ -155,11 +124,28 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
                     };
                 } else {
                     // Match Ends
+                    const runs1 = nextState.innings1.totalRuns;
+                    const runs2 = nextState.innings2.totalRuns;
+                    let result: any = { winner: 'Draw', reason: 'Scores are tied' };
+
+                    if (runs1 > runs2) {
+                        result = {
+                            winner: config.teamA,
+                            reason: `Won by ${runs1 - runs2} runs`
+                        };
+                    } else if (runs2 > runs1) {
+                        const wicketsLeft = config.playersPerTeam - 1 - nextState.innings2.totalWickets;
+                        result = {
+                            winner: config.teamB,
+                            reason: `Won by ${wicketsLeft} wickets`
+                        };
+                    }
+
                     nextState = {
                         ...nextState,
                         isPlaying: false,
+                        matchResult: result
                     };
-                    // Ideally navigate to a Summary screen or show alert (can be handled in UI via isPlaying check)
                 }
             }
 
@@ -173,6 +159,7 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
         state: {
             ...INITIAL_CONFIG, // Just reset state, keep config or reset? Let's reset purely state logic mostly
             isPlaying: false,
+            matchResult: null,
             currentInnings: 1,
             innings1: INITIAL_INNINGS,
             innings2: INITIAL_INNINGS,

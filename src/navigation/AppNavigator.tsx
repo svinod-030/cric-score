@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MatchSetupScreen from '../screens/MatchSetupScreen';
 import ScoreboardScreen from '../screens/ScoreboardScreen';
+import MatchResultScreen from '../screens/MatchResultScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,6 +18,7 @@ export default function AppNavigator() {
             >
                 <Stack.Screen name="MatchSetup" component={MatchSetupScreen} />
                 <Stack.Screen name="Scoreboard" component={ScoreboardScreen} />
+                <Stack.Screen name="MatchResult" component={MatchResultScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );

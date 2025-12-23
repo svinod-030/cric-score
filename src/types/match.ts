@@ -42,8 +42,14 @@ export type InningsState = {
     nonStrikerId: string; // ID of player
 };
 
+export type MatchResult = {
+    winner: string | 'Draw';
+    reason: string; // e.g. "By 20 runs" or "By 4 wickets"
+} | null;
+
 export interface MatchState extends MatchConfig {
     isPlaying: boolean;
+    matchResult: MatchResult;
     currentInnings: 1 | 2;
     innings1: InningsState;
     innings2: InningsState;
