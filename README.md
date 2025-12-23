@@ -9,13 +9,20 @@ CricScore is a React Native mobile application for scoring cricket matches effor
   - Set variable **Overs** per innings.
   - Set **Players** per team.
   - **Custom Rules**: Configure runs for Wides/No-balls and toggle Re-ball rules.
+- **Advanced Scoring Features**:
+  - **Player Stats**: Tracks Runs, Balls Faces, Fours, Sixes, Strike Rate for batters.
+  - **Bowling Stats**: Tracks Overs, Maidens, Runs Conceded, Wickets, Economy.
+  - **Bowler Rotation**: Manual bowler selection after every over.
+  - **Strike Rotation**: Automatic strike rotation for odd runs and over completion.
 - **Live Scoreboard**:
   - Intuitive interface for scoring runs (0-6).
   - Dedicated controls for **Wickets**, **Wides**, and **No-Balls**.
+  - Displays current batter and bowler stats alongside the main score.
   - Visual tracking of the current over.
-- **Auto-Logic**:
-  - Automatically handles tracking valid balls in an over.
-  - Switches innings automatically when overs are done or the team is All Out.
+- **Detailed Match Results**:
+  - Full winner summary.
+  - **Scorecards**: Detailed batting and bowling tables for both innings.
+  - **Extras**: Breakdown of Wides, No-balls, Byes, and Leg-byes.
 
 ## 🛠️ Tech Stack
 
@@ -57,7 +64,9 @@ CricScore is a React Native mobile application for scoring cricket matches effor
 
 ## 📂 Project Structure
 
-- `src/screens`: UI screens (Match Setup, Scoreboard).
+- `src/screens`: UI screens (Match Setup, Scoreboard, Result).
+- `src/components`: Reusable UI components (Scorecard, Modal).
 - `src/store`: State management logic (Zustand).
+- `src/utils`: Core game logic (Scoring, Stats).
 - `src/types`: TypeScript definitions.
 - `src/navigation`: App navigation configuration.
