@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { MatchConfig, MatchState, InningsState, ExtraType } from '../types/match';
+import { processBall } from '../utils/scoringUtils';
 
 interface MatchStore {
     config: MatchConfig;
@@ -61,101 +62,8 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
 
     recordBall: (runs, extraType, isWicket) => {
         set((store) => {
-            const { state, config } = store;
-            const currentInningsKey = state.currentInnings === 1 ? 'innings1' : 'innings2';
-            const innings = state[currentInningsKey];
-
-            let runsToAdd = runs;
-            let isValidBall = true;
-
-            // Calculate extras
-            if (extraType === 'wide') {
-                runsToAdd += config.runsForWide;
-                if (config.reballForWide) isValidBall = false;
-            } else if (extraType === 'no-ball') {
-                runsToAdd += config.runsForNoBall;
-                if (config.reballForNoBall) isValidBall = false;
-            }
-
-            // Update totals
-            const newTotalRuns = innings.totalRuns + runsToAdd;
-            const newTotalWickets = isWicket ? innings.totalWickets + 1 : innings.totalWickets;
-
-            const newBall = { runs: runsToAdd, extraType, isWicket, isValidBall };
-            const newCurrentOver = [...innings.currentOver, newBall];
-
-            // Check if over is complete
-            // Count valid balls in the current over
-            const validBallsCount = newCurrentOver.filter(b => b.isValidBall).length;
-
-            let finalCurrentOver = newCurrentOver;
-            let finalOvers = innings.overs;
-
-            if (validBallsCount >= 6) {
-                // Over complete
-                finalOvers = [...finalOvers, { balls: newCurrentOver, bowlerName: "Bowler" }];
-                finalCurrentOver = [];
-            }
-
-            const isAllOut = newTotalWickets >= config.playersPerTeam - 1;
-            const isMaxOvers = finalOvers.length >= config.overs;
-
-            let nextState = {
-                ...state,
-                [currentInningsKey]: {
-                    ...innings,
-                    totalRuns: newTotalRuns,
-                    totalWickets: newTotalWickets,
-                    currentOver: finalCurrentOver,
-                    overs: finalOvers,
-                },
-            };
-
-            const isTargetReached = state.currentInnings === 2 && newTotalRuns > state.innings1.totalRuns;
-
-            if (state.currentInnings === 1) {
-                if (isAllOut || isMaxOvers) {
-                    // Start 2nd Innings
-                    nextState = {
-                        ...nextState,
-                        currentInnings: 2,
-                        innings2: {
-                            ...INITIAL_INNINGS,
-                            battingTeam: config.teamB,
-                        }
-                    };
-                }
-            } else {
-                if (isAllOut || isMaxOvers || isTargetReached) {
-                    // Match Ends
-                    const runs1 = nextState.innings1.totalRuns;
-                    const runs2 = nextState.innings2.totalRuns;
-                    let result: any = { winner: 'Draw', reason: 'Scores are tied' };
-
-                    if (runs1 > runs2) {
-                        result = {
-                            winner: config.teamA,
-                            reason: `Won by ${runs1 - runs2} runs`
-                        };
-                    } else if (runs2 > runs1) {
-                        const wicketsLeft = config.playersPerTeam - 1 - nextState.innings2.totalWickets;
-                        result = {
-                            winner: config.teamB,
-                            reason: `Won by ${wicketsLeft} wickets`
-                        };
-                    }
-
-                    nextState = {
-                        ...nextState,
-                        isPlaying: false,
-                        matchResult: result
-                    };
-                }
-            }
-
-            return {
-                state: nextState,
-            };
+            const nextState = processBall(store.state, store.config, runs, extraType, isWicket);
+            return { state: nextState };
         });
     },
 
