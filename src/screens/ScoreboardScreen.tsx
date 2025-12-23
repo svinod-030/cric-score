@@ -1,19 +1,33 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
 import { ExtraType } from '../types/match';
 
 export default function ScoreboardScreen({ navigation }: any) {
-    const { state, recordBall, resetMatch } = useMatchStore();
+    const { state, recordBall, resetMatch, setBowler } = useMatchStore();
     const innings = state.currentInnings === 1 ? state.innings1 : state.innings2;
     const currentOverValidBalls = innings.currentOver.filter(b => b.isValidBall).length;
 
-    React.useEffect(() => {
+    // Derived Rosters
+    const bowlingTeamPlayers = state.currentInnings === 1 ? state.teamBPlayers : state.teamAPlayers;
+
+    const [isBowlerModalVisible, setBowlerModalVisible] = useState(false);
+
+    useEffect(() => {
         if (!state.isPlaying && state.matchResult) {
             navigation.replace('MatchResult');
         }
     }, [state.isPlaying, state.matchResult]);
+
+    // Check for missing bowler
+    useEffect(() => {
+        if (state.isPlaying && !innings.currentBowlerId) {
+            setBowlerModalVisible(true);
+        } else {
+            setBowlerModalVisible(false);
+        }
+    }, [state.isPlaying, innings.currentBowlerId]);
 
     const handleScore = (runs: number) => {
         recordBall(runs, 'none', false);
@@ -27,8 +41,22 @@ export default function ScoreboardScreen({ navigation }: any) {
         recordBall(0, 'none', true);
     };
 
+    // Stats Helpers
+    const getBatterStats = (id: string) => innings.battingStats[id] || { runs: 0, ballsFaced: 0, fours: 0, sixes: 0 };
+    const getBowlerStats = (id: string | null) => id ? innings.bowlingStats[id] || { overs: 0, runsConceded: 0, wickets: 0, balls: 0 } : null;
+
+    const strikerStats = getBatterStats(innings.strikerId);
+    const nonStrikerStats = getBatterStats(innings.nonStrikerId);
+    const currentBowlerStats = getBowlerStats(innings.currentBowlerId);
+    // Calculate partial overs for display (e.g. 1.2)
+    const bowlerOversDisplay = currentBowlerStats
+        ? `${currentBowlerStats.overs}.${currentBowlerStats.balls % 6}`
+        : "0.0";
+
+
     return (
         <SafeAreaView className="flex-1 bg-gray-900">
+            {/* Header / Score */}
             <View className="p-6 pb-2 border-b border-gray-800">
                 <Text className="text-gray-400 text-center font-medium mb-1">
                     {innings.battingTeam} Batting
@@ -52,6 +80,45 @@ export default function ScoreboardScreen({ navigation }: any) {
                         </View>
                     )}
                 </View>
+
+                {/* Player Stats Bar */}
+                <View className="flex-row justify-between bg-gray-800 p-3 rounded-xl mb-4">
+                    <View>
+                        <Text className="text-white font-bold text-lg">
+                            {innings.strikerId}*
+                        </Text>
+                        <Text className="text-gray-400">
+                            {strikerStats.runs} ({strikerStats.ballsFaced})
+                        </Text>
+                    </View>
+                    <View className="items-end">
+                        <Text className="text-white font-bold text-lg">
+                            {innings.nonStrikerId}
+                        </Text>
+                        <Text className="text-gray-400">
+                            {nonStrikerStats.runs} ({nonStrikerStats.ballsFaced})
+                        </Text>
+                    </View>
+                </View>
+
+                {/* Current Bowler Bar */}
+                <View className="flex-row justify-between items-center bg-gray-800 p-3 rounded-xl mb-4">
+                    <View>
+                        <Text className="text-gray-400 text-xs uppercase font-bold">Bowler</Text>
+                        <Text className="text-white font-bold text-lg">
+                            {innings.currentBowlerId || "Select Bowler"}
+                        </Text>
+                    </View>
+                    <View className="items-end">
+                        <Text className="text-white font-bold">
+                            {currentBowlerStats ? `${currentBowlerStats.wickets}-${currentBowlerStats.runsConceded}` : "0-0"}
+                        </Text>
+                        <Text className="text-gray-400 text-xs">
+                            {bowlerOversDisplay} Overs
+                        </Text>
+                    </View>
+                </View>
+
 
                 <View className="mb-4">
                     <Text className="text-gray-400 mb-2 text-sm">This Over:</Text>
@@ -122,6 +189,31 @@ export default function ScoreboardScreen({ navigation }: any) {
 
                 </View>
             </ScrollView>
+
+            {/* Bowler Selection Modal */}
+            <Modal
+                visible={isBowlerModalVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => { }} // Block back button
+            >
+                <View className="flex-1 bg-black/80 justify-end">
+                    <View className="bg-gray-900 rounded-t-3xl p-6 h-2/3">
+                        <Text className="text-white text-xl font-bold mb-4 text-center">Select Bowler</Text>
+                        <ScrollView>
+                            {bowlingTeamPlayers.map(player => (
+                                <TouchableOpacity
+                                    key={player.id}
+                                    className="p-4 border-b border-gray-800 active:bg-gray-800"
+                                    onPress={() => setBowler(player.id)}
+                                >
+                                    <Text className="text-white text-lg">{player.name}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }

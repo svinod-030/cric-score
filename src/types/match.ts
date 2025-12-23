@@ -10,12 +10,29 @@ export interface MatchConfig {
 }
 
 // Basic types
+// Basic types
 export type Player = {
     id: string;
     name: string;
+};
+
+export type BattingStats = {
+    playerId: string;
     runs: number;
     ballsFaced: number;
+    fours: number;
+    sixes: number;
     isOut: boolean;
+    dismissal?: string;
+};
+
+export type BowlingStats = {
+    playerId: string;
+    overs: number;
+    balls: number; // balls in current over (or total legal balls?) Let's track balls to calc partial overs
+    maidens: number;
+    runsConceded: number;
+    wickets: number;
 };
 
 export type ExtraType = 'wide' | 'no-ball' | 'bye' | 'leg-bye' | 'none';
@@ -24,12 +41,14 @@ export type Ball = {
     runs: number; // Runs off the bat or extras
     extraType: ExtraType;
     isWicket: boolean;
-    isValidBall: boolean; // False if wide/no-ball and reball is enabled (or just logically not a legal delivery counting towards over)
+    isValidBall: boolean;
+    batsmanId: string;
+    bowlerId: string;
 };
 
 export type Over = {
     balls: Ball[];
-    bowlerName: string; // Placeholder
+    bowlerId: string;
 };
 
 export type InningsState = {
@@ -38,8 +57,18 @@ export type InningsState = {
     totalWickets: number;
     overs: Over[];
     currentOver: Ball[];
-    strikerId: string; // ID of player
-    nonStrikerId: string; // ID of player
+
+    // Player Positions
+    strikerId: string;
+    nonStrikerId: string;
+    currentBowlerId: string | null;
+
+    // Stats Maps
+    battingStats: Record<string, BattingStats>;
+    bowlingStats: Record<string, BowlingStats>;
+
+    // Tracking
+    fallOfWickets: { runs: number; wicket: number; over: string }[];
 };
 
 export type MatchResult = {
@@ -51,6 +80,10 @@ export interface MatchState extends MatchConfig {
     isPlaying: boolean;
     matchResult: MatchResult;
     currentInnings: 1 | 2;
+    // Rosters
+    teamAPlayers: Player[];
+    teamBPlayers: Player[];
+
     innings1: InningsState;
     innings2: InningsState;
 }

@@ -7,6 +7,7 @@ interface MatchStore {
     state: MatchState;
     setConfig: (config: Partial<MatchConfig>) => void;
     startMatch: () => void;
+    setBowler: (playerId: string) => void;
     recordBall: (runs: number, extraType: ExtraType, isWicket: boolean) => void;
     resetMatch: () => void;
 }
@@ -28,8 +29,12 @@ const INITIAL_INNINGS: InningsState = {
     totalWickets: 0,
     overs: [],
     currentOver: [],
-    strikerId: "p1",
-    nonStrikerId: "p2",
+    strikerId: "",
+    nonStrikerId: "",
+    currentBowlerId: null,
+    battingStats: {},
+    bowlingStats: {},
+    fallOfWickets: []
 };
 
 export const useMatchStore = create<MatchStore>((set, get) => ({
@@ -39,6 +44,8 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
         isPlaying: false,
         matchResult: null,
         currentInnings: 1,
+        teamAPlayers: [],
+        teamBPlayers: [],
         innings1: INITIAL_INNINGS,
         innings2: INITIAL_INNINGS,
     },
@@ -47,16 +54,50 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
 
     startMatch: () => {
         const { config } = get();
-        // Initialize state based on config
+        // Generate Rosters
+        const teamAPlayers = Array.from({ length: config.playersPerTeam }, (_, i) => ({
+            id: `A${i + 1}`,
+            name: `${config.teamA} Player ${i + 1}`,
+        }));
+        const teamBPlayers = Array.from({ length: config.playersPerTeam }, (_, i) => ({
+            id: `B${i + 1}`,
+            name: `${config.teamB} Player ${i + 1}`,
+        }));
+
         set({
             state: {
                 ...config,
                 isPlaying: true,
                 matchResult: null,
                 currentInnings: 1,
-                innings1: { ...INITIAL_INNINGS, battingTeam: config.teamA },
-                innings2: { ...INITIAL_INNINGS, battingTeam: config.teamB },
+                teamAPlayers,
+                teamBPlayers,
+                innings1: {
+                    ...INITIAL_INNINGS,
+                    battingTeam: config.teamA,
+                    strikerId: teamAPlayers[0].id,
+                    nonStrikerId: teamAPlayers[1].id,
+                },
+                innings2: {
+                    ...INITIAL_INNINGS,
+                    battingTeam: config.teamB
+                },
             }
+        });
+    },
+
+    setBowler: (playerId: string) => {
+        set((store) => {
+            const currentInningsKey = store.state.currentInnings === 1 ? 'innings1' : 'innings2';
+            return {
+                state: {
+                    ...store.state,
+                    [currentInningsKey]: {
+                        ...store.state[currentInningsKey],
+                        currentBowlerId: playerId
+                    }
+                }
+            };
         });
     },
 
@@ -73,6 +114,8 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
             isPlaying: false,
             matchResult: null,
             currentInnings: 1,
+            teamAPlayers: [],
+            teamBPlayers: [],
             innings1: INITIAL_INNINGS,
             innings2: INITIAL_INNINGS,
             ...store.config // keep current config
