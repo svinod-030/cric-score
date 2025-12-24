@@ -150,7 +150,10 @@ export const useMatchStore = create<MatchStore>()(
             storage: createJSONStorage(() => AsyncStorage),
             partialize: (state) => {
                 const { tossWinner, tossDecision, ...restConfig } = state.config;
-                return { config: restConfig as MatchConfig };
+                return {
+                    config: restConfig as MatchConfig,
+                    state: state.state
+                };
             },
         }
     )
