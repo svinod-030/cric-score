@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function TeamsScreen() {
     return (
-        <SafeAreaView className="flex-1 bg-gray-900 items-center justify-center">
+        <SafeAreaView className="flex-1 bg-gray-900 items-center justify-center" edges={['left', 'right']}>
             <Text className="text-white text-xl font-bold">Teams</Text>
             <Text className="text-gray-400 mt-2">Coming Soon...</Text>
         </SafeAreaView>

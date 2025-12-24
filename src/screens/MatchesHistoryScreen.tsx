@@ -9,7 +9,7 @@ export default function MatchesHistoryScreen() {
     const navigation = useNavigation<any>();
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['top', 'left', 'right']}>
+        <SafeAreaView className="flex-1 bg-gray-900" edges={['left', 'right']}>
             <ScrollView className="p-4">
                 <Text className="text-white text-3xl font-bold mb-6">Matches</Text>
 
