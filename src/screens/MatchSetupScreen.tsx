@@ -92,6 +92,49 @@ export default function MatchSetupScreen({ navigation }: any) {
                     </View>
                 </View>
 
+                {/* Toss Section */}
+                <View className="mb-8 bg-gray-800 p-5 rounded-2xl border border-gray-700">
+                    <Text className="text-lg font-semibold text-white mb-4">Toss</Text>
+
+                    <View className="mb-4">
+                        <Text className="text-gray-300 mb-2">Who won the toss?</Text>
+                        <View className="flex-row gap-4">
+                            <TouchableOpacity
+                                onPress={() => updateConfig('tossWinner', config.teamA)}
+                                className={`flex-1 p-3 rounded-xl border ${config.tossWinner === config.teamA ? 'bg-blue-600 border-blue-500' : 'bg-gray-700 border-gray-600'}`}
+                            >
+                                <Text className="text-white text-center font-bold">{config.teamA || 'Team A'}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => updateConfig('tossWinner', config.teamB)}
+                                className={`flex-1 p-3 rounded-xl border ${config.tossWinner === config.teamB ? 'bg-blue-600 border-blue-500' : 'bg-gray-700 border-gray-600'}`}
+                            >
+                                <Text className="text-white text-center font-bold">{config.teamB || 'Team B'}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {config.tossWinner && (
+                        <View>
+                            <Text className="text-gray-300 mb-2">{config.tossWinner} elected to?</Text>
+                            <View className="flex-row gap-4">
+                                <TouchableOpacity
+                                    onPress={() => updateConfig('tossDecision', 'bat')}
+                                    className={`flex-1 p-3 rounded-xl border ${config.tossDecision === 'bat' ? 'bg-green-600 border-green-500' : 'bg-gray-700 border-gray-600'}`}
+                                >
+                                    <Text className="text-white text-center font-bold">Bat</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => updateConfig('tossDecision', 'bowl')}
+                                    className={`flex-1 p-3 rounded-xl border ${config.tossDecision === 'bowl' ? 'bg-green-600 border-green-500' : 'bg-gray-700 border-gray-600'}`}
+                                >
+                                    <Text className="text-white text-center font-bold">Bowl</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
+                </View>
+
                 {/* Rules */}
                 <View className="mb-8 bg-gray-800 p-5 rounded-2xl border border-gray-700">
                     <Text className="text-lg font-semibold text-white mb-4">Extras & Rules</Text>
@@ -114,7 +157,6 @@ export default function MatchSetupScreen({ navigation }: any) {
                             thumbColor="#fff"
                         />
                     </View>
-
                     <View className="flex-row justify-between items-center mb-4">
                         <Text className="text-gray-300">Re-ball for Wide</Text>
                         <Switch

@@ -7,6 +7,8 @@ export interface MatchConfig {
     runsForNoBall: number;
     reballForWide: boolean;
     reballForNoBall: boolean;
+    tossWinner?: string; // We'll store the team name or ID? Let's use string 'Team A' or 'Team B' for now to match current simple setup
+    tossDecision?: 'bat' | 'bowl';
 }
 
 // Basic types

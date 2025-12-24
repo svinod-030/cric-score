@@ -64,6 +64,25 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
             name: `${config.teamB} Player ${i + 1}`,
         }));
 
+        // Determine Batting First Team based on Toss
+        let battingFirstTeam = config.teamA; // Default
+
+        // If Toss info exists, use logic
+        if (config.tossWinner && config.tossDecision) {
+            if (config.tossDecision === 'bat') {
+                battingFirstTeam = config.tossWinner;
+            } else {
+                // If winner chose bowl, the OTHER team bats first
+                battingFirstTeam = config.tossWinner === config.teamA ? config.teamB : config.teamA;
+            }
+        }
+
+        const battingSecondTeam = battingFirstTeam === config.teamA ? config.teamB : config.teamA;
+
+        // Correctly assign players to innings based on who is batting
+        const firstInningsBattingPlayers = battingFirstTeam === config.teamA ? teamAPlayers : teamBPlayers;
+        const secondInningsBattingPlayers = battingSecondTeam === config.teamA ? teamAPlayers : teamBPlayers;
+
         set({
             state: {
                 ...config,
@@ -74,13 +93,13 @@ export const useMatchStore = create<MatchStore>((set, get) => ({
                 teamBPlayers,
                 innings1: {
                     ...INITIAL_INNINGS,
-                    battingTeam: config.teamA,
-                    strikerId: teamAPlayers[0].id,
-                    nonStrikerId: teamAPlayers[1].id,
+                    battingTeam: battingFirstTeam,
+                    strikerId: firstInningsBattingPlayers[0].id,
+                    nonStrikerId: firstInningsBattingPlayers[1].id,
                 },
                 innings2: {
                     ...INITIAL_INNINGS,
-                    battingTeam: config.teamB
+                    battingTeam: battingSecondTeam
                 },
             }
         });

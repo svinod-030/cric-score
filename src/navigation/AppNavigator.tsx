@@ -7,7 +7,14 @@ import MatchResultScreen from '../screens/MatchResultScreen';
 
 import { Image, Text, View } from 'react-native';
 
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import MatchesHistoryScreen from '../screens/MatchesHistoryScreen';
+import TeamsScreen from '../screens/TeamsScreen';
+
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 function LogoTitle() {
     return (
@@ -19,6 +26,43 @@ function LogoTitle() {
             />
             <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 20 }}>Cric Score</Text>
         </View>
+    );
+}
+
+function HomeTabs() {
+    return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#1F2937' }} edges={['bottom', 'left', 'right']}>
+            <Tab.Navigator
+                screenOptions={({ route }) => ({
+                    headerShown: false,
+                    tabBarStyle: {
+                        backgroundColor: '#1F2937', // gray-800
+                        borderTopColor: '#374151', // gray-700
+                        elevation: 0, // Android shadow remove
+                        paddingTop: 5,
+                    },
+                    tabBarActiveTintColor: '#3B82F6', // blue-500
+                    tabBarInactiveTintColor: '#9CA3AF', // gray-400
+                    tabBarIcon: ({ focused, color, size }) => {
+                        let iconName: any;
+
+                        if (route.name === 'Start Match') {
+                            iconName = focused ? 'play-circle' : 'play-circle-outline';
+                        } else if (route.name === 'Matches') {
+                            iconName = focused ? 'time' : 'time-outline';
+                        } else if (route.name === 'Teams') {
+                            iconName = focused ? 'people' : 'people-outline';
+                        }
+
+                        return <Ionicons name={iconName} size={size} color={color} />;
+                    },
+                })}
+            >
+                <Tab.Screen name="Start Match" component={MatchSetupScreen} />
+                <Tab.Screen name="Matches" component={MatchesHistoryScreen} />
+                <Tab.Screen name="Teams" component={TeamsScreen} />
+            </Tab.Navigator>
+        </SafeAreaView>
     );
 }
 
@@ -39,8 +83,8 @@ export default function AppNavigator() {
                 }}
             >
                 <Stack.Screen
-                    name="MatchSetup"
-                    component={MatchSetupScreen}
+                    name="HomeTabs"
+                    component={HomeTabs}
                     options={{ title: '' }}
                 />
                 <Stack.Screen name="Scoreboard" component={ScoreboardScreen} options={{ title: 'Score board' }} />
