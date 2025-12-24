@@ -5,7 +5,9 @@ import MatchSetupScreen from '../screens/MatchSetupScreen';
 import ScoreboardScreen from '../screens/ScoreboardScreen';
 import MatchResultScreen from '../screens/MatchResultScreen';
 
-import { Image, Text, View } from 'react-native';
+import { Image, Text, View, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useAuthStore } from '../store/useAuthStore';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,19 +15,35 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import MatchesHistoryScreen from '../screens/MatchesHistoryScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import LicensesScreen from '../screens/LicensesScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function LogoTitle() {
+    const navigation = useNavigation<any>();
+    const { user, isAuthenticated } = useAuthStore();
+
     return (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Image
-                style={{ width: 40, height: 40, borderRadius: 20 }}
-                source={require('../../assets/icon.png')}
-                resizeMode="contain"
-            />
-            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 20 }}>Cric Score</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%', paddingRight: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Image
+                    style={{ width: 40, height: 40, borderRadius: 20 }}
+                    source={require('../../assets/icon.png')}
+                    resizeMode="contain"
+                />
+                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 20 }}>Cric Score</Text>
+            </View>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                {isAuthenticated && user?.picture ? (
+                    <Image
+                        source={{ uri: user.picture }}
+                        style={{ width: 36, height: 36, borderRadius: 18, borderWidth: 2, borderColor: '#3B82F6' }}
+                    />
+                ) : (
+                    <Ionicons name="person-circle-outline" size={36} color="#9CA3AF" />
+                )}
+            </TouchableOpacity>
         </View>
     );
 }
@@ -91,6 +109,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="Scoreboard" component={ScoreboardScreen} options={{ title: 'Score board' }} />
                 <Stack.Screen name="MatchResult" component={MatchResultScreen} options={{ title: 'Result' }} />
                 <Stack.Screen name="Licenses" component={LicensesScreen} options={{ headerShown: false }} />
+                <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
             </Stack.Navigator>
         </NavigationContainer>
     );
