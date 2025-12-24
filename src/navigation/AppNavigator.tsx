@@ -11,7 +11,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MatchesHistoryScreen from '../screens/MatchesHistoryScreen';
-import TeamsScreen from '../screens/TeamsScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import LicensesScreen from '../screens/LicensesScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -50,8 +51,8 @@ function HomeTabs() {
                             iconName = focused ? 'play-circle' : 'play-circle-outline';
                         } else if (route.name === 'Matches') {
                             iconName = focused ? 'time' : 'time-outline';
-                        } else if (route.name === 'Teams') {
-                            iconName = focused ? 'people' : 'people-outline';
+                        } else if (route.name === 'Settings') {
+                            iconName = focused ? 'settings' : 'settings-outline';
                         }
 
                         return <Ionicons name={iconName} size={size} color={color} />;
@@ -60,7 +61,7 @@ function HomeTabs() {
             >
                 <Tab.Screen name="Start Match" component={MatchSetupScreen} />
                 <Tab.Screen name="Matches" component={MatchesHistoryScreen} />
-                <Tab.Screen name="Teams" component={TeamsScreen} />
+                <Tab.Screen name="Settings" component={SettingsScreen} />
             </Tab.Navigator>
         </SafeAreaView>
     );
@@ -89,6 +90,7 @@ export default function AppNavigator() {
                 />
                 <Stack.Screen name="Scoreboard" component={ScoreboardScreen} options={{ title: 'Score board' }} />
                 <Stack.Screen name="MatchResult" component={MatchResultScreen} options={{ title: 'Result' }} />
+                <Stack.Screen name="Licenses" component={LicensesScreen} options={{ headerShown: false }} />
             </Stack.Navigator>
         </NavigationContainer>
     );
