@@ -97,21 +97,21 @@ export default function MatchSetupScreen({ navigation }: any) {
                     <Text className="text-lg font-semibold text-white mb-4">Extras & Rules</Text>
 
                     <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-gray-300">Run for Wide</Text>
-                        <TextInput
-                            className="bg-gray-900 text-white w-12 p-2 rounded text-center text-lg font-semibold"
-                            keyboardType="numeric"
-                            value={config.runsForWide.toString()}
-                            onChangeText={(t) => updateConfig('runsForWide', parseInt(t) || 0)}
+                        <Text className="text-gray-300">Run for Wide (1)</Text>
+                        <Switch
+                            value={config.runsForWide > 0}
+                            onValueChange={(v) => updateConfig('runsForWide', v ? 1 : 0)}
+                            trackColor={{ false: "#374151", true: "#2563EB" }}
+                            thumbColor="#fff"
                         />
                     </View>
                     <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-gray-300">Run for No Ball</Text>
-                        <TextInput
-                            className="bg-gray-900 text-white w-12 p-2 rounded text-center text-lg font-semibold"
-                            keyboardType="numeric"
-                            value={config.runsForNoBall.toString()}
-                            onChangeText={(t) => updateConfig('runsForNoBall', parseInt(t) || 0)}
+                        <Text className="text-gray-300">Run for No Ball (1)</Text>
+                        <Switch
+                            value={config.runsForNoBall > 0}
+                            onValueChange={(v) => updateConfig('runsForNoBall', v ? 1 : 0)}
+                            trackColor={{ false: "#374151", true: "#2563EB" }}
+                            thumbColor="#fff"
                         />
                     </View>
 
