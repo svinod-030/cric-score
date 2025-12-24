@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Switch, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
 import { MatchConfig } from '../types/match';
@@ -18,7 +18,7 @@ export default function MatchSetupScreen({ navigation }: any) {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900">
+        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
             <ScrollView className="p-6">
                 <Text className="text-3xl font-bold text-white mb-8">New Match</Text>
 

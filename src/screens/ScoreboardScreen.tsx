@@ -56,7 +56,7 @@ export default function ScoreboardScreen({ navigation }: any) {
 
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900">
+        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
             {/* Header / Score */}
             <View className="p-6 pb-2 border-b border-gray-800">
                 <Text className="text-gray-400 text-center font-medium mb-1">

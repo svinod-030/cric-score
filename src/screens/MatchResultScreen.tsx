@@ -15,7 +15,7 @@ export default function MatchResultScreen({ navigation }: any) {
 
     if (!matchResult) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-900 items-center justify-center">
+            <SafeAreaView className="flex-1 bg-gray-900 items-center justify-center" edges={['bottom', 'left', 'right']}>
                 <Text className="text-white mb-4">No Result Yet</Text>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Text className="text-blue-500">Go Back</Text>
@@ -25,7 +25,7 @@ export default function MatchResultScreen({ navigation }: any) {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900">
+        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
             <ScrollView className="flex-1">
                 <View className="p-6 items-center border-b border-gray-800 mb-4">
                     <Text className="text-gray-400 text-lg mb-1">Match Result</Text>
