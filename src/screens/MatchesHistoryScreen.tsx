@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function MatchesHistoryScreen() {
-    const { state } = useMatchStore();
+    const { state, history } = useMatchStore();
     const navigation = useNavigation<any>();
 
     return (
@@ -13,7 +13,7 @@ export default function MatchesHistoryScreen() {
             <ScrollView className="p-4">
                 <Text className="text-white text-3xl font-bold mb-6">Matches</Text>
 
-                {state.isPlaying ? (
+                {state.isPlaying && (
                     <View className="bg-gray-800 rounded-2xl p-5 border border-gray-700 shadow-lg shadow-black/50 mb-6">
                         <View className="flex-row justify-between items-start mb-4">
                             <View>
@@ -56,16 +56,32 @@ export default function MatchesHistoryScreen() {
                             <Text className="text-white font-bold text-lg">Resume Match</Text>
                         </TouchableOpacity>
                     </View>
-                ) : (
-                    <View className="items-center justify-center py-20 opacity-50">
-                        <Ionicons name="tennisball-outline" size={64} color="#9CA3AF" />
-                        <Text className="text-gray-400 mt-4 text-center">No active match.{'\n'}Start a new game!</Text>
-                    </View>
                 )}
 
                 <Text className="text-white text-xl font-bold mb-4">History</Text>
-                <Text className="text-gray-500 text-center py-10">No completed matches yet.</Text>
 
+                {history.length === 0 ? (
+                    <Text className="text-gray-500 text-center py-10">No completed matches yet.</Text>
+                ) : (
+                    history.map((match, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            className="bg-gray-800 p-4 rounded-xl mb-3 border border-gray-700"
+                            onPress={() => navigation.navigate('MatchResult', { matchData: match })}
+                        >
+                            <View className="flex-row justify-between items-center mb-2">
+                                <Text className="text-white font-bold text-lg">{match.teamA} vs {match.teamB}</Text>
+                                <Text className="text-xs text-gray-400">Completed</Text>
+                            </View>
+                            <Text className="text-yellow-500 font-medium">
+                                {match.matchResult?.winner === 'Draw' ? 'Match Drawn' : `${match.matchResult?.winner} Won`}
+                            </Text>
+                            <Text className="text-gray-400 text-xs mt-1">{match.matchResult?.reason}</Text>
+                        </TouchableOpacity>
+                    ))
+                )}
+
+                <View className="h-20" />
             </ScrollView>
         </SafeAreaView>
     );

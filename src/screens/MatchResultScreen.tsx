@@ -4,13 +4,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
 import { ScorecardSection } from '../components/ScorecardSection';
 
-export default function MatchResultScreen({ navigation }: any) {
+export default function MatchResultScreen({ navigation, route }: any) {
     const { state, resetMatch } = useMatchStore();
-    const { matchResult, innings1, innings2, teamAPlayers, teamBPlayers } = state;
+
+    // Use passed match data (history) OR current active state
+    const matchData = route.params?.matchData || state;
+    const { matchResult, innings1, innings2, teamAPlayers, teamBPlayers } = matchData;
+    const isHistoryView = !!route.params?.matchData;
 
     const handleNewMatch = () => {
         resetMatch();
-        navigation.popToTop();
+        // Reset navigation stack to Home
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'HomeTabs' }],
+        });
     };
 
     if (!matchResult) {
@@ -53,14 +61,16 @@ export default function MatchResultScreen({ navigation }: any) {
                     />
                 </View>
 
-                <View className="p-6">
-                    <TouchableOpacity
-                        className="bg-blue-600 w-full p-4 rounded-xl items-center shadow-lg shadow-blue-900/50"
-                        onPress={handleNewMatch}
-                    >
-                        <Text className="text-white text-lg font-bold">Start New Match</Text>
-                    </TouchableOpacity>
-                </View>
+                {!isHistoryView && (
+                    <View className="p-6">
+                        <TouchableOpacity
+                            className="bg-blue-600 w-full p-4 rounded-xl items-center shadow-lg shadow-blue-900/50"
+                            onPress={handleNewMatch}
+                        >
+                            <Text className="text-white text-lg font-bold">Start New Match</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </ScrollView>
         </SafeAreaView>
     );

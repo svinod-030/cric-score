@@ -7,6 +7,7 @@ import { processBall } from '../utils/scoringUtils';
 interface MatchStore {
     config: MatchConfig;
     state: MatchState;
+    history: MatchState[]; // [MODIFIED] Added history
     setConfig: (config: Partial<MatchConfig>) => void;
     startMatch: () => void;
     setBowler: (playerId: string) => void;
@@ -53,6 +54,7 @@ export const useMatchStore = create<MatchStore>()(
                 innings1: INITIAL_INNINGS,
                 innings2: INITIAL_INNINGS,
             },
+            history: [], // [MODIFIED] Initial empty history
             setConfig: (updates) =>
                 set((store) => ({ config: { ...store.config, ...updates } })),
 
@@ -127,6 +129,16 @@ export const useMatchStore = create<MatchStore>()(
             recordBall: (runs, extraType, isWicket) => {
                 set((store) => {
                     const nextState = processBall(store.state, store.config, runs, extraType, isWicket);
+
+                    // [MODIFIED] If match just finished, save to history
+                    if (nextState.matchResult && !store.state.matchResult) {
+                        const completedMatch = { ...nextState };
+                        return {
+                            state: nextState,
+                            history: [completedMatch, ...store.history]
+                        };
+                    }
+
                     return { state: nextState };
                 });
             },
@@ -152,7 +164,8 @@ export const useMatchStore = create<MatchStore>()(
                 const { tossWinner, tossDecision, ...restConfig } = state.config;
                 return {
                     config: restConfig as MatchConfig,
-                    state: state.state
+                    state: state.state,
+                    history: state.history // [MODIFIED] Persist history
                 };
             },
         }
