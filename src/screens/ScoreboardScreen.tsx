@@ -67,7 +67,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                         {innings.totalRuns}/{innings.totalWickets}
                     </Text>
                     <Text className="text-xl text-gray-400 mt-2">
-                        Overs: {innings.overs.length}.{currentOverValidBalls}
+                        Overs: {innings.overs.length}.{currentOverValidBalls} ({state.overs})
                     </Text>
 
                     {state.currentInnings === 2 && (
@@ -123,17 +123,21 @@ export default function ScoreboardScreen({ navigation }: any) {
 
                 <View className="mb-4">
                     <Text className="text-gray-400 mb-2 text-sm">This Over:</Text>
-                    <View className="flex-row gap-2">
-                        {innings.currentOver.map((ball, idx) => (
-                            <View
-                                key={idx}
-                                className={`w-8 h-8 rounded-full items-center justify-center ${ball.isWicket ? 'bg-red-600' : ball.extraType !== 'none' ? 'bg-yellow-600' : ball.runs >= 4 ? 'bg-green-600' : 'bg-gray-700'}`}
-                            >
-                                <Text className="text-white font-bold text-xs">
-                                    {ball.isWicket ? 'W' : ball.extraType !== 'none' ? ball.extraType === 'wide' ? 'WD' : 'NB' : ball.runs}
-                                </Text>
-                            </View>
-                        ))}
+                    <View className="flex-row gap-2 min-h-[32px]">
+                        {innings.currentOver.length > 0 ? (
+                            innings.currentOver.map((ball, idx) => (
+                                <View
+                                    key={idx}
+                                    className={`w-8 h-8 rounded-full items-center justify-center ${ball.isWicket ? 'bg-red-600' : ball.extraType !== 'none' ? 'bg-yellow-600' : ball.runs >= 4 ? 'bg-green-600' : 'bg-gray-700'}`}
+                                >
+                                    <Text className="text-white font-bold text-xs">
+                                        {ball.isWicket ? 'W' : ball.extraType !== 'none' ? ball.extraType === 'wide' ? 'WD' : 'NB' : ball.runs}
+                                    </Text>
+                                </View>
+                            ))
+                        ) : (
+                            <Text className="text-gray-600 text-sm italic">-</Text>
+                        )}
                     </View>
                 </View>
             </View>

@@ -50,7 +50,7 @@ function LogoTitle() {
 
 function HomeTabs() {
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#1F2937' }} edges={['bottom', 'left', 'right']}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#1F2937' }} edges={['left', 'right']}>
             <Tab.Navigator
                 screenOptions={({ route }) => ({
                     headerShown: false,
