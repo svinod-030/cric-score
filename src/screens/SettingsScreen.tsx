@@ -28,9 +28,31 @@ const SettingItem = ({ icon, title, subtitle, onPress, color = '#3B82F6' }: Sett
 );
 
 import { useNavigation } from '@react-navigation/native';
+import { useAuthStore } from '../store/useAuthStore';
+import { backupToDrive } from '../utils/backupService';
+import React, { useState } from 'react';
 
 export default function SettingsScreen() {
     const navigation = useNavigation<any>();
+    const { isAuthenticated, accessToken } = useAuthStore();
+    const [isBackingUp, setIsBackingUp] = useState(false);
+
+    const handleBackup = async () => {
+        if (!isAuthenticated || !accessToken) {
+            Alert.alert("Sign In Required", "Please sign in with Google in the Profile tab to backup your data.");
+            return;
+        }
+
+        setIsBackingUp(true);
+        const success = await backupToDrive(accessToken);
+        setIsBackingUp(false);
+
+        if (success) {
+            Alert.alert("Backup Success", "Your data has been successfully backed up to Google Drive.");
+        } else {
+            Alert.alert("Backup Failed", "There was an error backing up your data. Please try again later.");
+        }
+    };
 
     const handlePress = (action: string) => {
         if (action === "Rate App") {
@@ -47,6 +69,10 @@ export default function SettingsScreen() {
         }
         if (action === "Contact Us") {
             Linking.openURL(`mailto:${APP_CONFIG.SUPPORT_EMAIL}?subject=CricScore Support`);
+            return;
+        }
+        if (action === "Backup") {
+            handleBackup();
             return;
         }
         // TODO: Implement "Remove Ads" functionality with login and in-app purchase integration
@@ -77,7 +103,7 @@ export default function SettingsScreen() {
                     <SettingItem
                         icon="cloud-upload"
                         title="Backup"
-                        subtitle="Save your data safely"
+                        subtitle={isBackingUp ? "Backing up..." : "Save your data safely"}
                         onPress={() => handlePress("Backup")}
                         color="#10B981"
                     />

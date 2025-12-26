@@ -1,16 +1,32 @@
+import React, { useEffect } from 'react';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
+import * as AuthSession from 'expo-auth-session';
 import { GOOGLE_CONFIG } from './constants';
+import { Platform } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
 
 export const useGoogleAuth = () => {
     const [request, response, promptAsync] = Google.useAuthRequest({
-        clientId: GOOGLE_CONFIG.expoClientId,
-        iosClientId: GOOGLE_CONFIG.iosClientId,
+        clientId: GOOGLE_CONFIG.webClientId,
         androidClientId: GOOGLE_CONFIG.androidClientId,
-        webClientId: GOOGLE_CONFIG.webClientId,
+        iosClientId: GOOGLE_CONFIG.iosClientId,
+        redirectUri: AuthSession.makeRedirectUri({
+            scheme: 'cric-score',
+            path: 'oauth2redirect',
+        }),
+        scopes: ['openid', 'profile', 'email', 'https://www.googleapis.com/auth/drive.file'],
     });
+
+    useEffect(() => {
+        if (request) {
+            console.log('--- Google Auth Request ---');
+            console.log('Platform:', Platform.OS);
+            console.log('Redirect URI:', request.redirectUri);
+            console.log('Client ID:', request.clientId);
+        }
+    }, [request]);
 
     return { request, response, promptAsync };
 };

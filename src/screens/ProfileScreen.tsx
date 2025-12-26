@@ -15,7 +15,7 @@ export default function ProfileScreen({ navigation }: any) {
             if (authentication?.accessToken) {
                 getUserInfo(authentication.accessToken).then((userInfo) => {
                     if (userInfo) {
-                        setUser(userInfo);
+                        setUser(userInfo, authentication.accessToken);
                         Alert.alert('Success', 'Signed in successfully!');
                     }
                 });

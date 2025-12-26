@@ -1,72 +1,47 @@
-# Google Sign-In Setup Instructions
+# Google Sign-In Setup (Direct Redirect / No Proxy)
 
-## ⚠️ Important: OAuth Configuration Required
+To avoid using Expo's `auth.expo.io` redirect service, you must use platform-specific Client IDs (Android/iOS) and your app's custom URL scheme.
 
-To enable Google Sign-In, you need to configure OAuth credentials in Google Cloud Console.
-
-## Steps:
-
-### 1. Create Google Cloud Project
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select an existing one
-3. Enable the **Google+ API** (or **Google Identity Services**)
-
-### 2. Create OAuth 2.0 Credentials
-
-#### For Expo Development
-1. Go to **APIs & Services** > **Credentials**
-2. Click **Create Credentials** > **OAuth client ID**
-3. Select **Web application**
-4. Add authorized redirect URI:
-   ```
-   https://auth.expo.io/@YOUR_EXPO_USERNAME/cric-score
-   ```
-5. Copy the **Client ID** → This is your `expoClientId`
-
-#### For Android
-1. Create another OAuth client ID
-2. Select **Android**
-3. Package name: `com.vinodsigadana.cricscore`
-4. Get SHA-1 certificate fingerprint:
-   ```bash
-   cd android && ./gradlew signingReport
-   ```
-5. Copy the **Client ID** → This is your `androidClientId`
-
-#### For iOS
-1. Create another OAuth client ID
-2. Select **iOS**
-3. Bundle ID: `com.vinodsigadana.cricscore`
-4. Copy the **Client ID** → This is your `iosClientId`
-
-### 3. Update Configuration
-
-Edit `src/utils/googleAuth.ts` and replace the placeholder values:
-
-```typescript
-export const GOOGLE_CONFIG = {
-    expoClientId: 'YOUR_ACTUAL_EXPO_CLIENT_ID.apps.googleusercontent.com',
-    iosClientId: 'YOUR_ACTUAL_IOS_CLIENT_ID.apps.googleusercontent.com',
-    androidClientId: 'YOUR_ACTUAL_ANDROID_CLIENT_ID.apps.googleusercontent.com',
-    webClientId: 'YOUR_ACTUAL_WEB_CLIENT_ID.apps.googleusercontent.com',
-};
+## 1. Configure Custom Scheme
+Ensure `app.json` has the scheme configured:
+```json
+{
+  "expo": {
+    "scheme": "cric-score",
+    ...
+  }
+}
 ```
 
-### 4. Test the Integration
+## 2. Google Cloud Console Setup
 
-1. Restart the Expo dev server:
-   ```bash
-   npx expo start -c
-   ```
-2. Click the profile icon in the header
-3. Click "Sign in with Google"
-4. Complete the OAuth flow
+### A. For Android
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) > **Credentials**.
+2. **Create Credentials** > **OAuth client ID** > **Android**.
+3. **Package name**: `com.vinodsigadana.cricscore` (from `app.json`).
+4. **SHA-1 certificate fingerprint**:
+   - For debug:
+     ```bash
+     cd android && ./gradlew signingReport
+     # OR if you don't have the android folder yet:
+     keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+     ```
+   - Copy the **Client ID** to `androidClientId` in `src/utils/constants.ts`.
 
-## Notes:
-- For Expo Go testing, use the `expoClientId`
-- For production builds, you'll need all platform-specific client IDs
-- The redirect URI must match exactly what's configured in Google Cloud Console
+### B. For iOS
+1. **Create Credentials** > **OAuth client ID** > **iOS**.
+2. **Bundle ID**: `com.vinodsigadana.cricscore`.
+3. Copy the **Client ID** to `iosClientId` in `src/utils/constants.ts`.
 
-## Current Status:
-✅ Code implementation complete
-⚠️ OAuth credentials need to be configured
+## 3. Update Configuration
+Update `src/utils/constants.ts` with your new IDs. Note that you don't need an `expoClientId` or a Redirect URI in the Google Console for these platform types—Google identifies the app by the package name/bundle ID and SHA-1.
+
+## 4. Why no Redirect URI?
+When using the "Android" or "iOS" client type in Google Console, Google uses the package name and certificate fingerprint (Android) or Bundle ID (iOS) to verify the request. The app then handles the redirect via its custom scheme (`cric-score://`).
+
+## 5. Development Test
+Since you are using Expo Go, you should still use the `expoClientId` (Web application type) if you want to test in the simulator easily, but for a "No Proxy" setup on a real device, building a **Development Client** is recommended.
+
+```bash
+npx expo run:android
+```
