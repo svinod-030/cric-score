@@ -11,7 +11,7 @@ export default function ScoreboardScreen({ navigation }: any) {
     const currentOverValidBalls = innings.currentOver.filter(b => b.isValidBall).length;
 
     // Derived Rosters
-    const bowlingTeamPlayers = state.currentInnings === 1 ? state.teamBPlayers : state.teamAPlayers;
+    const bowlingTeamPlayers = innings.battingTeam === state.teamA ? state.teamBPlayers : state.teamAPlayers;
 
     const [isBowlerModalVisible, setBowlerModalVisible] = useState(false);
 
@@ -45,6 +45,11 @@ export default function ScoreboardScreen({ navigation }: any) {
     // Stats Helpers
     const getBatterStats = (id: string) => innings.battingStats[id] || { runs: 0, ballsFaced: 0, fours: 0, sixes: 0 };
     const getBowlerStats = (id: string | null) => id ? innings.bowlingStats[id] || { overs: 0, runsConceded: 0, wickets: 0, balls: 0 } : null;
+
+    const getPlayerName = (id: string) => {
+        const player = [...state.teamAPlayers, ...state.teamBPlayers].find(p => p.id === id);
+        return player ? player.name : id;
+    };
 
     const strikerStats = getBatterStats(innings.strikerId);
     const nonStrikerStats = getBatterStats(innings.nonStrikerId);
@@ -86,7 +91,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                 <View className="flex-row justify-between bg-gray-800 p-3 rounded-xl mb-4">
                     <View>
                         <Text className="text-white font-bold text-lg">
-                            {innings.strikerId}*
+                            {getPlayerName(innings.strikerId)}*
                         </Text>
                         <Text className="text-gray-400">
                             {strikerStats.runs} ({strikerStats.ballsFaced})
@@ -94,7 +99,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                     </View>
                     <View className="items-end">
                         <Text className="text-white font-bold text-lg">
-                            {innings.nonStrikerId}
+                            {getPlayerName(innings.nonStrikerId)}
                         </Text>
                         <Text className="text-gray-400">
                             {nonStrikerStats.runs} ({nonStrikerStats.ballsFaced})
@@ -107,7 +112,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                     <View>
                         <Text className="text-gray-400 text-xs uppercase font-bold">Bowler</Text>
                         <Text className="text-white font-bold text-lg">
-                            {innings.currentBowlerId || "Select Bowler"}
+                            {innings.currentBowlerId ? getPlayerName(innings.currentBowlerId) : "Select Bowler"}
                         </Text>
                     </View>
                     <View className="items-end">

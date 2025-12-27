@@ -49,15 +49,15 @@ export default function MatchResultScreen({ navigation, route }: any) {
                     <ScorecardSection
                         title={`Innings 1: ${innings1.battingTeam}`}
                         innings={innings1}
-                        battingTeamPlayers={teamAPlayers}
-                        bowlingTeamPlayers={teamBPlayers}
+                        battingTeamPlayers={innings1.battingTeam === state.teamA ? teamAPlayers : teamBPlayers}
+                        bowlingTeamPlayers={innings1.battingTeam === state.teamA ? teamBPlayers : teamAPlayers}
                     />
 
                     <ScorecardSection
                         title={`Innings 2: ${innings2.battingTeam}`}
                         innings={innings2}
-                        battingTeamPlayers={teamBPlayers}
-                        bowlingTeamPlayers={teamAPlayers}
+                        battingTeamPlayers={innings2.battingTeam === state.teamA ? teamAPlayers : teamBPlayers}
+                        bowlingTeamPlayers={innings2.battingTeam === state.teamA ? teamBPlayers : teamAPlayers}
                     />
                 </View>
 

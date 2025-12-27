@@ -15,6 +15,7 @@ export const backupToDrive = async (accessToken: string) => {
         // 2. Find or Create Backup Folder
         let folderId = await findBackupFolder(accessToken);
         if (!folderId) {
+            console.log('Creating backup folder');
             folderId = await createBackupFolder(accessToken);
         }
 
@@ -48,6 +49,10 @@ const findBackupFolder = async (accessToken: string) => {
         }
     );
     const data = await response.json();
+    if (!response.ok) {
+        console.error('findBackupFolder error:', data);
+        return null;
+    }
     return data.files && data.files.length > 0 ? data.files[0].id : null;
 };
 
@@ -64,6 +69,10 @@ const createBackupFolder = async (accessToken: string) => {
         }),
     });
     const data = await response.json();
+    if (!response.ok) {
+        console.error('createBackupFolder error:', data);
+        return null;
+    }
     return data.id;
 };
 

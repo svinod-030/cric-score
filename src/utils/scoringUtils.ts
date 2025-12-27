@@ -23,14 +23,14 @@ export const calculateMatchResult = (
 
     if (runs1 > runs2) {
         return {
-            winner: config.teamA,
+            winner: state.innings1.battingTeam,
             reason: `Won by ${runs1 - runs2} runs`,
         };
     } else if (runs2 > runs1) {
         const wicketsLeft =
             config.playersPerTeam - 1 - state.innings2.totalWickets;
         return {
-            winner: config.teamB,
+            winner: state.innings2.battingTeam,
             reason: `Won by ${wicketsLeft} wickets`,
         };
     } else {
@@ -186,7 +186,7 @@ export const processBall = (
     if (isWicket) {
         // Current striker is OUT.
         // Need to find next player in roster who is NOT out and NOT non-striker
-        const roster = state.currentInnings === 1 ? state.teamAPlayers : state.teamBPlayers;
+        const roster = innings.battingTeam === config.teamA ? state.teamAPlayers : state.teamBPlayers;
         // Check who is already batting/out
         const activeIds = [strikerId, newNonStrikerId]; // Old striker is out, so we need to replace 'strikerId' position
         // Actually, if crossed, the NEW striker position might be the one out? 
@@ -276,25 +276,22 @@ export const processBall = (
 
     if (state.currentInnings === 1) {
         if (isAllOut || isMaxOvers) {
+            const battingSecondTeam = state.innings1.battingTeam === config.teamA ? config.teamB : config.teamA;
+            const battingSecondPlayers = battingSecondTeam === config.teamA ? state.teamAPlayers : state.teamBPlayers;
+
             return {
                 ...nextState,
                 currentInnings: 2,
                 innings2: {
                     ...INITIAL_INNINGS,
-                    battingTeam: config.teamB,
-                    // Need to init first 2 batters for Innings 2?
-                    // We'll handle that in startMatch or here? 
-                    // Better to rely on UI or logic to init players.
-                    // For now, let's copy the roster init logic from start match if needed 
-                    // or just rely on defaults (p1, p2 placeholders are bad now).
-                    // Logic will fail if p1/p2 not in roster. 
-                    // We will fix INITIAL_INNINGS in useMatchStore for real Ids.
-                    strikerId: state.teamBPlayers[0].id,
-                    nonStrikerId: state.teamBPlayers[1].id,
+                    battingTeam: battingSecondTeam,
+                    strikerId: battingSecondPlayers[0].id,
+                    nonStrikerId: battingSecondPlayers[1].id,
                 }
             };
         }
-    } else {
+    }
+    else {
         if (isAllOut || isMaxOvers || isTargetReached) {
             const result = calculateMatchResult(nextState, config);
             return {
