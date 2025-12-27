@@ -1,29 +1,26 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/useAuthStore';
-import { useGoogleAuth, getUserInfo } from '../utils/googleAuth';
+import { signInWithGoogle, signOutGoogle } from '../utils/googleAuth';
 
 export default function ProfileScreen({ navigation }: any) {
     const { user, isAuthenticated, setUser, signOut } = useAuthStore();
-    const { request, response, promptAsync } = useGoogleAuth();
 
-    useEffect(() => {
-        if (response?.type === 'success') {
-            const { authentication } = response;
-            if (authentication?.accessToken) {
-                getUserInfo(authentication.accessToken).then((userInfo) => {
-                    if (userInfo) {
-                        setUser(userInfo, authentication.accessToken);
-                        Alert.alert('Success', 'Signed in successfully!');
-                    }
-                });
+    const handleGoogleSignIn = async () => {
+        try {
+            const result = await signInWithGoogle();
+            if (result) {
+                setUser(result.user, result.accessToken);
+                Alert.alert('Success', 'Signed in successfully!');
             }
+        } catch (error: any) {
+            Alert.alert('Error', error.message || 'Authentication failed');
         }
-    }, [response]);
+    };
 
-    const handleSignOut = () => {
+    const handleSignOut = async () => {
         Alert.alert(
             'Sign Out',
             'Are you sure you want to sign out?',
@@ -32,7 +29,8 @@ export default function ProfileScreen({ navigation }: any) {
                 {
                     text: 'Sign Out',
                     style: 'destructive',
-                    onPress: () => {
+                    onPress: async () => {
+                        await signOutGoogle();
                         signOut();
                         Alert.alert('Signed Out', 'You have been signed out successfully.');
                     },
@@ -52,8 +50,7 @@ export default function ProfileScreen({ navigation }: any) {
                     </Text>
 
                     <TouchableOpacity
-                        disabled={!request}
-                        onPress={() => promptAsync()}
+                        onPress={handleGoogleSignIn}
                         className="bg-white flex-row items-center px-6 py-4 rounded-xl shadow-lg"
                     >
                         <Image
