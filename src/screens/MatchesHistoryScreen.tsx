@@ -1,17 +1,69 @@
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { restoreFromDrive } from '../utils/backupService';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
 
 export default function MatchesHistoryScreen() {
-    const { state, history } = useMatchStore();
+    const { state, history, restoreMatches } = useMatchStore();
+    const { isAuthenticated, accessToken } = useAuthStore();
+    const [isRestoring, setIsRestoring] = useState(false);
     const navigation = useNavigation<any>();
+
+    const handleRestore = async () => {
+        if (!accessToken) return;
+
+        Alert.alert(
+            "Restore Matches",
+            "This will merge your cloud backup with your current matches. Do you want to proceed?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Restore",
+                    onPress: async () => {
+                        setIsRestoring(true);
+                        try {
+                            const backupData = await restoreFromDrive(accessToken);
+                            if (backupData) {
+                                restoreMatches(backupData);
+                                Alert.alert("Success", "Matches restored successfully!");
+                            } else {
+                                Alert.alert("Not Found", "No backup file found on Google Drive.");
+                            }
+                        } catch (error) {
+                            Alert.alert("Error", "Failed to restore matches. Please try again.");
+                        } finally {
+                            setIsRestoring(false);
+                        }
+                    }
+                }
+            ]
+        );
+    };
 
     return (
         <SafeAreaView className="flex-1 bg-gray-900" edges={['left', 'right']}>
             <ScrollView className="p-4">
-                <Text className="text-white text-3xl font-bold mb-6">Matches</Text>
+                <View className="flex-row justify-between items-center mb-6">
+                    <Text className="text-white text-3xl font-bold">Matches</Text>
+                    {isAuthenticated && (
+                        <TouchableOpacity
+                            onPress={handleRestore}
+                            disabled={isRestoring}
+                            className={`flex-row items-center px-4 py-2 rounded-xl border border-blue-500/30 ${isRestoring ? 'bg-gray-800' : 'bg-blue-600/10'}`}
+                        >
+                            {isRestoring ? (
+                                <ActivityIndicator size="small" color="#3B82F6" className="mr-2" />
+                            ) : (
+                                <Ionicons name="cloud-download" size={18} color="#3B82F6" className="mr-2" />
+                            )}
+                            <Text className="text-blue-500 font-bold">Restore</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
 
                 {state.isPlaying && (
                     <View className="bg-gray-800 rounded-2xl p-5 border border-gray-700 shadow-lg shadow-black/50 mb-6">
@@ -69,9 +121,16 @@ export default function MatchesHistoryScreen() {
                             className="bg-gray-800 p-4 rounded-xl mb-3 border border-gray-700"
                             onPress={() => navigation.navigate('MatchResult', { matchData: match })}
                         >
-                            <View className="flex-row justify-between items-center mb-2">
-                                <Text className="text-white font-bold text-lg">{match.teamA} vs {match.teamB}</Text>
-                                <Text className="text-xs text-gray-400">Completed</Text>
+                            <View className="flex-row justify-between items-start mb-2">
+                                <View>
+                                    <Text className="text-white font-bold text-lg">{match.teamA} vs {match.teamB}</Text>
+                                    {match.completedAt && (
+                                        <Text className="text-[10px] text-gray-500 font-medium">
+                                            {new Date(match.completedAt).toLocaleDateString()} at {new Date(match.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </Text>
+                                    )}
+                                </View>
+                                <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Completed</Text>
                             </View>
                             <Text className="text-yellow-500 font-medium">
                                 {match.matchResult?.winner === 'Draw' ? 'Match Drawn' : `${match.matchResult?.winner} Won`}

@@ -41,6 +41,34 @@ export const backupToDrive = async (accessToken: string) => {
     }
 };
 
+export const restoreFromDrive = async (accessToken: string) => {
+    try {
+        const folderId = await findBackupFolder(accessToken);
+        if (!folderId) return null;
+
+        const fileId = await findExistingBackupFile(accessToken, folderId);
+        if (!fileId) return null;
+
+        const response = await fetch(
+            `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+            {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            }
+        );
+
+        if (!response.ok) {
+            console.error('Failed to download backup file');
+            return null;
+        }
+
+        const data = await response.text();
+        return data;
+    } catch (error) {
+        console.error('Restore failed:', error);
+        return null;
+    }
+};
+
 const findBackupFolder = async (accessToken: string) => {
     const response = await fetch(
         `https://www.googleapis.com/drive/v3/files?q=name='${BACKUP_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,

@@ -88,4 +88,5 @@ export interface MatchState extends MatchConfig {
 
     innings1: InningsState;
     innings2: InningsState;
+    completedAt?: string; // ISO string format
 }

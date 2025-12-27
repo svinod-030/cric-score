@@ -13,6 +13,7 @@ interface MatchStore {
     setBowler: (playerId: string) => void;
     recordBall: (runs: number, extraType: ExtraType, isWicket: boolean) => void;
     resetMatch: () => void;
+    restoreMatches: (backupData: string) => void;
 }
 
 const INITIAL_CONFIG: MatchConfig = {
@@ -130,11 +131,14 @@ export const useMatchStore = create<MatchStore>()(
                 set((store) => {
                     const nextState = processBall(store.state, store.config, runs, extraType, isWicket);
 
-                    // [MODIFIED] If match just finished, save to history
+                    // If match just finished, save to history
                     if (nextState.matchResult && !store.state.matchResult) {
-                        const completedMatch = { ...nextState };
+                        const completedMatch = {
+                            ...nextState,
+                            completedAt: new Date().toISOString()
+                        };
                         return {
-                            state: nextState,
+                            state: completedMatch,
                             history: [completedMatch, ...store.history]
                         };
                     }
@@ -145,7 +149,7 @@ export const useMatchStore = create<MatchStore>()(
 
             resetMatch: () => set((store) => ({
                 state: {
-                    ...INITIAL_CONFIG, // Just reset state, keep config or reset? Let's reset purely state logic mostly
+                    ...INITIAL_CONFIG,
                     isPlaying: false,
                     matchResult: null,
                     currentInnings: 1,
@@ -153,9 +157,24 @@ export const useMatchStore = create<MatchStore>()(
                     teamBPlayers: [],
                     innings1: INITIAL_INNINGS,
                     innings2: INITIAL_INNINGS,
-                    ...store.config // keep current config
+                    ...store.config
                 }
             })),
+            restoreMatches: (backupData: string) => {
+                try {
+                    const parsedData = JSON.parse(backupData);
+                    if (parsedData.state) {
+                        set({
+                            config: parsedData.state.config || get().config,
+                            state: parsedData.state.state || get().state,
+                            history: parsedData.state.history || get().history,
+                        });
+                    }
+                } catch (error) {
+                    console.error('Failed to restore matches:', error);
+                    throw error;
+                }
+            },
         }),
         {
             name: 'match-storage',
