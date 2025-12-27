@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { backupToDrive } from '../utils/backupService';
 import { ExtraType } from '../types/match';
 import { BowlerSelectionModal } from '../components/BowlerSelectionModal';
+import { ScorecardSection } from '../components/ScorecardSection';
 
 export default function ScoreboardScreen({ navigation }: any) {
     const { state, recordBall, resetMatch, setBowler } = useMatchStore();
@@ -16,9 +19,19 @@ export default function ScoreboardScreen({ navigation }: any) {
     const [isBowlerModalVisible, setBowlerModalVisible] = useState(false);
 
     useEffect(() => {
-        if (!state.isPlaying && state.matchResult) {
-            navigation.replace('MatchResult');
-        }
+        const handleMatchEnd = async () => {
+            if (!state.isPlaying && state.matchResult) {
+                // If authenticated, backup immediately
+                const { isAuthenticated, accessToken } = useAuthStore.getState();
+                if (isAuthenticated && accessToken) {
+                    console.log('Match completed, triggering auto-backup...');
+                    backupToDrive(accessToken); // Fire and forget in background
+                }
+                navigation.replace('MatchResult');
+            }
+        };
+
+        handleMatchEnd();
     }, [state.isPlaying, state.matchResult]);
 
     // Check for missing bowler
@@ -195,6 +208,29 @@ export default function ScoreboardScreen({ navigation }: any) {
                         >
                             <Text className="text-yellow-500 font-bold text-lg">No Ball</Text>
                         </TouchableOpacity>
+                    </View>
+
+                    {/* Full Scorecard Section */}
+                    <View className="mt-10 mb-20">
+                        <Text className="text-white text-2xl font-bold mb-4 px-2">Scorecard</Text>
+
+                        {state.currentInnings === 2 && (
+                            <View className="mb-8">
+                                <ScorecardSection
+                                    title={`Innings 1: ${state.innings1.battingTeam}`}
+                                    innings={state.innings1}
+                                    battingTeamPlayers={state.innings1.battingTeam === state.teamA ? state.teamAPlayers : state.teamBPlayers}
+                                    bowlingTeamPlayers={state.innings1.battingTeam === state.teamA ? state.teamBPlayers : state.teamAPlayers}
+                                />
+                            </View>
+                        )}
+
+                        <ScorecardSection
+                            title={`${state.currentInnings === 2 ? 'Innings 2' : 'Innings 1'}: ${innings.battingTeam}`}
+                            innings={innings}
+                            battingTeamPlayers={innings.battingTeam === state.teamA ? state.teamAPlayers : state.teamBPlayers}
+                            bowlingTeamPlayers={innings.battingTeam === state.teamA ? state.teamBPlayers : state.teamAPlayers}
+                        />
                     </View>
 
                 </View>
