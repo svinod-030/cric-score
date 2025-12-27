@@ -8,7 +8,6 @@ export const APP_CONFIG = {
 };
 
 export const GOOGLE_CONFIG = {
-    webClientId: '145287006804-dgoaoqv7acfhdvbjmrsqne6anhp2bnpc.apps.googleusercontent.com',
+    webClientId: '918020484080-98hoih83c6dngpl675p6npd11079svg0.apps.googleusercontent.com',
     iosClientId: 'YOUR_IOS_CLIENT_ID.apps.googleusercontent.com',
-    androidClientId: '145287006804-oovbqr1nbnjpalse8gn8fqeoo2mc3egt.apps.googleusercontent.com',
 };
