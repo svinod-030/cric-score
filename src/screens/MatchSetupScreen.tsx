@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Switch, Modal } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
 import { MatchConfig } from '../types/match';
@@ -7,10 +7,17 @@ import { MatchConfig } from '../types/match';
 export default function MatchSetupScreen({ navigation }: any) {
     const { config, setConfig, startMatch } = useMatchStore();
 
+    const canStartMatch = () => {
+        return config.tossWinner && config.tossDecision && config.teamA && config.teamB;
+    };
+
     const handleStartMatch = () => {
+        if (!canStartMatch()) {
+            alert('Please select toss winner and decision before starting.');
+            return;
+        }
         startMatch();
-        navigation.navigate('Scoreboard'); // Will implement later
-        // console.log("Match Started with config:", config);
+        navigation.navigate('Scoreboard');
     };
 
     const updateConfig = (key: keyof MatchConfig, value: any) => {
@@ -27,24 +34,24 @@ export default function MatchSetupScreen({ navigation }: any) {
                     <Text className="text-lg font-semibold text-gray-300 mb-2">Teams</Text>
                     <View className="flex-row gap-4">
                         <View className="flex-1">
-                            <Text className="text-gray-400 text-sm mb-1">Team A</Text>
                             <TextInput
                                 className="bg-gray-800 text-white p-4 rounded-xl border border-gray-700"
                                 value={config.teamA}
-                                onChangeText={(text) => updateConfig('teamA', text)}
-                                placeholder="Team A Name"
+                                onChangeText={(text: string) => updateConfig('teamA', text?.toUpperCase())}
+                                placeholder="Team A"
                                 placeholderTextColor="#666"
                             />
+                            {!config.teamA && <Text className="text-red-500 mt-2">Please provide a name</Text>}
                         </View>
                         <View className="flex-1">
-                            <Text className="text-gray-400 text-sm mb-1">Team B</Text>
                             <TextInput
                                 className="bg-gray-800 text-white p-4 rounded-xl border border-gray-700"
                                 value={config.teamB}
-                                onChangeText={(text) => updateConfig('teamB', text)}
-                                placeholder="Team B Name"
+                                onChangeText={(text: string) => updateConfig('teamB', text?.toUpperCase())}
+                                placeholder="Team B"
                                 placeholderTextColor="#666"
                             />
+                            {!config.teamB && <Text className="text-red-500 mt-2">Please provide a name</Text>}
                         </View>
                     </View>
                 </View>
@@ -116,7 +123,7 @@ export default function MatchSetupScreen({ navigation }: any) {
 
                     {config.tossWinner && (
                         <View>
-                            <Text className="text-gray-300 mb-2">{config.tossWinner} elected to?</Text>
+                            <Text className="text-gray-300 mb-2">{config.tossWinner === config.teamA ? (config.teamA || 'Team A') : (config.teamB || 'Team B')} elected to?</Text>
                             <View className="flex-row gap-4">
                                 <TouchableOpacity
                                     onPress={() => updateConfig('tossDecision', 'bat')}
@@ -166,7 +173,7 @@ export default function MatchSetupScreen({ navigation }: any) {
                             thumbColor="#fff"
                         />
                     </View>
-                    <View className="flex-row justify-between items-center">
+                    <View className="flex-row justify-between items-center mb-4">
                         <Text className="text-gray-300">Re-ball for No Ball</Text>
                         <Switch
                             value={config.reballForNoBall}
@@ -175,11 +182,64 @@ export default function MatchSetupScreen({ navigation }: any) {
                             thumbColor="#fff"
                         />
                     </View>
+
+                    <View className="flex-row justify-between items-center">
+                        <Text className="text-gray-300">Custom Player Names</Text>
+                        <Switch
+                            value={config.isCustomNamesEnabled || false}
+                            onValueChange={(v) => updateConfig('isCustomNamesEnabled', v)}
+                            trackColor={{ false: "#374151", true: "#2563EB" }}
+                            thumbColor="#fff"
+                        />
+                    </View>
                 </View>
 
+                {config.isCustomNamesEnabled && (
+                    <View className="mb-8 bg-gray-800 p-5 rounded-2xl border border-gray-700">
+                        <Text className="text-lg font-semibold text-white mb-4">Player Names</Text>
+                        <View className="flex-row gap-6">
+                            <View className="flex-1">
+                                <Text className="text-gray-400 text-sm mb-2 font-bold">{config.teamA || 'Team A'}</Text>
+                                {Array.from({ length: config.playersPerTeam }).map((_, i) => (
+                                    <TextInput
+                                        key={`A${i}`}
+                                        className="bg-gray-700 text-white p-2 rounded-lg border border-gray-600 mb-2 text-sm"
+                                        placeholder={`Player ${i + 1}`}
+                                        placeholderTextColor="#666"
+                                        value={config.teamAPlayerNames?.[i] || ''}
+                                        onChangeText={(text) => {
+                                            const names = [...(config.teamAPlayerNames || [])];
+                                            names[i] = text;
+                                            updateConfig('teamAPlayerNames', names);
+                                        }}
+                                    />
+                                ))}
+                            </View>
+                            <View className="flex-1">
+                                <Text className="text-gray-400 text-sm mb-2 font-bold">{config.teamB || 'Team B'}</Text>
+                                {Array.from({ length: config.playersPerTeam }).map((_, i) => (
+                                    <TextInput
+                                        key={`B${i}`}
+                                        className="bg-gray-700 text-white p-2 rounded-lg border border-gray-600 mb-2 text-sm"
+                                        placeholder={`Player ${i + 1}`}
+                                        placeholderTextColor="#666"
+                                        value={config.teamBPlayerNames?.[i] || ''}
+                                        onChangeText={(text) => {
+                                            const names = [...(config.teamBPlayerNames || [])];
+                                            names[i] = text;
+                                            updateConfig('teamBPlayerNames', names);
+                                        }}
+                                    />
+                                ))}
+                            </View>
+                        </View>
+                    </View>
+                )}
+
                 <TouchableOpacity
-                    className="bg-blue-600 p-4 rounded-xl items-center mb-10 shadow-lg shadow-blue-900/50"
+                    className={`p-4 rounded-xl items-center mb-10 shadow-lg ${(!canStartMatch()) ? 'bg-gray-700 shadow-none' : 'bg-blue-600 shadow-blue-900/50'}`}
                     onPress={handleStartMatch}
+                    disabled={!canStartMatch()}
                 >
                     <Text className="text-white text-lg font-bold">Start Match</Text>
                 </TouchableOpacity>

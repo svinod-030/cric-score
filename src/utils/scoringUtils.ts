@@ -1,7 +1,8 @@
-import { MatchConfig, MatchState, InningsState, ExtraType, MatchResult } from '../types/match';
+import { MatchConfig, MatchState, InningsState, ExtraType, MatchResult, WicketType } from '../types/match';
 
 const INITIAL_INNINGS: InningsState = {
     battingTeam: "",
+    battingTeamKey: 'teamA',
     totalRuns: 0,
     totalWickets: 0,
     overs: [],
@@ -66,7 +67,9 @@ export const processBall = (
     config: MatchConfig,
     runs: number,
     extraType: ExtraType,
-    isWicket: boolean
+    isWicket: boolean,
+    wicketType: WicketType = 'none',
+    fielderId?: string
 ): MatchState => {
     const currentInningsKey = state.currentInnings === 1 ? 'innings1' : 'innings2';
     const innings = state[currentInningsKey];
@@ -131,7 +134,9 @@ export const processBall = (
 
     if (isWicket) {
         strikerStats.isOut = true;
-        strikerStats.dismissal = "Bowled/Caught"; // Simplified
+        strikerStats.dismissal = wicketType;
+        strikerStats.fielderId = fielderId;
+        strikerStats.bowlerId = innings.currentBowlerId!;
     }
 
     // Bowling Updates
@@ -155,7 +160,7 @@ export const processBall = (
     }
     bowlerStats.runsConceded += bowlerRuns;
 
-    if (isWicket && !['run-out'].includes('')) { // Simplify: all wickets credit to bowler for now
+    if (isWicket && !['run-out', 'retired-hurt'].includes(wicketType)) {
         bowlerStats.wickets += 1;
     }
 
@@ -167,9 +172,11 @@ export const processBall = (
         runs: runsToAdd,
         extraType,
         isWicket,
+        wicketType,
         isValidBall,
         batsmanId: strikerId,
-        bowlerId: bowlerId
+        bowlerId: bowlerId,
+        fielderId: fielderId
     };
     const newCurrentOver = [...innings.currentOver, newBall];
 
@@ -276,18 +283,9 @@ export const processBall = (
 
     if (state.currentInnings === 1) {
         if (isAllOut || isMaxOvers) {
-            const battingSecondTeam = state.innings1.battingTeam === config.teamA ? config.teamB : config.teamA;
-            const battingSecondPlayers = battingSecondTeam === config.teamA ? state.teamAPlayers : state.teamBPlayers;
-
             return {
                 ...nextState,
-                currentInnings: 2,
-                innings2: {
-                    ...INITIAL_INNINGS,
-                    battingTeam: battingSecondTeam,
-                    strikerId: battingSecondPlayers[0].id,
-                    nonStrikerId: battingSecondPlayers[1].id,
-                }
+                isInningsBreak: true
             };
         }
     }

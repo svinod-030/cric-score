@@ -1,17 +1,22 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MatchConfig, MatchState, InningsState, ExtraType } from '../types/match';
+import { MatchConfig, MatchState, InningsState, ExtraType, WicketType } from '../types/match';
 import { processBall } from '../utils/scoringUtils';
 
 interface MatchStore {
     config: MatchConfig;
     state: MatchState;
-    history: MatchState[]; // [MODIFIED] Added history
+    history: MatchState[];
+    ballHistory: MatchState[];
     setConfig: (config: Partial<MatchConfig>) => void;
     startMatch: () => void;
     setBowler: (playerId: string) => void;
-    recordBall: (runs: number, extraType: ExtraType, isWicket: boolean) => void;
+    recordBall: (runs: number, extraType: ExtraType, isWicket: boolean, wicketType?: WicketType, fielderId?: string) => void;
+    startSecondInnings: () => void;
+    undoBall: () => void;
+    swapBatsmen: () => void;
+    retirePlayer: (playerId: string) => void;
     resetMatch: () => void;
     restoreMatches: (backupData: string) => void;
 }
@@ -29,6 +34,7 @@ const INITIAL_CONFIG: MatchConfig = {
 
 const INITIAL_INNINGS: InningsState = {
     battingTeam: "",
+    battingTeamKey: 'teamA',
     totalRuns: 0,
     totalWickets: 0,
     overs: [],
@@ -50,12 +56,14 @@ export const useMatchStore = create<MatchStore>()(
                 isPlaying: false,
                 matchResult: null,
                 currentInnings: 1,
+                isInningsBreak: false,
                 teamAPlayers: [],
                 teamBPlayers: [],
                 innings1: INITIAL_INNINGS,
                 innings2: INITIAL_INNINGS,
             },
-            history: [], // [MODIFIED] Initial empty history
+            history: [],
+            ballHistory: [],
             setConfig: (updates) =>
                 set((store) => ({ config: { ...store.config, ...updates } })),
 
@@ -64,33 +72,37 @@ export const useMatchStore = create<MatchStore>()(
                 // Generate Rosters
                 const teamAPlayers = Array.from({ length: config.playersPerTeam }, (_, i) => ({
                     id: `A${i + 1}`,
-                    name: `${config.teamA} Player ${i + 1}`,
+                    name: config.isCustomNamesEnabled && config.teamAPlayerNames?.[i]
+                        ? config.teamAPlayerNames[i]
+                        : `${config.teamA} Player ${i + 1}`,
                 }));
                 const teamBPlayers = Array.from({ length: config.playersPerTeam }, (_, i) => ({
                     id: `B${i + 1}`,
-                    name: `${config.teamB} Player ${i + 1}`,
+                    name: config.isCustomNamesEnabled && config.teamBPlayerNames?.[i]
+                        ? config.teamBPlayerNames[i]
+                        : `${config.teamB} Player ${i + 1}`,
                 }));
 
                 // Determine Batting First Team based on Toss
-                let battingFirstTeam = config.teamA; // Default
+                let battingFirstKey: 'teamA' | 'teamB' = 'teamA';
 
-                // If Toss info exists, use logic
                 if (config.tossWinner && config.tossDecision) {
                     if (config.tossDecision === 'bat') {
-                        battingFirstTeam = config.tossWinner;
+                        battingFirstKey = config.tossWinner;
                     } else {
                         // If winner chose bowl, the OTHER team bats first
-                        battingFirstTeam = config.tossWinner === config.teamA ? config.teamB : config.teamA;
+                        battingFirstKey = config.tossWinner === 'teamA' ? 'teamB' : 'teamA';
                     }
                 }
 
-                const battingSecondTeam = battingFirstTeam === config.teamA ? config.teamB : config.teamA;
+                const battingFirstTeam = battingFirstKey === 'teamA' ? config.teamA : config.teamB;
+                const battingSecondTeam = battingFirstKey === 'teamA' ? config.teamB : config.teamA;
 
-                // Correctly assign players to innings based on who is batting
-                const firstInningsBattingPlayers = battingFirstTeam === config.teamA ? teamAPlayers : teamBPlayers;
-                const secondInningsBattingPlayers = battingSecondTeam === config.teamA ? teamAPlayers : teamBPlayers;
+                const firstInningsBattingPlayers = battingFirstKey === 'teamA' ? teamAPlayers : teamBPlayers;
+                const secondInningsBattingPlayers = battingFirstKey === 'teamA' ? teamBPlayers : teamAPlayers;
 
                 set({
+                    ballHistory: [],
                     state: {
                         ...config,
                         isPlaying: true,
@@ -101,13 +113,16 @@ export const useMatchStore = create<MatchStore>()(
                         innings1: {
                             ...INITIAL_INNINGS,
                             battingTeam: battingFirstTeam,
+                            battingTeamKey: battingFirstKey,
                             strikerId: firstInningsBattingPlayers[0].id,
                             nonStrikerId: firstInningsBattingPlayers[1].id,
                         },
                         innings2: {
                             ...INITIAL_INNINGS,
-                            battingTeam: battingSecondTeam
+                            battingTeam: battingSecondTeam,
+                            battingTeamKey: battingFirstKey === 'teamA' ? 'teamB' : 'teamA'
                         },
+                        isInningsBreak: false
                     }
                 });
             },
@@ -127,9 +142,9 @@ export const useMatchStore = create<MatchStore>()(
                 });
             },
 
-            recordBall: (runs, extraType, isWicket) => {
+            recordBall: (runs, extraType, isWicket, wicketType = 'none', fielderId) => {
                 set((store) => {
-                    const nextState = processBall(store.state, store.config, runs, extraType, isWicket);
+                    const nextState = processBall(store.state, store.config, runs, extraType, isWicket, wicketType, fielderId);
 
                     // If match just finished, save to history
                     if (nextState.matchResult && !store.state.matchResult) {
@@ -139,11 +154,101 @@ export const useMatchStore = create<MatchStore>()(
                         };
                         return {
                             state: completedMatch,
-                            history: [completedMatch, ...store.history]
+                            history: [completedMatch, ...store.history],
+                            ballHistory: [] // Clear internal history
                         };
                     }
 
-                    return { state: nextState };
+                    return {
+                        state: nextState,
+                        ballHistory: [...store.ballHistory, store.state] // Push CURRENT state before update
+                    };
+                });
+            },
+
+            undoBall: () => {
+                set((store) => {
+                    if (store.ballHistory.length === 0) return store;
+                    const prevStates = [...store.ballHistory];
+                    const lastState = prevStates.pop();
+                    return {
+                        state: lastState!,
+                        ballHistory: prevStates
+                    };
+                });
+            },
+
+            swapBatsmen: () => {
+                set((store) => {
+                    const currentInningsKey = store.state.currentInnings === 1 ? 'innings1' : 'innings2';
+                    const innings = store.state[currentInningsKey];
+                    return {
+                        state: {
+                            ...store.state,
+                            [currentInningsKey]: {
+                                ...innings,
+                                strikerId: innings.nonStrikerId,
+                                nonStrikerId: innings.strikerId
+                            }
+                        }
+                    };
+                });
+            },
+
+            retirePlayer: (playerId: string) => {
+                set((store) => {
+                    const currentInningsKey = store.state.currentInnings === 1 ? 'innings1' : 'innings2';
+                    const innings = store.state[currentInningsKey];
+
+                    // Mark player as retired hurt
+                    const strikerStats = { ...(innings.battingStats[playerId] || { playerId, runs: 0, ballsFaced: 0, fours: 0, sixes: 0, isOut: false }) };
+                    strikerStats.isRetired = true;
+
+                    // Find next player
+                    const roster = innings.battingTeam === store.state.teamA ? store.state.teamAPlayers : store.state.teamBPlayers;
+                    const nextBatter = roster.find(p => {
+                        const stats = innings.battingStats[p.id];
+                        const isPlaying = p.id === innings.strikerId || p.id === innings.nonStrikerId;
+                        return !isPlaying && (!stats || (!stats.isOut && !stats.isRetired));
+                    });
+
+                    if (!nextBatter) return store; // No more players
+
+                    const isStriker = innings.strikerId === playerId;
+                    return {
+                        state: {
+                            ...store.state,
+                            [currentInningsKey]: {
+                                ...innings,
+                                strikerId: isStriker ? nextBatter.id : innings.strikerId,
+                                nonStrikerId: !isStriker ? nextBatter.id : innings.nonStrikerId,
+                                battingStats: {
+                                    ...innings.battingStats,
+                                    [playerId]: strikerStats
+                                }
+                            }
+                        }
+                    };
+                });
+            },
+
+            startSecondInnings: () => {
+                set((store) => {
+                    const config = store.config;
+                    const battingSecondPlayers = store.state.innings2.battingTeamKey === 'teamA' ? store.state.teamAPlayers : store.state.teamBPlayers;
+
+                    return {
+                        state: {
+                            ...store.state,
+                            currentInnings: 2 as 1 | 2,
+                            isInningsBreak: false,
+                            innings2: {
+                                ...store.state.innings2,
+                                strikerId: battingSecondPlayers[0].id,
+                                nonStrikerId: battingSecondPlayers[1].id,
+                            }
+                        }
+                    };
                 });
             },
 
@@ -153,6 +258,7 @@ export const useMatchStore = create<MatchStore>()(
                     isPlaying: false,
                     matchResult: null,
                     currentInnings: 1,
+                    isInningsBreak: false,
                     teamAPlayers: [],
                     teamBPlayers: [],
                     innings1: INITIAL_INNINGS,
@@ -184,7 +290,8 @@ export const useMatchStore = create<MatchStore>()(
                 return {
                     config: restConfig as MatchConfig,
                     state: state.state,
-                    history: state.history // [MODIFIED] Persist history
+                    history: state.history,
+                    ballHistory: state.ballHistory
                 };
             },
         }

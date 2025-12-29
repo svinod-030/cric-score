@@ -57,7 +57,20 @@ export const ScorecardSection = ({
                     <View key={player.id} className="flex-row p-3 border-b border-gray-700/50">
                         <View className="flex-[3]">
                             <Text className="text-white font-medium">{player.name}</Text>
-                            <Text className="text-gray-500 text-xs">{stats.isOut ? "Out" : "Not Out"}</Text>
+                            {stats.isOut ? (
+                                <Text className="text-gray-500 text-[10px] leading-tight mt-0.5">
+                                    {stats.dismissal === 'bowled' && `b ${bowlingTeamPlayers.find(p => p.id === stats.bowlerId)?.name || 'Bowler'}`}
+                                    {stats.dismissal === 'caught' && `c ${bowlingTeamPlayers.find(p => p.id === stats.fielderId)?.name || 'Fielder'} b ${bowlingTeamPlayers.find(p => p.id === stats.bowlerId)?.name || 'Bowler'}`}
+                                    {stats.dismissal === 'lbw' && `lbw b ${bowlingTeamPlayers.find(p => p.id === stats.bowlerId)?.name || 'Bowler'}`}
+                                    {stats.dismissal === 'run-out' && `run out (${bowlingTeamPlayers.find(p => p.id === stats.fielderId)?.name || 'Fielder'})`}
+                                    {stats.dismissal === 'stumped' && `st ${bowlingTeamPlayers.find(p => p.id === stats.fielderId)?.name || 'Fielder'} b ${bowlingTeamPlayers.find(p => p.id === stats.bowlerId)?.name || 'Bowler'}`}
+                                    {stats.dismissal === 'retired-hurt' && 'retired hurt'}
+                                    {stats.dismissal === 'other' && 'out'}
+                                    {(!stats.dismissal || stats.dismissal === 'none') && 'out'}
+                                </Text>
+                            ) : (
+                                <Text className="text-blue-400 text-[10px] font-bold mt-0.5">not out</Text>
+                            )}
                         </View>
                         <Text className="flex-1 text-white font-bold text-center">{stats.runs}</Text>
                         <Text className="flex-1 text-gray-400 text-center">{stats.ballsFaced}</Text>

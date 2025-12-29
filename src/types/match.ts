@@ -7,8 +7,11 @@ export interface MatchConfig {
     runsForNoBall: number;
     reballForWide: boolean;
     reballForNoBall: boolean;
-    tossWinner?: string; // We'll store the team name or ID? Let's use string 'Team A' or 'Team B' for now to match current simple setup
+    tossWinner?: 'teamA' | 'teamB';
     tossDecision?: 'bat' | 'bowl';
+    isCustomNamesEnabled?: boolean;
+    teamAPlayerNames?: string[];
+    teamBPlayerNames?: string[];
 }
 
 // Basic types
@@ -25,7 +28,10 @@ export type BattingStats = {
     fours: number;
     sixes: number;
     isOut: boolean;
+    isRetired: boolean;
     dismissal?: string;
+    fielderId?: string;
+    bowlerId?: string;
 };
 
 export type BowlingStats = {
@@ -37,15 +43,19 @@ export type BowlingStats = {
     wickets: number;
 };
 
+export type WicketType = 'bowled' | 'caught' | 'lbw' | 'run-out' | 'stumped' | 'retired-hurt' | 'other' | 'none';
+
 export type ExtraType = 'wide' | 'no-ball' | 'bye' | 'leg-bye' | 'none';
 
 export type Ball = {
     runs: number; // Runs off the bat or extras
     extraType: ExtraType;
     isWicket: boolean;
+    wicketType: WicketType;
     isValidBall: boolean;
     batsmanId: string;
     bowlerId: string;
+    fielderId?: string;
 };
 
 export type Over = {
@@ -55,6 +65,7 @@ export type Over = {
 
 export type InningsState = {
     battingTeam: string;
+    battingTeamKey: 'teamA' | 'teamB';
     totalRuns: number;
     totalWickets: number;
     overs: Over[];
@@ -88,5 +99,6 @@ export interface MatchState extends MatchConfig {
 
     innings1: InningsState;
     innings2: InningsState;
+    isInningsBreak: boolean;
     completedAt?: string; // ISO string format
 }
