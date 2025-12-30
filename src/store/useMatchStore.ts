@@ -12,6 +12,8 @@ interface MatchStore {
     setConfig: (config: Partial<MatchConfig>) => void;
     startMatch: () => void;
     setBowler: (playerId: string) => void;
+    setStriker: (playerId: string) => void;
+    setNonStriker: (playerId: string) => void;
     recordBall: (runs: number, extraType: ExtraType, isWicket: boolean, wicketType?: WicketType, fielderId?: string) => void;
     startSecondInnings: () => void;
     undoBall: () => void;
@@ -114,8 +116,8 @@ export const useMatchStore = create<MatchStore>()(
                             ...INITIAL_INNINGS,
                             battingTeam: battingFirstTeam,
                             battingTeamKey: battingFirstKey,
-                            strikerId: firstInningsBattingPlayers[0].id,
-                            nonStrikerId: firstInningsBattingPlayers[1].id,
+                            strikerId: "",
+                            nonStrikerId: "",
                         },
                         innings2: {
                             ...INITIAL_INNINGS,
@@ -136,6 +138,36 @@ export const useMatchStore = create<MatchStore>()(
                             [currentInningsKey]: {
                                 ...store.state[currentInningsKey],
                                 currentBowlerId: playerId
+                            }
+                        }
+                    };
+                });
+            },
+
+            setStriker: (playerId: string) => {
+                set((store) => {
+                    const currentInningsKey = store.state.currentInnings === 1 ? 'innings1' : 'innings2';
+                    return {
+                        state: {
+                            ...store.state,
+                            [currentInningsKey]: {
+                                ...store.state[currentInningsKey],
+                                strikerId: playerId
+                            }
+                        }
+                    };
+                });
+            },
+
+            setNonStriker: (playerId: string) => {
+                set((store) => {
+                    const currentInningsKey = store.state.currentInnings === 1 ? 'innings1' : 'innings2';
+                    return {
+                        state: {
+                            ...store.state,
+                            [currentInningsKey]: {
+                                ...store.state[currentInningsKey],
+                                nonStrikerId: playerId
                             }
                         }
                     };
@@ -220,8 +252,8 @@ export const useMatchStore = create<MatchStore>()(
                             ...store.state,
                             [currentInningsKey]: {
                                 ...innings,
-                                strikerId: isStriker ? nextBatter.id : innings.strikerId,
-                                nonStrikerId: !isStriker ? nextBatter.id : innings.nonStrikerId,
+                                strikerId: isStriker ? "" : innings.strikerId,
+                                nonStrikerId: !isStriker ? "" : innings.nonStrikerId,
                                 battingStats: {
                                     ...innings.battingStats,
                                     [playerId]: strikerStats
@@ -244,8 +276,8 @@ export const useMatchStore = create<MatchStore>()(
                             isInningsBreak: false,
                             innings2: {
                                 ...store.state.innings2,
-                                strikerId: battingSecondPlayers[0].id,
-                                nonStrikerId: battingSecondPlayers[1].id,
+                                strikerId: "",
+                                nonStrikerId: "",
                             }
                         }
                     };

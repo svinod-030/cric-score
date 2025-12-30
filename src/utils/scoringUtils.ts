@@ -189,51 +189,9 @@ export const processBall = (
         [newStrikerId, newNonStrikerId] = [newNonStrikerId, newStrikerId];
     }
 
-    // Handle Wicket Fall - Pick Next Batsman
+    // Handle Wicket Fall - Reset striker to empty string for manual selection
     if (isWicket) {
-        // Current striker is OUT.
-        // Need to find next player in roster who is NOT out and NOT non-striker
-        const roster = innings.battingTeam === config.teamA ? state.teamAPlayers : state.teamBPlayers;
-        // Check who is already batting/out
-        const activeIds = [strikerId, newNonStrikerId]; // Old striker is out, so we need to replace 'strikerId' position
-        // Actually, if crossed, the NEW striker position might be the one out? 
-        // Standard rule: New batsman takes strike usually, unless Crossed? 
-        // Simplified: New batsman takes place of dismissed batsman.
-
-        const nextPlayer = roster.find(p =>
-            p.id !== strikerId &&
-            p.id !== newNonStrikerId &&
-            !innings.battingStats[p.id]?.isOut &&
-            !innings.battingStats[p.id]?.runs // Simplified: find someone with NO stats yet? Or just track who played
-            // Better: Check if existing stats say isOut. 
-            // Also need to check if they are the current non-striker.
-        );
-
-        // Wait, 'roster' contains simple Player objects without 'isOut' state usually, 
-        // unless we are looking at 'InningsState.battingStats'. 
-        // For MVP, lets iterate roster and check `innings.battingStats`.
-
-        const nextBatter = roster.find(p => {
-            const stats = innings.battingStats[p.id];
-            const isPlaying = p.id === strikerId || p.id === newNonStrikerId;
-            return !isPlaying && (!stats || !stats.isOut);
-        });
-
-        if (nextBatter) {
-            // Who was out? The 'strikerId' (before swap? or after?). 
-            // Usually the one facing is out.
-            // If they ran 1 run and got runout, valid ball?
-            // Let's assume Caught/Bowled => Striker Out.
-            // Place new batter at Striker end (if not crossed)
-            // Simplified: New batter replaces StrikerId.
-            // If they ran odd runs, we already swapped names. 
-            // So we overwrite the `newStrikerId` (which points to the guy who is now at striker end).
-            // Actually, if Wicket, runs usually don't count for swap unless Run Out. 
-            // Assume NO RUNS on wicket for MVP.
-            newStrikerId = nextBatter.id;
-        } else {
-            // No more batters - All Out logic handled by checks below
-        }
+        newStrikerId = "";
     }
 
 

@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { backupToDrive } from '../utils/backupService';
 import { ExtraType } from '../types/match';
 import { BowlerSelectionModal } from '../components/BowlerSelectionModal';
+import { BatterSelectionModal } from '../components/BatterSelectionModal';
 import { ScorecardSection } from '../components/ScorecardSection';
 import { RunSelectionModal } from '../components/RunSelectionModal';
 import { WicketTypeSelectionModal } from '../components/WicketTypeSelectionModal';
@@ -14,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { WicketType } from '../types/match';
 
 export default function ScoreboardScreen({ navigation }: any) {
-    const { state, recordBall, resetMatch, setBowler, undoBall, swapBatsmen, retirePlayer, startSecondInnings } = useMatchStore();
+    const { state, recordBall, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings } = useMatchStore();
     const innings = state.currentInnings === 1 ? state.innings1 : state.innings2;
     const currentOverValidBalls = innings.currentOver.filter(b => b.isValidBall).length;
 
@@ -26,6 +27,9 @@ export default function ScoreboardScreen({ navigation }: any) {
     const [wicketModalVisible, setWicketModalVisible] = useState(false);
     const [fielderModalVisible, setFielderModalVisible] = useState(false);
     const [runModalConfig, setRunModalConfig] = useState<{ title: string; type: ExtraType | 'wicket'; runs: number; options?: number[] }>({ title: '', type: 'none', runs: 0 });
+
+    const [isBatterModalVisible, setBatterModalVisible] = useState(false);
+    const [batterSelectionType, setBatterSelectionType] = useState<'striker' | 'nonStriker' | null>(null);
 
     // Pending Wicket State
     const [pendingWicket, setPendingWicket] = useState<{ type: WicketType; fielderId?: string; runs?: number }>({ type: 'none' });
@@ -54,6 +58,32 @@ export default function ScoreboardScreen({ navigation }: any) {
             setBowlerModalVisible(false);
         }
     }, [state.isPlaying, state.isInningsBreak, innings.currentBowlerId]);
+
+    // Check for missing batsmen
+    useEffect(() => {
+        if (state.isPlaying && !state.isInningsBreak) {
+            if (!innings.strikerId) {
+                setBatterSelectionType('striker');
+                setBatterSelectionVisible(true);
+            } else if (!innings.nonStrikerId) {
+                setBatterSelectionType('nonStriker');
+                setBatterSelectionVisible(true);
+            } else {
+                setBatterSelectionVisible(false);
+                setBatterSelectionType(null);
+            }
+        }
+    }, [state.isPlaying, state.isInningsBreak, innings.strikerId, innings.nonStrikerId]);
+
+    const [isBatterSelectionVisible, setBatterSelectionVisible] = useState(false);
+
+    const handleBatterSelect = (playerId: string) => {
+        if (batterSelectionType === 'striker') {
+            setStriker(playerId);
+        } else {
+            setNonStriker(playerId);
+        }
+    };
 
     const handleScore = (runs: number) => {
         recordBall(runs, 'none', false);
@@ -115,6 +145,7 @@ export default function ScoreboardScreen({ navigation }: any) {
     const getBowlerStats = (id: string | null) => id ? innings.bowlingStats[id] || { overs: 0, runsConceded: 0, wickets: 0, balls: 0 } : null;
 
     const getPlayerName = (id: string) => {
+        if (!id) return "Select Player";
         const player = [...state.teamAPlayers, ...state.teamBPlayers].find(p => p.id === id);
         return player ? player.name : id;
     };
@@ -366,6 +397,16 @@ export default function ScoreboardScreen({ navigation }: any) {
                 visible={isBowlerModalVisible}
                 players={bowlingTeamPlayers}
                 onSelect={setBowler}
+            />
+            <BatterSelectionModal
+                visible={isBatterSelectionVisible}
+                title={batterSelectionType === 'striker' ? "Select Striker" : "Select Non-Striker"}
+                players={(innings.battingTeam === state.teamA ? state.teamAPlayers : state.teamBPlayers).filter(p => {
+                    const stats = innings.battingStats[p.id];
+                    const isOtherBatter = batterSelectionType === 'striker' ? p.id === innings.nonStrikerId : p.id === innings.strikerId;
+                    return !isOtherBatter && (!stats || (!stats.isOut && !stats.isRetired));
+                })}
+                onSelect={handleBatterSelect}
             />
             <RunSelectionModal
                 visible={runModalVisible}
