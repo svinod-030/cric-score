@@ -97,14 +97,7 @@ android {
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
-    splits {
-        abi {
-            enable !gradle.startParameter.taskNames.any { it.contains("bundle") }
-            reset()
-            include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
-            universalApk false
-        }
-    }
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
