@@ -36,6 +36,19 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# generated native folders
-/ios
-/android
+# generated native folders (unignored to allow committing native configuration)
+# /ios
+# /android
+
+# Specific native build artifacts
+android/build/
+android/.gradle/
+android/app/build/
+ios/build/
+ios/Pods/
+ios/.xccheckout
+ios/*.xcworkspace
+ios/*.xcuserdata
+ios/*.moved-aside
+ios/*/*.xcuserdata
+ios/*/*.xccheckout
