@@ -7,7 +7,11 @@
     "android": "expo run:android",
     "android:aab": "eas build --platform android --profile production",
     "android:apk": "eas build --platform android --profile preview",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "compile": "tsc --noEmit",
+    "test": "echo \"No tests specified\" && exit 0",
+    "local:apk": "cd android && ./gradlew assembleRelease",
+    "local:aab": "cd android && ./gradlew bundleRelease"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
