@@ -38,10 +38,10 @@ export default function ScoreboardScreen({ navigation }: any) {
         const handleMatchEnd = async () => {
             if (!state.isPlaying && state.matchResult) {
                 // If authenticated, backup immediately
-                const { isAuthenticated, accessToken } = useAuthStore.getState();
-                if (isAuthenticated && accessToken) {
+                const { isAuthenticated } = useAuthStore.getState();
+                if (isAuthenticated) {
                     console.log('Match completed, triggering auto-backup...');
-                    backupToDrive(accessToken); // Fire and forget in background
+                    backupToDrive(); // Fire and forget in background
                 }
                 navigation.replace('MatchResult');
             }

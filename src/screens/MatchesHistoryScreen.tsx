@@ -9,12 +9,12 @@ import React, { useState } from 'react';
 
 export default function MatchesHistoryScreen() {
     const { state, history, restoreMatches } = useMatchStore();
-    const { isAuthenticated, accessToken } = useAuthStore();
+    const { isAuthenticated } = useAuthStore();
     const [isRestoring, setIsRestoring] = useState(false);
     const navigation = useNavigation<any>();
 
     const handleRestore = async () => {
-        if (!accessToken) return;
+        if (!isAuthenticated) return;
 
         Alert.alert(
             "Restore Matches",
@@ -26,7 +26,7 @@ export default function MatchesHistoryScreen() {
                     onPress: async () => {
                         setIsRestoring(true);
                         try {
-                            const backupData = await restoreFromDrive(accessToken);
+                            const backupData = await restoreFromDrive();
                             if (backupData) {
                                 restoreMatches(backupData);
                                 Alert.alert("Success", "Matches restored successfully!");

@@ -8,6 +8,36 @@ GoogleSignin.configure({
     scopes: ['https://www.googleapis.com/auth/drive.file'],
 });
 
+export const getFreshAccessToken = async () => {
+    try {
+        let tokens = await GoogleSignin.getTokens();
+
+        // If no token or potentially invalid, try silent sign in to refresh
+        if (!tokens.accessToken) {
+            console.log('No access token found, signing in silently...');
+            const userInfo = await GoogleSignin.signInSilently();
+            if (userInfo.data?.user) {
+                tokens = await GoogleSignin.getTokens();
+            }
+        }
+
+        return tokens.accessToken;
+    } catch (error) {
+        console.log('Error getting tokens, attempting silent sign-in...', error);
+        try {
+            const userInfo = await GoogleSignin.signInSilently();
+            if (userInfo.data?.user) {
+                const tokens = await GoogleSignin.getTokens();
+                return tokens.accessToken;
+            }
+        } catch (silentError) {
+            console.error('Silent sign-in failed:', silentError);
+        }
+        return null;
+    }
+};
+
+
 export const signInWithGoogle = async () => {
     try {
         await GoogleSignin.hasPlayServices();
@@ -16,7 +46,7 @@ export const signInWithGoogle = async () => {
         // Extract what we need for our store
         if (userInfo.data?.user) {
             const { user } = userInfo.data;
-            const tokens = await GoogleSignin.getTokens();
+            const accessToken = await getFreshAccessToken();
 
             return {
                 user: {
@@ -25,10 +55,11 @@ export const signInWithGoogle = async () => {
                     name: user.name || '',
                     picture: user.photo || undefined,
                 },
-                accessToken: tokens.accessToken
+                accessToken
             };
         }
         return null;
+
     } catch (error: any) {
         if (error.code === statusCodes.SIGN_IN_CANCELLED) {
             console.log('User cancelled the login flow');

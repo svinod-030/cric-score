@@ -1,9 +1,52 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getFreshAccessToken } from './googleAuth';
+import { useAuthStore } from '../store/useAuthStore';
 
 const BACKUP_FOLDER_NAME = 'Cric Score Backups';
 const BACKUP_FILE_NAME = 'match_data_backup.json';
 
-export const backupToDrive = async (accessToken: string) => {
+const authenticatedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+    let token = useAuthStore.getState().accessToken;
+
+    if (!token) {
+        token = await getFreshAccessToken();
+        if (token) {
+            useAuthStore.getState().setUser(useAuthStore.getState().user, token);
+        }
+    }
+
+    const setHeaders = (t: string | null) => ({
+        ...options.headers,
+        Authorization: `Bearer ${t}`,
+        'Accept': 'application/json',
+    });
+
+    let response = await fetch(url, { ...options, headers: setHeaders(token) });
+
+    // if 401, try to refresh token once
+    if (response.status === 401) {
+        console.log('Access token expired, refreshing...');
+        const newToken = await getFreshAccessToken();
+        if (newToken) {
+            useAuthStore.getState().setUser(useAuthStore.getState().user, newToken);
+            response = await fetch(url, { ...options, headers: setHeaders(newToken) });
+        }
+    }
+
+    if (!response.ok) {
+        try {
+            const errorData = await response.clone().json();
+            console.error(`API Error (${response.status}) for ${url}:`, JSON.stringify(errorData, null, 2));
+        } catch (e) {
+            const text = await response.clone().text();
+            console.error(`API Error (${response.status}) for ${url}:`, text);
+        }
+    }
+
+    return response;
+};
+
+export const backupToDrive = async () => {
     try {
         // 1. Get the data to backup
         const matchData = await AsyncStorage.getItem('match-storage');
@@ -13,10 +56,10 @@ export const backupToDrive = async (accessToken: string) => {
         }
 
         // 2. Find or Create Backup Folder
-        let folderId = await findBackupFolder(accessToken);
+        let folderId = await findBackupFolder();
         if (!folderId) {
             console.log('Creating backup folder');
-            folderId = await createBackupFolder(accessToken);
+            folderId = await createBackupFolder();
         }
 
         if (!folderId) {
@@ -24,13 +67,13 @@ export const backupToDrive = async (accessToken: string) => {
         }
 
         // 3. Find existing backup file in that folder
-        const existingFileId = await findExistingBackupFile(accessToken, folderId);
+        const existingFileId = await findExistingBackupFile(folderId);
 
         // 4. Upload/Update file
         if (existingFileId) {
-            await updateBackupFile(accessToken, existingFileId, matchData);
+            await updateBackupFile(existingFileId, matchData);
         } else {
-            await createBackupFile(accessToken, folderId, matchData);
+            await createBackupFile(folderId, matchData);
         }
 
         console.log('Backup successful');
@@ -41,19 +84,16 @@ export const backupToDrive = async (accessToken: string) => {
     }
 };
 
-export const restoreFromDrive = async (accessToken: string) => {
+export const restoreFromDrive = async () => {
     try {
-        const folderId = await findBackupFolder(accessToken);
+        const folderId = await findBackupFolder();
         if (!folderId) return null;
 
-        const fileId = await findExistingBackupFile(accessToken, folderId);
+        const fileId = await findExistingBackupFile(folderId);
         if (!fileId) return null;
 
-        const response = await fetch(
-            `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
-            {
-                headers: { Authorization: `Bearer ${accessToken}` },
-            }
+        const response = await authenticatedFetch(
+            `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`
         );
 
         if (!response.ok) {
@@ -69,50 +109,56 @@ export const restoreFromDrive = async (accessToken: string) => {
     }
 };
 
-const findBackupFolder = async (accessToken: string) => {
-    const response = await fetch(
-        `https://www.googleapis.com/drive/v3/files?q=name='${BACKUP_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-        {
-            headers: { Authorization: `Bearer ${accessToken}` },
-        }
+const findBackupFolder = async () => {
+    try {
+        const query = `name='${BACKUP_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+        const response = await authenticatedFetch(
+            `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`
+        );
+        const data = await response.json();
+        return data.files && data.files.length > 0 ? data.files[0].id : null;
+    } catch (error) {
+        console.error('Failed to find backup folder:', error);
+        return null;
+    }
+};
+
+
+const createBackupFolder = async () => {
+    try {
+        const response = await authenticatedFetch('https://www.googleapis.com/drive/v3/files', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: BACKUP_FOLDER_NAME,
+                mimeType: 'application/vnd.google-apps.folder',
+            }),
+        });
+        const data = await response.json();
+        return data.id;
+    } catch (error) {
+        console.error('Failed to create backup folder:', error);
+        return null;
+    }
+};
+
+const findExistingBackupFile = async (folderId: string) => {
+    const query = `name='${BACKUP_FILE_NAME}' and '${folderId}' in parents and trashed=false`;
+    const response = await authenticatedFetch(
+        `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}`
     );
     const data = await response.json();
     return data.files && data.files.length > 0 ? data.files[0].id : null;
 };
 
-const createBackupFolder = async (accessToken: string) => {
-    const response = await fetch('https://www.googleapis.com/drive/v3/files', {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            name: BACKUP_FOLDER_NAME,
-            mimeType: 'application/vnd.google-apps.folder',
-        }),
-    });
-    const data = await response.json();
-    return data.id;
-};
 
-const findExistingBackupFile = async (accessToken: string, folderId: string) => {
-    const response = await fetch(
-        `https://www.googleapis.com/drive/v3/files?q=name='${BACKUP_FILE_NAME}' and '${folderId}' in parents and trashed=false`,
-        {
-            headers: { Authorization: `Bearer ${accessToken}` },
-        }
-    );
-    const data = await response.json();
-    return data.files && data.files.length > 0 ? data.files[0].id : null;
-};
-
-const createBackupFile = async (accessToken: string, folderId: string, data: string) => {
+const createBackupFile = async (folderId: string, data: string) => {
     // 1. Create file with metadata
-    const response = await fetch('https://www.googleapis.com/drive/v3/files', {
+    const response = await authenticatedFetch('https://www.googleapis.com/drive/v3/files', {
         method: 'POST',
         headers: {
-            Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -125,16 +171,15 @@ const createBackupFile = async (accessToken: string, folderId: string, data: str
     const file = await response.json();
 
     // 2. Upload the data content
-    return await updateBackupFile(accessToken, file.id, data);
+    return await updateBackupFile(file.id, data);
 };
 
-const updateBackupFile = async (accessToken: string, fileId: string, data: string) => {
-    const response = await fetch(
+const updateBackupFile = async (fileId: string, data: string) => {
+    const response = await authenticatedFetch(
         `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`,
         {
             method: 'PATCH',
             headers: {
-                Authorization: `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',
             },
             body: data,
@@ -142,3 +187,4 @@ const updateBackupFile = async (accessToken: string, fileId: string, data: strin
     );
     return response.ok;
 };
+

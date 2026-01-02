@@ -34,17 +34,17 @@ import React, { useState } from 'react';
 
 export default function SettingsScreen() {
     const navigation = useNavigation<any>();
-    const { isAuthenticated, accessToken } = useAuthStore();
+    const { isAuthenticated } = useAuthStore();
     const [isBackingUp, setIsBackingUp] = useState(false);
 
     const handleBackup = async () => {
-        if (!isAuthenticated || !accessToken) {
+        if (!isAuthenticated) {
             Alert.alert("Sign In Required", "Please sign in with Google in the Profile tab to backup your data.");
             return;
         }
 
         setIsBackingUp(true);
-        const success = await backupToDrive(accessToken);
+        const success = await backupToDrive();
         setIsBackingUp(false);
 
         if (success) {
