@@ -1,5 +1,5 @@
 export const APP_CONFIG = {
-    SUPPORT_EMAIL: 'cricscore.support@gmail.com',
+    SUPPORT_EMAIL: 'scricscore3@gmail.com',
     ANDROID_PACKAGE_NAME: 'com.vinodsigadana.cricscore',
     IOS_APP_ID: '1234567890', // Placeholder
     APP_VERSION: '1.0.0',

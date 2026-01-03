@@ -148,7 +148,7 @@ Once build completes, download the `.aab` file from the provided link.
 - **Tags**: Cricket, Sports, Scoring
 
 #### Contact Details
-- **Email**: cricscore.support@gmail.com
+- **Email**: scricscore3@gmail.com
 - **Privacy Policy**: [Your URL]
 
 ### Content Rating
