@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Linking, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
 import { ScorecardSection } from '../components/ScorecardSection';
+import { APP_CONFIG } from '../utils/constants';
 
 export default function MatchResultScreen({ navigation, route }: any) {
     const { state, resetMatch } = useMatchStore();
@@ -31,6 +32,14 @@ export default function MatchResultScreen({ navigation, route }: any) {
             </SafeAreaView>
         )
     }
+
+    const handleRateApp = () => {
+        if (Platform.OS === 'android') {
+            Linking.openURL(APP_CONFIG.STORE_URL_ANDROID);
+        } else {
+            Linking.openURL(APP_CONFIG.STORE_URL_IOS);
+        }
+    };
 
     return (
         <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
@@ -61,16 +70,22 @@ export default function MatchResultScreen({ navigation, route }: any) {
                     />
                 </View>
 
-                {!isHistoryView && (
-                    <View className="p-6">
+                <View className="p-6 pt-0">
+                    <TouchableOpacity
+                        className="bg-blue-600 w-full p-4 rounded-xl items-center shadow-lg shadow-blue-900/50 mb-4"
+                        onPress={handleRateApp}
+                    >
+                        <Text className="text-white text-lg font-bold">Rate App</Text>
+                    </TouchableOpacity>
+                    {!isHistoryView && (
                         <TouchableOpacity
-                            className="bg-blue-600 w-full p-4 rounded-xl items-center shadow-lg shadow-blue-900/50"
+                            className="bg-blue-600 w-full p-4 rounded-xl items-center shadow-lg shadow-blue-900/50 mb-4"
                             onPress={handleNewMatch}
                         >
                             <Text className="text-white text-lg font-bold">Start New Match</Text>
                         </TouchableOpacity>
-                    </View>
-                )}
+                    )}
+                </View>
             </ScrollView>
         </SafeAreaView>
     );

@@ -75,7 +75,7 @@ export default function SettingsScreen() {
             handleBackup();
             return;
         }
-        // TODO: Implement "Remove Ads" functionality with login and in-app purchase integration
+
         Alert.alert("Coming Soon", `${action} feature is under development.`);
     };
 
@@ -93,13 +93,7 @@ export default function SettingsScreen() {
                         onPress={() => handlePress("Rate App")}
                         color="#F59E0B"
                     />
-                    <SettingItem
-                        icon="diamond"
-                        title="Remove Ads"
-                        subtitle="Go Premium"
-                        onPress={() => handlePress("Remove Ads")}
-                        color="#EC4899"
-                    />
+
                     <SettingItem
                         icon="cloud-upload"
                         title="Backup"
