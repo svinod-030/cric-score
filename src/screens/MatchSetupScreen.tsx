@@ -115,14 +115,14 @@ export default function MatchSetupScreen({ navigation }: any) {
                         <Text className="text-gray-300 mb-2">Who won the toss?</Text>
                         <View className="flex-row gap-4">
                             <TouchableOpacity
-                                onPress={() => updateConfig('tossWinner', config.teamA)}
-                                className={`flex-1 p-3 rounded-xl border ${config.tossWinner === config.teamA ? 'bg-blue-600 border-blue-500' : 'bg-gray-700 border-gray-600'}`}
+                                onPress={() => updateConfig('tossWinner', 'teamA')}
+                                className={`flex-1 p-3 rounded-xl border ${config.tossWinner === 'teamA' ? 'bg-blue-600 border-blue-500' : 'bg-gray-700 border-gray-600'}`}
                             >
                                 <Text className="text-white text-center font-bold">{config.teamA || 'Team A'}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                onPress={() => updateConfig('tossWinner', config.teamB)}
-                                className={`flex-1 p-3 rounded-xl border ${config.tossWinner === config.teamB ? 'bg-blue-600 border-blue-500' : 'bg-gray-700 border-gray-600'}`}
+                                onPress={() => updateConfig('tossWinner', 'teamB')}
+                                className={`flex-1 p-3 rounded-xl border ${config.tossWinner === 'teamB' ? 'bg-blue-600 border-blue-500' : 'bg-gray-700 border-gray-600'}`}
                             >
                                 <Text className="text-white text-center font-bold">{config.teamB || 'Team B'}</Text>
                             </TouchableOpacity>
@@ -131,7 +131,7 @@ export default function MatchSetupScreen({ navigation }: any) {
 
                     {config.tossWinner && (
                         <View>
-                            <Text className="text-gray-300 mb-2">{config.tossWinner === config.teamA ? (config.teamA || 'Team A') : (config.teamB || 'Team B')} elected to?</Text>
+                            <Text className="text-gray-300 mb-2">{config.tossWinner === 'teamA' ? (config.teamA || 'Team A') : (config.teamB || 'Team B')} elected to?</Text>
                             <View className="flex-row gap-4">
                                 <TouchableOpacity
                                     onPress={() => updateConfig('tossDecision', 'bat')}
