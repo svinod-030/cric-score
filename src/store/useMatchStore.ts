@@ -102,7 +102,7 @@ export const useMatchStore = create<MatchStore>()(
                 const battingSecondTeam = battingFirstKey === 'teamA' ? config.teamB : config.teamA;
 
                 const firstInningsBattingPlayers = battingFirstKey === 'teamA' ? teamAPlayers : teamBPlayers;
-                const secondInningsBattingPlayers = battingFirstKey === 'teamA' ? teamBPlayers : teamAPlayers;
+                const firstInningsBowlingPlayers = battingFirstKey === 'teamA' ? teamBPlayers : teamAPlayers;
 
                 set({
                     ballHistory: [],
@@ -117,8 +117,9 @@ export const useMatchStore = create<MatchStore>()(
                             ...INITIAL_INNINGS,
                             battingTeam: battingFirstTeam,
                             battingTeamKey: battingFirstKey,
-                            strikerId: "",
-                            nonStrikerId: "",
+                            strikerId: !config.isCustomNamesEnabled ? firstInningsBattingPlayers[0]?.id || "" : "",
+                            nonStrikerId: !config.isCustomNamesEnabled ? firstInningsBattingPlayers[1]?.id || "" : "",
+                            currentBowlerId: !config.isCustomNamesEnabled ? firstInningsBowlingPlayers[firstInningsBowlingPlayers.length - 1]?.id || null : null,
                         },
                         innings2: {
                             ...INITIAL_INNINGS,
