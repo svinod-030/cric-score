@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MatchConfig, MatchState, InningsState, ExtraType, WicketType } from '../types/match';
+import { MatchConfig, MatchState, InningsState, ExtraType, WicketType, Player } from '../types/match';
 import { processBall } from '../utils/scoringUtils';
 
 interface MatchStore {
@@ -21,6 +21,7 @@ interface MatchStore {
     retirePlayer: (playerId: string) => void;
     resetMatch: () => void;
     restoreMatches: (backupData: string) => void;
+    renamePlayer: (playerId: string, newName: string) => void;
 }
 
 const INITIAL_CONFIG: MatchConfig = {
@@ -312,6 +313,23 @@ export const useMatchStore = create<MatchStore>()(
                     console.error('Failed to restore matches:', error);
                     throw error;
                 }
+            },
+
+            renamePlayer: (playerId: string, newName: string) => {
+                set((store) => {
+                    const { teamAPlayers, teamBPlayers } = store.state;
+
+                    const updateRoster = (roster: Player[]) =>
+                        roster.map(p => p.id === playerId ? { ...p, name: newName } : p);
+
+                    return {
+                        state: {
+                            ...store.state,
+                            teamAPlayers: updateRoster(teamAPlayers),
+                            teamBPlayers: updateRoster(teamBPlayers)
+                        }
+                    };
+                });
             },
         }),
         {

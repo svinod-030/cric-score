@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Modal, Switch, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
 import { useAuthStore } from '../store/useAuthStore';
@@ -14,8 +14,57 @@ import { FielderSelectionModal } from '../components/FielderSelectionModal';
 import { Ionicons } from '@expo/vector-icons';
 import { WicketType } from '../types/match';
 
+const EditablePlayerName = ({
+    name,
+    onSave,
+    textClassName = "text-white font-bold text-lg",
+    containerClassName = ""
+}: {
+    name: string;
+    onSave: (newName: string) => void;
+    textClassName?: string;
+    containerClassName?: string;
+}) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [tempName, setTempName] = useState(name);
+
+    useEffect(() => {
+        setTempName(name);
+    }, [name]);
+
+    const handleSave = () => {
+        if (tempName.trim()) {
+            onSave(tempName.trim());
+        } else {
+            setTempName(name); // Revert if empty
+        }
+        setIsEditing(false);
+    };
+
+    if (isEditing) {
+        return (
+            <TextInput
+                value={tempName}
+                onChangeText={setTempName}
+                onBlur={handleSave}
+                onSubmitEditing={handleSave}
+                autoFocus
+                className={`${textClassName} border-b border-blue-500 min-w-[100px] p-0`}
+                selectionColor="#3b82f6"
+            />
+        );
+    }
+
+    return (
+        <TouchableOpacity onPress={() => setIsEditing(true)} className={`flex-row items-center gap-2 ${containerClassName}`}>
+            <Text className={textClassName} numberOfLines={1}>{name}</Text>
+            <Ionicons name="pencil" size={14} color="#6b7280" />
+        </TouchableOpacity>
+    );
+};
+
 export default function ScoreboardScreen({ navigation }: any) {
-    const { state, recordBall, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings } = useMatchStore();
+    const { state, recordBall, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings, renamePlayer } = useMatchStore();
     const innings = state.currentInnings === 1 ? state.innings1 : state.innings2;
     const currentOverValidBalls = innings.currentOver.filter(b => b.isValidBall).length;
 
@@ -218,17 +267,19 @@ export default function ScoreboardScreen({ navigation }: any) {
                 {/* Player Stats Bar */}
                 <View className="flex-row justify-between bg-gray-800 p-3 rounded-xl mb-4">
                     <View>
-                        <Text className="text-white font-bold text-lg">
-                            {getPlayerName(innings.strikerId)}*
-                        </Text>
+                        <EditablePlayerName
+                            name={getPlayerName(innings.strikerId) + "*"}
+                            onSave={(newName) => renamePlayer(innings.strikerId, newName.replace('*', ''))}
+                        />
                         <Text className="text-gray-400">
                             {strikerStats.runs} ({strikerStats.ballsFaced})
                         </Text>
                     </View>
                     <View className="items-end">
-                        <Text className="text-white font-bold text-lg">
-                            {getPlayerName(innings.nonStrikerId)}
-                        </Text>
+                        <EditablePlayerName
+                            name={getPlayerName(innings.nonStrikerId)}
+                            onSave={(newName) => renamePlayer(innings.nonStrikerId, newName)}
+                        />
                         <Text className="text-gray-400">
                             {nonStrikerStats.runs} ({nonStrikerStats.ballsFaced})
                         </Text>
@@ -239,9 +290,14 @@ export default function ScoreboardScreen({ navigation }: any) {
                 <View className="flex-row justify-between items-center bg-gray-800 p-3 rounded-xl mb-4">
                     <View>
                         <Text className="text-gray-400 text-xs uppercase font-bold">Bowler</Text>
-                        <Text className="text-white font-bold text-lg">
-                            {innings.currentBowlerId ? getPlayerName(innings.currentBowlerId) : "Select Bowler"}
-                        </Text>
+                        {innings.currentBowlerId ? (
+                            <EditablePlayerName
+                                name={getPlayerName(innings.currentBowlerId)}
+                                onSave={(newName) => renamePlayer(innings.currentBowlerId!, newName)}
+                            />
+                        ) : (
+                            <Text className="text-white font-bold text-lg">Select Bowler</Text>
+                        )}
                     </View>
                     <View className="items-end">
                         <Text className="text-white font-bold">
