@@ -189,9 +189,27 @@ export const processBall = (
         [newStrikerId, newNonStrikerId] = [newNonStrikerId, newStrikerId];
     }
 
-    // Handle Wicket Fall - Reset striker to empty string for manual selection
+    // Handle Wicket Fall
     if (isWicket) {
-        newStrikerId = "";
+        if (!config.isCustomNamesEnabled) {
+            // Auto-select next batter
+            const roster = innings.battingTeam === state.teamA ? state.teamAPlayers : state.teamBPlayers;
+            const nextBatter = roster.find(p => {
+                const pStats = innings.battingStats[p.id];
+                const isPlaying = p.id === strikerId || p.id === innings.nonStrikerId;
+                // Not playing AND (no stats OR (not out AND not retired))
+                return !isPlaying && (!pStats || (!pStats.isOut && !pStats.isRetired));
+            });
+
+            if (nextBatter) {
+                newStrikerId = nextBatter.id;
+            } else {
+                newStrikerId = ""; // No more players?
+            }
+        } else {
+            // Manual selection triggered by empty ID
+            newStrikerId = "";
+        }
     }
 
 

@@ -270,6 +270,9 @@ export const useMatchStore = create<MatchStore>()(
                 set((store) => {
                     const config = store.config;
                     const battingSecondPlayers = store.state.innings2.battingTeamKey === 'teamA' ? store.state.teamAPlayers : store.state.teamBPlayers;
+                    const bowlingSecondPlayers = store.state.innings2.battingTeamKey === 'teamA' ? store.state.teamBPlayers : store.state.teamAPlayers;
+
+                    const isDefaultNames = !config.isCustomNamesEnabled;
 
                     return {
                         state: {
@@ -278,8 +281,9 @@ export const useMatchStore = create<MatchStore>()(
                             isInningsBreak: false,
                             innings2: {
                                 ...store.state.innings2,
-                                strikerId: "",
-                                nonStrikerId: "",
+                                strikerId: isDefaultNames ? battingSecondPlayers[0]?.id || "" : "",
+                                nonStrikerId: isDefaultNames ? battingSecondPlayers[1]?.id || "" : "",
+                                currentBowlerId: isDefaultNames ? bowlingSecondPlayers[bowlingSecondPlayers.length - 1]?.id || null : null,
                             }
                         }
                     };
@@ -320,15 +324,51 @@ export const useMatchStore = create<MatchStore>()(
                 set((store) => {
                     const { teamAPlayers, teamBPlayers } = store.state;
 
+                    // 1. Update Current Match State
                     const updateRoster = (roster: Player[]) =>
                         roster.map(p => p.id === playerId ? { ...p, name: newName } : p);
 
-                    return {
-                        state: {
-                            ...store.state,
-                            teamAPlayers: updateRoster(teamAPlayers),
-                            teamBPlayers: updateRoster(teamBPlayers)
+                    const nextState = {
+                        ...store.state,
+                        teamAPlayers: updateRoster(teamAPlayers),
+                        teamBPlayers: updateRoster(teamBPlayers)
+                    };
+
+                    // 2. Persist to Global Config
+                    const nextConfig = { ...store.config };
+
+                    // Parse ID (A1...A11 or B1...B11)
+                    if (playerId.startsWith('A')) {
+                        const index = parseInt(playerId.substring(1)) - 1;
+                        if (!isNaN(index)) {
+                            // Ensure array exists and has values
+                            if (!nextConfig.teamAPlayerNames) {
+                                nextConfig.teamAPlayerNames = Array.from({ length: nextConfig.playersPerTeam }, (_, i) => `${nextConfig.teamA} Player ${i + 1}`);
+                            }
+                            // Fill any gaps if array is shorter than index
+                            while (nextConfig.teamAPlayerNames.length <= index) {
+                                nextConfig.teamAPlayerNames.push(`${nextConfig.teamA} Player ${nextConfig.teamAPlayerNames.length + 1}`);
+                            }
+                            nextConfig.teamAPlayerNames[index] = newName;
+                            nextConfig.isCustomNamesEnabled = true;
                         }
+                    } else if (playerId.startsWith('B')) {
+                        const index = parseInt(playerId.substring(1)) - 1;
+                        if (!isNaN(index)) {
+                            if (!nextConfig.teamBPlayerNames) {
+                                nextConfig.teamBPlayerNames = Array.from({ length: nextConfig.playersPerTeam }, (_, i) => `${nextConfig.teamB} Player ${i + 1}`);
+                            }
+                            while (nextConfig.teamBPlayerNames.length <= index) {
+                                nextConfig.teamBPlayerNames.push(`${nextConfig.teamB} Player ${nextConfig.teamBPlayerNames.length + 1}`);
+                            }
+                            nextConfig.teamBPlayerNames[index] = newName;
+                            nextConfig.isCustomNamesEnabled = true;
+                        }
+                    }
+
+                    return {
+                        config: nextConfig,
+                        state: nextState
                     };
                 });
             },

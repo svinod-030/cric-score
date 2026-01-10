@@ -56,7 +56,13 @@ const EditablePlayerName = ({
     }
 
     return (
-        <TouchableOpacity onPress={() => setIsEditing(true)} className={`flex-row items-center gap-2 ${containerClassName}`}>
+        <TouchableOpacity
+            onPress={() => {
+                setIsEditing(true);
+                setTempName('');
+            }}
+            className={`flex-row items-center gap-2 ${containerClassName}`}
+        >
             <Text className={textClassName} numberOfLines={1}>{name}</Text>
             <Ionicons name="pencil" size={14} color="#6b7280" />
         </TouchableOpacity>
