@@ -22,11 +22,16 @@ export default function ScoreboardScreen({ navigation }: any) {
     // Derived Rosters
     const bowlingTeamPlayers = innings.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers;
 
+    // Filter available bowlers (no consecutive overs)
+    const lastOver = innings.overs.length > 0 ? innings.overs[innings.overs.length - 1] : null;
+    const lastBowlerId = lastOver ? lastOver.bowlerId : null;
+    const availableBowlers = bowlingTeamPlayers.filter(p => p.id !== lastBowlerId);
+
     const [isBowlerModalVisible, setBowlerModalVisible] = useState(false);
     const [runModalVisible, setRunModalVisible] = useState(false);
     const [wicketModalVisible, setWicketModalVisible] = useState(false);
     const [fielderModalVisible, setFielderModalVisible] = useState(false);
-    const [runModalConfig, setRunModalConfig] = useState<{ title: string; type: ExtraType | 'wicket'; runs: number; options?: number[] }>({ title: '', type: 'none', runs: 0 });
+    const [runModalConfig, setRunModalConfig] = useState<{ title: string; type: ExtraType | 'wicket'; runs: number; options?: number[]; showByeToggle?: boolean }>({ title: '', type: 'none', runs: 0 });
 
     const [isBatterModalVisible, setBatterModalVisible] = useState(false);
     const [batterSelectionType, setBatterSelectionType] = useState<'striker' | 'nonStriker' | null>(null);
@@ -90,12 +95,36 @@ export default function ScoreboardScreen({ navigation }: any) {
     };
 
     const handleExtra = (type: ExtraType) => {
-        if (type === 'bye' || type === 'leg-bye') {
-            setRunModalConfig({ title: `Select ${type === 'bye' ? 'Byes' : 'Leg Byes'}`, type, runs: 0 });
-            setRunModalVisible(true);
-        } else {
-            recordBall(0, type, false);
+        // For ALL extras (Wide, No Ball, Bye, Leg Bye), allow run selection
+        const titleMap: Record<string, string> = {
+            'wide': 'Wide Ball',
+            'no-ball': 'No Ball',
+            'bye': 'Byes',
+            'leg-bye': 'Leg Byes'
+        };
+
+        let options = [0, 1, 2, 3, 4, 6];
+        if (type === 'wide') {
+            // Wides can be 1wd, 1wd+1, 1wd+2 etc. But usually just Wides. 
+            // If user selects 1, it means 1 wide extra + 1 run running usually? 
+            // Wait, standard app behavior: Select "Wide", then select "1". Means 1 Wide Ball penalty + 1 run ran? = 2 Wides total.
+            // Our logic adds `config.runsForWide` (1) automatically.
+            // So if user inputs 0 -> 1 Wide. Input 1 -> 2 Wides. Input 4 -> 5 Wides.
+            // This is consistent.
+            options = [0, 1, 2, 3, 4];
         }
+
+        setRunModalConfig({
+            title: titleMap[type] || 'Select Extras',
+            type,
+            runs: 0,
+            options,
+            // Only show "Bye" toggle for No Ball. 
+            // Wides are always extras. Byes/LegByes are always extras.
+            // No Ball can be runs off bat OR byes.
+            showByeToggle: type === 'no-ball'
+        });
+        setRunModalVisible(true);
     };
 
     const handleWicket = () => {
@@ -131,12 +160,12 @@ export default function ScoreboardScreen({ navigation }: any) {
         }
     };
 
-    const handleRunSelection = (runs: number) => {
+    const handleRunSelection = (runs: number, isBye?: boolean) => {
         setRunModalVisible(false);
         if (runModalConfig.type === 'wicket') {
             recordBall(runs, 'none', true, pendingWicket.type, pendingWicket.fielderId);
         } else {
-            recordBall(runs, runModalConfig.type as ExtraType, false);
+            recordBall(runs, runModalConfig.type as ExtraType, false, undefined, undefined, isBye);
         }
     };
 
@@ -238,8 +267,8 @@ export default function ScoreboardScreen({ navigation }: any) {
                                         <Text className="text-white font-bold text-xs">
                                             {ball.isWicket ? 'W' : ball.extraType !== 'none' ? ball.extraType === 'wide' ? 'WD' : ball.extraType === 'no-ball' ? 'NB' : ball.extraType === 'bye' ? 'B' : 'LB' : ball.runs}
                                         </Text>
-                                        {(ball.extraType === 'bye' || ball.extraType === 'leg-bye' || (ball.isWicket && ball.runs > 0)) && (
-                                            <Text className="text-white font-bold text-[10px] ml-0.5">+{ball.runs}</Text>
+                                        {(ball.extraType === 'bye' || ball.extraType === 'leg-bye' || (ball.isWicket && ball.runs > 0) || (ball.extraType === 'no-ball' && ball.runs > state.runsForNoBall) || (ball.extraType === 'wide' && ball.runs > state.runsForWide)) && (
+                                            <Text className="text-white font-bold text-[10px] ml-0.5">+{ball.extraType === 'no-ball' ? ball.runs - state.runsForNoBall : ball.extraType === 'wide' ? ball.runs - state.runsForWide : ball.runs}</Text>
                                         )}
                                     </View>
                                 </View>
@@ -395,7 +424,7 @@ export default function ScoreboardScreen({ navigation }: any) {
 
             <BowlerSelectionModal
                 visible={isBowlerModalVisible}
-                players={bowlingTeamPlayers}
+                players={availableBowlers}
                 onSelect={setBowler}
             />
             <BatterSelectionModal

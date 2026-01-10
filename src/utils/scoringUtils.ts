@@ -69,7 +69,8 @@ export const processBall = (
     extraType: ExtraType,
     isWicket: boolean,
     wicketType: WicketType = 'none',
-    fielderId?: string
+    fielderId?: string,
+    isByeForNoBall?: boolean
 ): MatchState => {
     const currentInningsKey = state.currentInnings === 1 ? 'innings1' : 'innings2';
     const innings = state[currentInningsKey];
@@ -93,18 +94,12 @@ export const processBall = (
         if (config.reballForWide) isValidBall = false;
     } else if (extraType === 'no-ball') {
         runsToAdd += config.runsForNoBall;
-        runsOffBat = runs; // Runs scored off no-ball count for batsman? Usually runs off bat do, the no-ball extra penalty doesn't. 
-        // For simplicity: Run input implies runs off bat + extra runs logic handling here.
-        // Standard rule: 1 run for NB + whatever runs hit. "runs" arg here is the button pressed.
-        // If button is "4" on NoBall, it's 1 NB + 4 runs.
-        // If button is "NB", it's 0 runs + 1 NB.
-        // Let's assume input runs is purely what's run/hit, unrelated to the extra PENALTY.
-        // actually NoBall button adds penalty. If user presses "Run" button after no-ball, it's complex.
-        // SIMPLIFICATION: Extra buttons add 0 runs + penalty. "Runs" buttons add runs only. 
-        // If "No Ball" button is pressed, it adds 1 runs. 
-        // If we want "4 off a No ball", we need better UI. For now, assume "No Ball" button = 1 run total. 
-        // OR better: recordBall(runs, extraType). 
-        // If extraType is NB, we add runs + NB penalty.
+        // If it's a bye off a no ball, or just "runs", the logic differs.
+        if (isByeForNoBall) {
+            runsOffBat = 0; // It's byes, so no runs for batsman
+        } else {
+            runsOffBat = runs; // Runs scored off bat
+        }
         isExtra = true;
         if (config.reballForNoBall) isValidBall = false;
     } else if (extraType === 'bye' || extraType === 'leg-bye') {
@@ -120,12 +115,10 @@ export const processBall = (
     let bowlerStats = { ...getBowlingStats(state, innings, bowlerId) };
 
     // Batting Updates
-    if (isValidBall || extraType === 'no-ball') {
-        // No balls count as balls faced? Actually, usually NO. 
-        // Wides don't count as balls faced.
-        if (extraType !== 'wide') {
-            strikerStats.ballsFaced += 1;
-        }
+    if (isValidBall) {
+        // Only valid balls count as balls faced
+        // Wides and No Balls do NOT count as balls faced
+        strikerStats.ballsFaced += 1;
     }
 
     strikerStats.runs += runsOffBat;
@@ -184,7 +177,14 @@ export const processBall = (
     let newStrikerId = strikerId;
     let newNonStrikerId = innings.nonStrikerId;
 
-    if (runsToAdd % 2 !== 0) {
+    // Swap based on RUNS RAN (or runs scored excluding fixed extras), not total runs added to score
+    // Typical logic: 1, 3, 5 runs = Swap. 4, 6 = No Swap.
+    // runs input:
+    // - On Wide: input is runs RAN (e.g. 1). Swap if 1.
+    // - On No Ball: input is runs RAN or Boundary (e.g. 1 or 4). Swap if 1.
+    // - On Normal: input is runs (1 or 4). Swap if 1.
+    // So checking runs % 2 !== 0 covers all these standard cases.
+    if (runs % 2 !== 0) {
         // Swap
         [newStrikerId, newNonStrikerId] = [newNonStrikerId, newStrikerId];
     }

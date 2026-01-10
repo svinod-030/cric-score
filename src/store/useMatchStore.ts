@@ -14,7 +14,7 @@ interface MatchStore {
     setBowler: (playerId: string) => void;
     setStriker: (playerId: string) => void;
     setNonStriker: (playerId: string) => void;
-    recordBall: (runs: number, extraType: ExtraType, isWicket: boolean, wicketType?: WicketType, fielderId?: string) => void;
+    recordBall: (runs: number, extraType: ExtraType, isWicket: boolean, wicketType?: WicketType, fielderId?: string, isByeForNoBall?: boolean) => void;
     startSecondInnings: () => void;
     undoBall: () => void;
     swapBatsmen: () => void;
@@ -174,9 +174,9 @@ export const useMatchStore = create<MatchStore>()(
                 });
             },
 
-            recordBall: (runs, extraType, isWicket, wicketType = 'none', fielderId) => {
+            recordBall: (runs, extraType, isWicket, wicketType = 'none', fielderId, isByeForNoBall) => {
                 set((store) => {
-                    const nextState = processBall(store.state, store.config, runs, extraType, isWicket, wicketType, fielderId);
+                    const nextState = processBall(store.state, store.config, runs, extraType, isWicket, wicketType, fielderId, isByeForNoBall);
 
                     // If match just finished, save to history
                     if (nextState.matchResult && !store.state.matchResult) {
