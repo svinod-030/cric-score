@@ -30,11 +30,14 @@ export const ScorecardSection = ({
     battingTeamPlayers: Player[],
     bowlingTeamPlayers: Player[]
 }) => {
+    const validBalls = innings.currentOver.filter(b => b.isValidBall).length;
+    const totalOvers = `${innings.overs.length}.${validBalls}`;
+
     return (
         <View className="mb-6 bg-gray-800 rounded-xl overflow-hidden">
             <View className="bg-gray-700 p-3 flex-row justify-between items-center">
                 <Text className="text-white font-bold text-lg">{title}</Text>
-                <Text className="text-gray-300 font-bold">{innings.totalRuns}/{innings.totalWickets} ({innings.overs.length} Ov)</Text>
+                <Text className="text-gray-300 font-bold">{innings.totalRuns}/{innings.totalWickets} ({totalOvers} Ov)</Text>
             </View>
 
             {/* Batting Header */}
@@ -98,7 +101,7 @@ export const ScorecardSection = ({
             <View className="flex-row justify-between p-3 border-b border-gray-700 bg-gray-900/40">
                 <Text className="text-white font-black text-lg">Total</Text>
                 <Text className="text-white font-black text-lg">
-                    {innings.totalRuns}/{innings.totalWickets} <Text className="text-base text-gray-400 font-normal">({innings.overs.length} Ov)</Text>
+                    {innings.totalRuns}/{innings.totalWickets} <Text className="text-base text-gray-400 font-normal">({totalOvers} Ov)</Text>
                 </Text>
             </View>
 

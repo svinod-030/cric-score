@@ -245,244 +245,247 @@ export default function ScoreboardScreen({ navigation }: any) {
 
     return (
         <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
-            {/* Header / Score */}
-            <View className="p-6 pb-2 border-b border-gray-800">
-                <Text className="text-gray-400 text-center font-medium mb-1">
-                    {innings.battingTeam} Batting
-                </Text>
-                <View className="items-center mb-6">
-                    <Text className="text-6xl font-black text-white">
-                        {innings.totalRuns}/{innings.totalWickets}
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                {/* Header / Score */}
+                <View className="p-6 pb-2 border-b border-gray-800">
+                    <Text className="text-gray-400 text-center font-medium mb-1">
+                        {innings.battingTeam} Batting
                     </Text>
-                    <Text className="text-xl text-gray-400 mt-2">
-                        Overs: {innings.overs.length}.{currentOverValidBalls} ({state.overs})
-                    </Text>
-
-                    {state.currentInnings === 2 && (
-                        <View className="mt-4 bg-gray-800 px-4 py-2 rounded-lg">
-                            <Text className="text-yellow-500 font-bold text-lg text-center">
-                                Target: {state.innings1.totalRuns + 1}
-                            </Text>
-                            <Text className="text-gray-300 text-sm text-center mt-1">
-                                Need {state.innings1.totalRuns + 1 - innings.totalRuns} runs in {(state.overs * 6) - (innings.overs.length * 6 + currentOverValidBalls)} balls
-                            </Text>
-                        </View>
-                    )}
-                </View>
-
-                {/* Player Stats Bar */}
-                <View className="flex-row justify-between bg-gray-800 p-3 rounded-xl mb-4">
-                    <View>
-                        <EditablePlayerName
-                            name={getPlayerName(innings.strikerId) + "*"}
-                            onSave={(newName) => renamePlayer(innings.strikerId, newName.replace('*', ''))}
-                        />
-                        <Text className="text-gray-400">
-                            {strikerStats.runs} ({strikerStats.ballsFaced})
+                    <View className="items-center mb-6">
+                        <Text className="text-6xl font-black text-white">
+                            {innings.totalRuns}/{innings.totalWickets}
                         </Text>
-                    </View>
-                    <View className="items-end">
-                        <EditablePlayerName
-                            name={getPlayerName(innings.nonStrikerId)}
-                            onSave={(newName) => renamePlayer(innings.nonStrikerId, newName)}
-                        />
-                        <Text className="text-gray-400">
-                            {nonStrikerStats.runs} ({nonStrikerStats.ballsFaced})
+                        <Text className="text-xl text-gray-400 mt-2">
+                            Overs: {innings.overs.length}.{currentOverValidBalls} ({state.overs})
                         </Text>
-                    </View>
-                </View>
 
-                {/* Current Bowler Bar */}
-                <View className="flex-row justify-between items-center bg-gray-800 p-3 rounded-xl mb-4">
-                    <View>
-                        <Text className="text-gray-400 text-xs uppercase font-bold">Bowler</Text>
-                        {innings.currentBowlerId ? (
+                        {state.currentInnings === 2 && (
+                            <View className="mt-4 bg-gray-800 px-4 py-2 rounded-lg">
+                                <Text className="text-yellow-500 font-bold text-lg text-center">
+                                    Target: {state.innings1.totalRuns + 1}
+                                </Text>
+                                <Text className="text-gray-300 text-sm text-center mt-1">
+                                    Need {state.innings1.totalRuns + 1 - innings.totalRuns} runs in {(state.overs * 6) - (innings.overs.length * 6 + currentOverValidBalls)} balls
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+
+                    {/* Player Stats Bar */}
+                    <View className="flex-row justify-between bg-gray-800 p-3 rounded-xl mb-4">
+                        <View>
                             <EditablePlayerName
-                                name={getPlayerName(innings.currentBowlerId)}
-                                onSave={(newName) => renamePlayer(innings.currentBowlerId!, newName)}
+                                name={getPlayerName(innings.strikerId) + "*"}
+                                onSave={(newName) => renamePlayer(innings.strikerId, newName.replace('*', ''))}
                             />
-                        ) : (
-                            <Text className="text-white font-bold text-lg">Select Bowler</Text>
-                        )}
-                    </View>
-                    <View className="items-end">
-                        <Text className="text-white font-bold">
-                            {currentBowlerStats ? `${currentBowlerStats.wickets}-${currentBowlerStats.runsConceded}` : "0-0"}
-                        </Text>
-                        <Text className="text-gray-400 text-xs">
-                            {bowlerOversDisplay} Overs
-                        </Text>
-                    </View>
-                </View>
-
-
-                <View className="mb-4">
-                    <Text className="text-gray-400 mb-2 text-sm">This Over:</Text>
-                    <View className="flex-row gap-2 min-h-[32px] flex-wrap">
-                        {innings.currentOver.length > 0 ? (
-                            innings.currentOver.map((ball, idx) => (
-                                <View
-                                    key={idx}
-                                    className={`px-2 h-8 rounded-full items-center justify-center border border-white/10 ${ball.isWicket ? 'bg-red-600' : ball.extraType !== 'none' ? 'bg-yellow-600' : ball.runs >= 4 ? 'bg-green-600' : 'bg-gray-700'}`}
-                                >
-                                    <View className="flex-row items-center">
-                                        <Text className="text-white font-bold text-xs">
-                                            {ball.isWicket ? 'W' : ball.extraType !== 'none' ? ball.extraType === 'wide' ? 'WD' : ball.extraType === 'no-ball' ? 'NB' : ball.extraType === 'bye' ? 'B' : 'LB' : ball.runs}
-                                        </Text>
-                                        {(ball.extraType === 'bye' || ball.extraType === 'leg-bye' || (ball.isWicket && ball.runs > 0) || (ball.extraType === 'no-ball' && ball.runs > state.runsForNoBall) || (ball.extraType === 'wide' && ball.runs > state.runsForWide)) && (
-                                            <Text className="text-white font-bold text-[10px] ml-0.5">+{ball.extraType === 'no-ball' ? ball.runs - state.runsForNoBall : ball.extraType === 'wide' ? ball.runs - state.runsForWide : ball.runs}</Text>
-                                        )}
-                                    </View>
-                                </View>
-                            ))
-                        ) : (
-                            <Text className="text-gray-600 text-sm italic">-</Text>
-                        )}
-                    </View>
-                </View>
-
-                {/* Quick Controls */}
-                <View className="flex-row gap-2 mt-2">
-                    <TouchableOpacity
-                        onPress={undoBall}
-                        className="flex-1 bg-red-900/30 py-2 rounded-lg flex-row items-center justify-center border border-red-800/50"
-                    >
-                        <Ionicons name="arrow-undo" size={16} color="#ef4444" />
-                        <Text className="text-red-500 font-bold ml-2">Undo</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={swapBatsmen}
-                        className="flex-1 bg-blue-900/30 py-2 rounded-lg flex-row items-center justify-center border border-blue-800/50"
-                    >
-                        <Ionicons name="swap-horizontal" size={16} color="#3b82f6" />
-                        <Text className="text-blue-500 font-bold ml-2">Swap</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={() => retirePlayer(innings.strikerId)}
-                        className="flex-1 bg-orange-900/30 py-2 rounded-lg flex-row items-center justify-center border border-orange-800/50"
-                    >
-                        <Ionicons name="exit-outline" size={16} color="#f97316" />
-                        <Text className="text-orange-500 font-bold ml-2">Retire</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            {state.isInningsBreak ? (
-                <ScrollView className="flex-1 p-6">
-                    <View className="items-center mb-8 bg-gray-800 p-8 rounded-3xl border border-blue-900/30">
-                        <Ionicons name="trophy" size={64} color="#fbbf24" className="mb-4" />
-                        <Text className="text-white text-3xl font-black text-center">Innings Over!</Text>
-                        <Text className="text-gray-400 text-lg mt-2">{state.innings1.battingTeam} finished their innings</Text>
-                        <View className="mt-6 flex-row items-baseline">
-                            <Text className="text-5xl font-bold text-white">{state.innings1.totalRuns}</Text>
-                            <Text className="text-2xl text-gray-500 font-medium ml-2">/ {state.innings1.totalWickets}</Text>
+                            <Text className="text-gray-400">
+                                {strikerStats.runs} ({strikerStats.ballsFaced})
+                            </Text>
+                        </View>
+                        <View className="items-end">
+                            <EditablePlayerName
+                                name={getPlayerName(innings.nonStrikerId)}
+                                onSave={(newName) => renamePlayer(innings.nonStrikerId, newName)}
+                            />
+                            <Text className="text-gray-400">
+                                {nonStrikerStats.runs} ({nonStrikerStats.ballsFaced})
+                            </Text>
                         </View>
                     </View>
 
-                    <ScorecardSection
-                        title={`1st Innings: ${state.innings1.battingTeam}`}
-                        innings={state.innings1}
-                        battingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
-                        bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
-                    />
-
-                    <TouchableOpacity
-                        onPress={startSecondInnings}
-                        className="mt-10 mb-20 bg-blue-600 p-5 rounded-2xl items-center shadow-lg shadow-blue-500/30 active:bg-blue-700"
-                    >
-                        <Text className="text-white text-xl font-black">START 2ND INNINGS</Text>
-                        <Text className="text-blue-200 text-sm mt-1 uppercase tracking-widest font-bold">Target: {state.innings1.totalRuns + 1}</Text>
-                    </TouchableOpacity>
-                </ScrollView>
-            ) : (
-                <ScrollView className="flex-1 p-4">
-                    <View className="flex-col gap-4">
-                        {/* Runs Grid */}
-                        <View className="flex-row gap-4 justify-between">
-                            {[0, 1, 2, 3].map(run => (
-                                <TouchableOpacity
-                                    key={run}
-                                    onPress={() => handleScore(run)}
-                                    className="flex-1 aspect-square bg-gray-800 rounded-2xl items-center justify-center border border-gray-700 active:bg-gray-700"
-                                >
-                                    <Text className="text-white text-3xl font-bold">{run}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-
-                        <View className="flex-row gap-4 justify-between">
-                            {[4, 6].map(run => (
-                                <TouchableOpacity
-                                    key={run}
-                                    onPress={() => handleScore(run)}
-                                    className="flex-1 aspect-video bg-gray-800 rounded-2xl items-center justify-center border border-gray-700 active:bg-gray-700"
-                                >
-                                    <Text className="text-white text-3xl font-bold">{run}</Text>
-                                </TouchableOpacity>
-                            ))}
-                            <TouchableOpacity
-                                onPress={handleWicket}
-                                className="flex-1 aspect-video bg-red-900/50 rounded-2xl items-center justify-center border border-red-700 active:bg-red-800/50"
-                            >
-                                <Text className="text-red-500 text-2xl font-bold">Wicket</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Extras */}
-                        <Text className="text-gray-400 mt-4 mb-2">Extras</Text>
-                        <View className="flex-row gap-4">
-                            <TouchableOpacity
-                                onPress={() => handleExtra('wide')}
-                                className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
-                            >
-                                <Text className="text-yellow-500 font-bold text-lg">Wide</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => handleExtra('no-ball')}
-                                className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
-                            >
-                                <Text className="text-yellow-500 font-bold text-lg">No Ball</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => handleExtra('bye')}
-                                className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
-                            >
-                                <Text className="text-yellow-500 font-bold text-lg">Bye</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => handleExtra('leg-bye')}
-                                className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
-                            >
-                                <Text className="text-yellow-500 font-bold text-lg">L-Bye</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Full Scorecard Section */}
-                        <View className="mt-10 mb-20">
-                            <Text className="text-white text-2xl font-bold mb-4 px-2">Scorecard</Text>
-
-                            {state.currentInnings === 2 && (
-                                <View className="mb-8">
-                                    <ScorecardSection
-                                        title={`Innings 1: ${state.innings1.battingTeam}`}
-                                        innings={state.innings1}
-                                        battingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
-                                        bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
-                                    />
-                                </View>
+                    {/* Current Bowler Bar */}
+                    <View className="flex-row justify-between items-center bg-gray-800 p-3 rounded-xl mb-4">
+                        <View>
+                            <Text className="text-gray-400 text-xs uppercase font-bold">Bowler</Text>
+                            {innings.currentBowlerId ? (
+                                <EditablePlayerName
+                                    name={getPlayerName(innings.currentBowlerId)}
+                                    onSave={(newName) => renamePlayer(innings.currentBowlerId!, newName)}
+                                />
+                            ) : (
+                                <Text className="text-white font-bold text-lg">Select Bowler</Text>
                             )}
+                        </View>
+                        <View className="items-end">
+                            <Text className="text-white font-bold">
+                                {currentBowlerStats ? `${currentBowlerStats.wickets}-${currentBowlerStats.runsConceded}` : "0-0"}
+                            </Text>
+                            <Text className="text-gray-400 text-xs">
+                                {bowlerOversDisplay} Overs
+                            </Text>
+                        </View>
+                    </View>
 
-                            <ScorecardSection
-                                title={`${state.currentInnings === 2 ? 'Innings 2' : 'Innings 1'}: ${innings.battingTeam}`}
-                                innings={innings}
-                                battingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
-                                bowlingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
-                            />
+
+                    <View className="mb-4">
+                        <Text className="text-gray-400 mb-2 text-sm">This Over:</Text>
+                        <View className="flex-row gap-2 min-h-[32px] flex-wrap">
+                            {innings.currentOver.length > 0 ? (
+                                innings.currentOver.map((ball, idx) => (
+                                    <View
+                                        key={idx}
+                                        className={`px-2 h-8 rounded-full items-center justify-center border border-white/10 ${ball.isWicket ? 'bg-red-600' : ball.extraType !== 'none' ? 'bg-yellow-600' : ball.runs >= 4 ? 'bg-green-600' : 'bg-gray-700'}`}
+                                    >
+                                        <View className="flex-row items-center">
+                                            <Text className="text-white font-bold text-xs">
+                                                {ball.isWicket ? 'W' : ball.extraType !== 'none' ? ball.extraType === 'wide' ? 'WD' : ball.extraType === 'no-ball' ? 'NB' : ball.extraType === 'bye' ? 'B' : 'LB' : ball.runs}
+                                            </Text>
+                                            {(ball.extraType === 'bye' || ball.extraType === 'leg-bye' || (ball.isWicket && ball.runs > 0) || (ball.extraType === 'no-ball' && ball.runs > state.runsForNoBall) || (ball.extraType === 'wide' && ball.runs > state.runsForWide)) && (
+                                                <Text className="text-white font-bold text-[10px] ml-0.5">+{ball.extraType === 'no-ball' ? ball.runs - state.runsForNoBall : ball.extraType === 'wide' ? ball.runs - state.runsForWide : ball.runs}</Text>
+                                            )}
+                                        </View>
+                                    </View>
+                                ))
+                            ) : (
+                                <Text className="text-gray-600 text-sm italic">-</Text>
+                            )}
+                        </View>
+                    </View>
+
+                    {/* Quick Controls */}
+                    <View className="flex-row gap-2 mt-2">
+                        <TouchableOpacity
+                            onPress={undoBall}
+                            className="flex-1 bg-red-900/30 py-2 rounded-lg flex-row items-center justify-center border border-red-800/50"
+                        >
+                            <Ionicons name="arrow-undo" size={16} color="#ef4444" />
+                            <Text className="text-red-500 font-bold ml-2">Undo</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={swapBatsmen}
+                            className="flex-1 bg-blue-900/30 py-2 rounded-lg flex-row items-center justify-center border border-blue-800/50"
+                        >
+                            <Ionicons name="swap-horizontal" size={16} color="#3b82f6" />
+                            <Text className="text-blue-500 font-bold ml-2">Swap</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => retirePlayer(innings.strikerId)}
+                            className="flex-1 bg-orange-900/30 py-2 rounded-lg flex-row items-center justify-center border border-orange-800/50"
+                        >
+                            <Ionicons name="exit-outline" size={16} color="#f97316" />
+                            <Text className="text-orange-500 font-bold ml-2">Retire</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {state.isInningsBreak ? (
+                    <View className="flex-1 p-6">
+                        <View className="items-center mb-8 bg-gray-800 p-8 rounded-3xl border border-blue-900/30">
+                            <Ionicons name="trophy" size={64} color="#fbbf24" className="mb-4" />
+                            <Text className="text-white text-3xl font-black text-center">Innings Over!</Text>
+                            <Text className="text-gray-400 text-lg mt-2">{state.innings1.battingTeam} finished their innings</Text>
+                            <View className="mt-6 flex-row items-baseline">
+                                <Text className="text-5xl font-bold text-white">{state.innings1.totalRuns}</Text>
+                                <Text className="text-2xl text-gray-500 font-medium ml-2">/ {state.innings1.totalWickets}</Text>
+                            </View>
                         </View>
 
+                        <ScorecardSection
+                            title={`1st Innings: ${state.innings1.battingTeam}`}
+                            innings={state.innings1}
+                            battingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
+                            bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
+                        />
+
+                        <TouchableOpacity
+                            onPress={startSecondInnings}
+                            className="mt-10 mb-20 bg-blue-600 p-5 rounded-2xl items-center shadow-lg shadow-blue-500/30 active:bg-blue-700"
+                        >
+                            <Text className="text-white text-xl font-black">START 2ND INNINGS</Text>
+                            <Text className="text-blue-200 text-sm mt-1 uppercase tracking-widest font-bold">Target: {state.innings1.totalRuns + 1}</Text>
+                        </TouchableOpacity>
                     </View>
-                </ScrollView>
-            )}
+                ) : (
+                    <View className="flex-1 p-4">
+                        <View className="flex-col gap-4">
+                            {/* Runs Grid */}
+                            <View className="flex-row gap-4 justify-between">
+                                {[0, 1, 2, 3].map(run => (
+                                    <TouchableOpacity
+                                        key={run}
+                                        onPress={() => handleScore(run)}
+                                        className="flex-1 aspect-square bg-gray-800 rounded-2xl items-center justify-center border border-gray-700 active:bg-gray-700"
+                                    >
+                                        <Text className="text-white text-3xl font-bold">{run}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+
+                            <View className="flex-row gap-4 justify-between">
+                                {[4, 6].map(run => (
+                                    <TouchableOpacity
+                                        key={run}
+                                        onPress={() => handleScore(run)}
+                                        className="flex-1 aspect-video bg-gray-800 rounded-2xl items-center justify-center border border-gray-700 active:bg-gray-700"
+                                    >
+                                        <Text className="text-white text-3xl font-bold">{run}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                                <TouchableOpacity
+                                    onPress={handleWicket}
+                                    className="flex-1 aspect-video bg-red-900/50 rounded-2xl items-center justify-center border border-red-700 active:bg-red-800/50"
+                                >
+                                    <Text className="text-red-500 text-2xl font-bold">Wicket</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Extras */}
+                            <Text className="text-gray-400 mt-4 mb-2">Extras</Text>
+                            <View className="flex-row gap-4">
+                                <TouchableOpacity
+                                    onPress={() => handleExtra('wide')}
+                                    className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
+                                >
+                                    <Text className="text-yellow-500 font-bold text-lg">Wide</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => handleExtra('no-ball')}
+                                    className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
+                                >
+                                    <Text className="text-yellow-500 font-bold text-lg">No Ball</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => handleExtra('bye')}
+                                    className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
+                                >
+                                    <Text className="text-yellow-500 font-bold text-lg">Bye</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => handleExtra('leg-bye')}
+                                    className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
+                                >
+                                    <Text className="text-yellow-500 font-bold text-lg">L-Bye</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* Full Scorecard Section */}
+                            <View className="mt-10 mb-20">
+                                <Text className="text-white text-2xl font-bold mb-4 px-2">Scorecard</Text>
+
+                                {state.currentInnings === 2 && (
+                                    <View className="mb-8">
+                                        <ScorecardSection
+                                            title={`Innings 1: ${state.innings1.battingTeam}`}
+                                            innings={state.innings1}
+                                            battingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
+                                            bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
+                                        />
+                                    </View>
+                                )}
+
+                                <ScorecardSection
+                                    title={`${state.currentInnings === 2 ? 'Innings 2' : 'Innings 1'}: ${innings.battingTeam}`}
+                                    innings={innings}
+                                    battingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
+                                    bowlingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
+                                />
+                            </View>
+
+                        </View>
+                    </View>
+                )}
+
+            </ScrollView>
 
             <BowlerSelectionModal
                 visible={isBowlerModalVisible}
