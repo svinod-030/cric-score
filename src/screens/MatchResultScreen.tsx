@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Linking, Platform } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
 import { ScorecardSection } from '../components/ScorecardSection';
+import { OverSummarySection } from '../components/OverSummarySection';
 import { APP_CONFIG } from '../utils/constants';
 
 export default function MatchResultScreen({ navigation, route }: any) {
@@ -56,18 +57,37 @@ export default function MatchResultScreen({ navigation, route }: any) {
 
                 <View className="px-4">
                     <ScorecardSection
-                        title={`Innings 1: ${innings1.battingTeam}`}
+                        title={`1st Innings: ${innings1.battingTeam}`}
                         innings={innings1}
                         battingTeamPlayers={innings1.battingTeam === state.teamA ? teamAPlayers : teamBPlayers}
                         bowlingTeamPlayers={innings1.battingTeam === state.teamA ? teamBPlayers : teamAPlayers}
+                        isCollapsible={true}
+                        defaultExpanded={true}
                     />
 
-                    <ScorecardSection
-                        title={`Innings 2: ${innings2.battingTeam}`}
-                        innings={innings2}
-                        battingTeamPlayers={innings2.battingTeam === state.teamA ? teamAPlayers : teamBPlayers}
-                        bowlingTeamPlayers={innings2.battingTeam === state.teamA ? teamBPlayers : teamAPlayers}
+                    <OverSummarySection
+                        title={`1st Innings Over Summary`}
+                        innings={innings1}
+                        defaultExpanded={false}
                     />
+
+                    {(innings2.totalRuns > 0 || innings2.overs.length > 0 || innings2.currentOver.length > 0) && (
+                        <>
+                            <ScorecardSection
+                                title={`2nd Innings: ${innings2.battingTeam}`}
+                                innings={innings2}
+                                battingTeamPlayers={innings2.battingTeam === state.teamA ? teamAPlayers : teamBPlayers}
+                                bowlingTeamPlayers={innings2.battingTeam === state.teamA ? teamBPlayers : teamAPlayers}
+                                isCollapsible={true}
+                                defaultExpanded={false}
+                            />
+                            <OverSummarySection
+                                title={`2nd Innings Over Summary`}
+                                innings={innings2}
+                                defaultExpanded={false}
+                            />
+                        </>
+                    )}
                 </View>
 
                 <View className="p-6 pt-0">

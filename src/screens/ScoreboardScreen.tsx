@@ -8,6 +8,7 @@ import { ExtraType } from '../types/match';
 import { BowlerSelectionModal } from '../components/BowlerSelectionModal';
 import { BatterSelectionModal } from '../components/BatterSelectionModal';
 import { ScorecardSection } from '../components/ScorecardSection';
+import { OverSummarySection } from '../components/OverSummarySection';
 import { RunSelectionModal } from '../components/RunSelectionModal';
 import { WicketTypeSelectionModal } from '../components/WicketTypeSelectionModal';
 import { FielderSelectionModal } from '../components/FielderSelectionModal';
@@ -501,21 +502,36 @@ export default function ScoreboardScreen({ navigation }: any) {
                                 <Text className="text-white text-2xl font-bold mb-4 px-2">Scorecard</Text>
 
                                 {state.currentInnings === 2 && (
-                                    <View className="mb-8">
+                                    <View className="mb-4">
                                         <ScorecardSection
-                                            title={`Innings 1: ${state.innings1.battingTeam}`}
+                                            title={`1st Innings: ${state.innings1.battingTeam}`}
                                             innings={state.innings1}
                                             battingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
                                             bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
+                                            isCollapsible={true}
+                                            defaultExpanded={true}
+                                        />
+                                        <OverSummarySection
+                                            title={`1st Innings Over Summary`}
+                                            innings={state.innings1}
+                                            defaultExpanded={false}
                                         />
                                     </View>
                                 )}
 
                                 <ScorecardSection
-                                    title={`${state.currentInnings === 2 ? 'Innings 2' : 'Innings 1'}: ${innings.battingTeam}`}
+                                    title={`${state.currentInnings === 2 ? '2nd Innings' : '1st Innings'}: ${innings.battingTeam}`}
                                     innings={innings}
                                     battingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
                                     bowlingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
+                                    isCollapsible={true}
+                                    defaultExpanded={state.currentInnings === 1}
+                                />
+
+                                <OverSummarySection
+                                    title={`${state.currentInnings === 2 ? '2nd Innings' : '1st Innings'} Over Summary`}
+                                    innings={innings}
+                                    defaultExpanded={false}
                                 />
                             </View>
 
