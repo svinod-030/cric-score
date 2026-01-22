@@ -11,8 +11,11 @@ import { ScorecardSection } from '../components/ScorecardSection';
 import { RunSelectionModal } from '../components/RunSelectionModal';
 import { WicketTypeSelectionModal } from '../components/WicketTypeSelectionModal';
 import { FielderSelectionModal } from '../components/FielderSelectionModal';
+import { WhoIsOutModal } from '../components/WhoIsOutModal';
+import { OverHistory } from '../components/OverHistory';
 import { Ionicons } from '@expo/vector-icons';
 import { WicketType } from '../types/match';
+import { Alert } from 'react-native';
 
 const EditablePlayerName = ({
     name,
@@ -63,14 +66,14 @@ const EditablePlayerName = ({
             }}
             className={`flex-row items-center gap-2 ${containerClassName}`}
         >
-            <Text className={textClassName} numberOfLines={1}>{name}</Text>
+            <Text className={`max-w-[150px] ${textClassName}`}>{name}</Text>
             <Ionicons name="pencil" size={14} color="#6b7280" />
-        </TouchableOpacity>
+        </TouchableOpacity >
     );
 };
 
 export default function ScoreboardScreen({ navigation }: any) {
-    const { state, recordBall, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings, renamePlayer } = useMatchStore();
+    const { state, config, recordBall, endInnings, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings, renamePlayer } = useMatchStore();
     const innings = state.currentInnings === 1 ? state.innings1 : state.innings2;
     const currentOverValidBalls = innings.currentOver.filter(b => b.isValidBall).length;
 
@@ -86,6 +89,7 @@ export default function ScoreboardScreen({ navigation }: any) {
     const [runModalVisible, setRunModalVisible] = useState(false);
     const [wicketModalVisible, setWicketModalVisible] = useState(false);
     const [fielderModalVisible, setFielderModalVisible] = useState(false);
+    const [whoIsOutModalVisible, setWhoIsOutModalVisible] = useState(false);
     const [runModalConfig, setRunModalConfig] = useState<{ title: string; type: ExtraType | 'wicket'; runs: number; options?: number[]; showByeToggle?: boolean }>({ title: '', type: 'none', runs: 0 });
 
     const [isBatterModalVisible, setBatterModalVisible] = useState(false);
@@ -150,6 +154,12 @@ export default function ScoreboardScreen({ navigation }: any) {
     };
 
     const handleExtra = (type: ExtraType) => {
+        // If Wide Run is disabled, record immediately without modal
+        if (type === 'wide' && config.runsForWide === 0) {
+            recordBall(0, 'wide', false);
+            return;
+        }
+
         // For ALL extras (Wide, No Ball, Bye, Leg Bye), allow run selection
         const titleMap: Record<string, string> = {
             'wide': 'Wide Ball',
@@ -160,12 +170,6 @@ export default function ScoreboardScreen({ navigation }: any) {
 
         let options = [0, 1, 2, 3, 4, 6];
         if (type === 'wide') {
-            // Wides can be 1wd, 1wd+1, 1wd+2 etc. But usually just Wides. 
-            // If user selects 1, it means 1 wide extra + 1 run running usually? 
-            // Wait, standard app behavior: Select "Wide", then select "1". Means 1 Wide Ball penalty + 1 run ran? = 2 Wides total.
-            // Our logic adds `config.runsForWide` (1) automatically.
-            // So if user inputs 0 -> 1 Wide. Input 1 -> 2 Wides. Input 4 -> 5 Wides.
-            // This is consistent.
             options = [0, 1, 2, 3, 4];
         }
 
@@ -174,9 +178,6 @@ export default function ScoreboardScreen({ navigation }: any) {
             type,
             runs: 0,
             options,
-            // Only show "Bye" toggle for No Ball. 
-            // Wides are always extras. Byes/LegByes are always extras.
-            // No Ball can be runs off bat OR byes.
             showByeToggle: type === 'no-ball'
         });
         setRunModalVisible(true);
@@ -218,10 +219,35 @@ export default function ScoreboardScreen({ navigation }: any) {
     const handleRunSelection = (runs: number, isBye?: boolean) => {
         setRunModalVisible(false);
         if (runModalConfig.type === 'wicket') {
-            recordBall(runs, 'none', true, pendingWicket.type, pendingWicket.fielderId);
+            // If it's a run out, we must ask "Who is out?"
+            if (pendingWicket.type === 'run-out') {
+                // Save the runs temporarily, use existing pendingWicket state
+                setPendingWicket(prev => ({ ...prev, runs }));
+                setTimeout(() => setWhoIsOutModalVisible(true), 200); // Small delay for modal smooth transition
+            } else {
+                recordBall(runs, 'none', true, pendingWicket.type, pendingWicket.fielderId);
+            }
         } else {
             recordBall(runs, runModalConfig.type as ExtraType, false, undefined, undefined, isBye);
         }
+    };
+
+    const handleWhoIsOutSelect = (who: 'striker' | 'non-striker') => {
+        setWhoIsOutModalVisible(false);
+        recordBall(pendingWicket.runs || 0, 'none', true, pendingWicket.type, pendingWicket.fielderId, false, who);
+    };
+
+    const handleEndInnings = () => {
+        Alert.alert(
+            "End Innings",
+            state.currentInnings === 1
+                ? "Are you sure you want to end the 1st innings?"
+                : "Are you sure you want to end the match and calculate result?",
+            [
+                { text: "Cancel", style: "cancel" },
+                { text: "End Innings", style: "destructive", onPress: () => endInnings() }
+            ]
+        );
     };
 
     // Stats Helpers
@@ -248,9 +274,15 @@ export default function ScoreboardScreen({ navigation }: any) {
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 {/* Header / Score */}
                 <View className="p-6 pb-2 border-b border-gray-800">
-                    <Text className="text-gray-400 text-center font-medium mb-1">
-                        {innings.battingTeam} Batting
-                    </Text>
+                    <View className="flex-row justify-between items-center mb-1">
+                        <View style={{ width: 40 }} />
+                        <Text className="text-gray-400 text-center font-medium flex-1">
+                            {innings.battingTeam} Batting
+                        </Text>
+                        <TouchableOpacity onPress={handleEndInnings} className="p-1 px-3 bg-red-900/30 rounded border border-red-800/50">
+                            <Text className="text-red-500 text-[10px] font-bold">END</Text>
+                        </TouchableOpacity>
+                    </View>
                     <View className="items-center mb-6">
                         <Text className="text-6xl font-black text-white">
                             {innings.totalRuns}/{innings.totalWickets}
@@ -460,6 +492,12 @@ export default function ScoreboardScreen({ navigation }: any) {
 
                             {/* Full Scorecard Section */}
                             <View className="mt-10 mb-20">
+                                <OverHistory
+                                    overs={innings.overs}
+                                    runsForNoBall={state.runsForNoBall}
+                                    runsForWide={state.runsForWide}
+                                />
+
                                 <Text className="text-white text-2xl font-bold mb-4 px-2">Scorecard</Text>
 
                                 {state.currentInnings === 2 && (
@@ -520,6 +558,13 @@ export default function ScoreboardScreen({ navigation }: any) {
                 onSelect={handleFielderSelect}
                 title={pendingWicket.type === 'caught' ? "Who caught it?" : pendingWicket.type === 'stumped' ? "Who stumped it?" : "Who made the run out?"}
                 onCancel={() => setFielderModalVisible(false)}
+            />
+            <WhoIsOutModal
+                visible={whoIsOutModalVisible}
+                strikerName={getPlayerName(innings.strikerId)}
+                nonStrikerName={getPlayerName(innings.nonStrikerId)}
+                onSelect={handleWhoIsOutSelect}
+                onCancel={() => setWhoIsOutModalVisible(false)}
             />
         </SafeAreaView>
     );

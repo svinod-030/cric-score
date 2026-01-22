@@ -7,7 +7,7 @@ import { useMatchStore } from '../store/useMatchStore';
 import { MatchConfig } from '../types/match';
 
 export default function MatchSetupScreen({ navigation }: any) {
-    const { config, setConfig, startMatch } = useMatchStore();
+    const { config, setConfig, startMatch, loadTeamRoster } = useMatchStore();
 
     const canStartMatch = () => {
         return config.tossWinner && config.tossDecision && config.teamA && config.teamB;
@@ -46,7 +46,11 @@ export default function MatchSetupScreen({ navigation }: any) {
                             <TextInput
                                 className="bg-gray-800 text-white p-4 rounded-xl border border-gray-700"
                                 value={config.teamA}
-                                onChangeText={(text: string) => updateConfig('teamA', text?.toUpperCase())}
+                                onChangeText={(text: string) => {
+                                    const teamName = text?.toUpperCase();
+                                    updateConfig('teamA', teamName);
+                                    loadTeamRoster('teamA', teamName);
+                                }}
                                 placeholder="Team A"
                                 placeholderTextColor="#666"
                             />
@@ -56,7 +60,11 @@ export default function MatchSetupScreen({ navigation }: any) {
                             <TextInput
                                 className="bg-gray-800 text-white p-4 rounded-xl border border-gray-700"
                                 value={config.teamB}
-                                onChangeText={(text: string) => updateConfig('teamB', text?.toUpperCase())}
+                                onChangeText={(text: string) => {
+                                    const teamName = text?.toUpperCase();
+                                    updateConfig('teamB', teamName);
+                                    loadTeamRoster('teamB', teamName);
+                                }}
                                 placeholder="Team B"
                                 placeholderTextColor="#666"
                             />

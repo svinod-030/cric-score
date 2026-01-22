@@ -12,6 +12,7 @@ export interface MatchConfig {
     isCustomNamesEnabled?: boolean;
     teamAPlayerNames?: string[];
     teamBPlayerNames?: string[];
+    savedTeams?: Record<string, string[]>; // Team Name -> Player Names
 }
 
 // Basic types

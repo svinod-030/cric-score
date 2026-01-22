@@ -1,20 +1,5 @@
 import { MatchConfig, MatchState, InningsState, ExtraType, MatchResult, WicketType } from '../types/match';
 
-const INITIAL_INNINGS: InningsState = {
-    battingTeam: "",
-    battingTeamKey: 'teamA',
-    totalRuns: 0,
-    totalWickets: 0,
-    overs: [],
-    currentOver: [],
-    strikerId: "",
-    nonStrikerId: "",
-    currentBowlerId: null,
-    battingStats: {},
-    bowlingStats: {},
-    fallOfWickets: [],
-};
-
 export const calculateMatchResult = (
     state: MatchState,
     config: MatchConfig
@@ -70,14 +55,14 @@ export const processBall = (
     isWicket: boolean,
     wicketType: WicketType = 'none',
     fielderId?: string,
-    isByeForNoBall?: boolean
+    isByeForNoBall?: boolean,
+    whoIsOut?: 'striker' | 'non-striker'
 ): MatchState => {
     const currentInningsKey = state.currentInnings === 1 ? 'innings1' : 'innings2';
     const innings = state[currentInningsKey];
 
     // Ensure we have a bowler
     if (!innings.currentBowlerId) {
-        // Should ideally be blocked by UI, but safe return if not
         return state;
     }
 
@@ -86,19 +71,17 @@ export const processBall = (
     let runsOffBat = runs;
     let isExtra = false;
 
-    // Calculate extras
     if (extraType === 'wide') {
         runsToAdd += config.runsForWide;
-        runsOffBat = 0; // Wides don't count for batsman runs usually
+        runsOffBat = 0;
         isExtra = true;
         if (config.reballForWide) isValidBall = false;
     } else if (extraType === 'no-ball') {
         runsToAdd += config.runsForNoBall;
-        // If it's a bye off a no ball, or just "runs", the logic differs.
         if (isByeForNoBall) {
-            runsOffBat = 0; // It's byes, so no runs for batsman
+            runsOffBat = 0;
         } else {
-            runsOffBat = runs; // Runs scored off bat
+            runsOffBat = runs;
         }
         isExtra = true;
         if (config.reballForNoBall) isValidBall = false;
@@ -109,15 +92,14 @@ export const processBall = (
 
     // --- Update Stats ---
     const strikerId = innings.strikerId;
+    const nonStrikerId = innings.nonStrikerId;
     const bowlerId = innings.currentBowlerId;
 
     let strikerStats = { ...getBattingStats(state, innings, strikerId) };
+    let nonStrikerStats = { ...getBattingStats(state, innings, nonStrikerId) };
     let bowlerStats = { ...getBowlingStats(state, innings, bowlerId) };
 
-    // Batting Updates
     if (isValidBall) {
-        // Only valid balls count as balls faced
-        // Wides and No Balls do NOT count as balls faced
         strikerStats.ballsFaced += 1;
     }
 
@@ -125,11 +107,17 @@ export const processBall = (
     if (runsOffBat === 4) strikerStats.fours += 1;
     if (runsOffBat === 6) strikerStats.sixes += 1;
 
+    let dismissedPlayerId: string | undefined;
+
     if (isWicket) {
-        strikerStats.isOut = true;
-        strikerStats.dismissal = wicketType;
-        strikerStats.fielderId = fielderId;
-        strikerStats.bowlerId = innings.currentBowlerId!;
+        const isNonStrikerOut = whoIsOut === 'non-striker';
+        dismissedPlayerId = isNonStrikerOut ? nonStrikerId : strikerId;
+
+        const statsToUpdate = isNonStrikerOut ? nonStrikerStats : strikerStats;
+        statsToUpdate.isOut = true;
+        statsToUpdate.dismissal = wicketType;
+        statsToUpdate.fielderId = fielderId;
+        statsToUpdate.bowlerId = innings.currentBowlerId!;
     }
 
     // Bowling Updates
@@ -137,19 +125,16 @@ export const processBall = (
         bowlerStats.balls += 1;
         if (bowlerStats.balls % 6 === 0) {
             bowlerStats.overs += 1;
-            // Check Maiden? (Need to track runs in this over, too complex for simplified logic right now)
         }
     }
-    // Runs conceded by bowler:
-    // Wides/NB count to bowler. Byes/Legbyes do NOT count to bowler runs, but to team extras.
+
     let bowlerRuns = 0;
     if (extraType === 'wide' || extraType === 'no-ball') {
-        bowlerRuns += runsToAdd; // Includes penalty + runs ran
+        bowlerRuns += runsToAdd;
     } else if (extraType === 'bye' || extraType === 'leg-bye') {
-        // Byes/Legbyes don't count against bowler
         bowlerRuns = 0;
     } else {
-        bowlerRuns = runsToAdd; // Regular runs
+        bowlerRuns = runsToAdd;
     }
     bowlerStats.runsConceded += bowlerRuns;
 
@@ -175,40 +160,39 @@ export const processBall = (
 
     // --- Strike Rotation ---
     let newStrikerId = strikerId;
-    let newNonStrikerId = innings.nonStrikerId;
+    let newNonStrikerId = nonStrikerId;
 
-    // Swap based on RUNS RAN (or runs scored excluding fixed extras), not total runs added to score
-    // Typical logic: 1, 3, 5 runs = Swap. 4, 6 = No Swap.
-    // runs input:
-    // - On Wide: input is runs RAN (e.g. 1). Swap if 1.
-    // - On No Ball: input is runs RAN or Boundary (e.g. 1 or 4). Swap if 1.
-    // - On Normal: input is runs (1 or 4). Swap if 1.
-    // So checking runs % 2 !== 0 covers all these standard cases.
+    // Standard Swap on odd runs
     if (runs % 2 !== 0) {
-        // Swap
         [newStrikerId, newNonStrikerId] = [newNonStrikerId, newStrikerId];
     }
 
-    // Handle Wicket Fall
-    if (isWicket) {
+    // Handle Wicket Fall - Logic for replacement
+    if (isWicket && dismissedPlayerId) {
         if (!config.isCustomNamesEnabled) {
             // Auto-select next batter
             const roster = innings.battingTeam === state.teamA ? state.teamAPlayers : state.teamBPlayers;
             const nextBatter = roster.find(p => {
                 const pStats = innings.battingStats[p.id];
                 const isPlaying = p.id === strikerId || p.id === innings.nonStrikerId;
-                // Not playing AND (no stats OR (not out AND not retired))
                 return !isPlaying && (!pStats || (!pStats.isOut && !pStats.isRetired));
             });
 
-            if (nextBatter) {
-                newStrikerId = nextBatter.id;
-            } else {
-                newStrikerId = ""; // No more players?
+            const nextPlayerId = nextBatter ? nextBatter.id : "";
+
+            // Replace the dismissed player
+            if (newStrikerId === dismissedPlayerId) {
+                newStrikerId = nextPlayerId;
+            } else if (newNonStrikerId === dismissedPlayerId) {
+                newNonStrikerId = nextPlayerId;
             }
         } else {
-            // Manual selection triggered by empty ID
-            newStrikerId = "";
+            // Manual selection
+            if (newStrikerId === dismissedPlayerId) {
+                newStrikerId = "";
+            } else if (newNonStrikerId === dismissedPlayerId) {
+                newNonStrikerId = "";
+            }
         }
     }
 
@@ -226,7 +210,6 @@ export const processBall = (
         // Swap Ends at end of over
         [newStrikerId, newNonStrikerId] = [newNonStrikerId, newStrikerId];
 
-        // Clear bowler to force selection
         finalBowlerId = null as any;
     }
 
@@ -243,8 +226,8 @@ export const processBall = (
             currentBowlerId: finalBowlerId,
             battingStats: {
                 ...innings.battingStats,
-                [strikerId]: strikerStats, // Save stats for the guy who faced the ball
-                // Ensure the OTHER guy is also in stats? initialized at start
+                [strikerId]: strikerStats,
+                [nonStrikerId]: nonStrikerStats,
             },
             bowlingStats: {
                 ...innings.bowlingStats,

@@ -58,7 +58,7 @@ export const ScorecardSection = ({
                 const sr = stats.ballsFaced > 0 ? ((stats.runs / stats.ballsFaced) * 100).toFixed(0) : "0";
                 return (
                     <View key={player.id} className="flex-row p-3 border-b border-gray-700/50">
-                        <View className="flex-[3]">
+                        <View className="flex-[3] pr-2">
                             <Text className="text-white font-medium">{player.name}</Text>
                             {stats.isOut ? (
                                 <Text className="text-gray-500 text-[10px] leading-tight mt-0.5">

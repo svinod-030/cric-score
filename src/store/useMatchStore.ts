@@ -14,7 +14,8 @@ interface MatchStore {
     setBowler: (playerId: string) => void;
     setStriker: (playerId: string) => void;
     setNonStriker: (playerId: string) => void;
-    recordBall: (runs: number, extraType: ExtraType, isWicket: boolean, wicketType?: WicketType, fielderId?: string, isByeForNoBall?: boolean) => void;
+    endInnings: () => void;
+    recordBall: (runs: number, extraType: ExtraType, isWicket: boolean, wicketType?: WicketType, fielderId?: string, isByeForNoBall?: boolean, whoIsOut?: 'striker' | 'non-striker') => void;
     startSecondInnings: () => void;
     undoBall: () => void;
     swapBatsmen: () => void;
@@ -22,6 +23,8 @@ interface MatchStore {
     resetMatch: () => void;
     restoreMatches: (backupData: string) => void;
     renamePlayer: (playerId: string, newName: string) => void;
+    loadTeamRoster: (teamKey: 'teamA' | 'teamB', teamName: string) => void;
+    saveTeamRoster: (teamName: string, playerNames: string[]) => void;
 }
 
 const INITIAL_CONFIG: MatchConfig = {
@@ -33,6 +36,7 @@ const INITIAL_CONFIG: MatchConfig = {
     runsForNoBall: 1,
     reballForWide: true,
     reballForNoBall: true,
+    savedTeams: {},
 };
 
 const INITIAL_INNINGS: InningsState = {
@@ -70,6 +74,47 @@ export const useMatchStore = create<MatchStore>()(
             setConfig: (updates) =>
                 set((store) => ({ config: { ...store.config, ...updates } })),
 
+            loadTeamRoster: (teamKey, teamName) => {
+                const { config } = get();
+                const key = teamKey === 'teamA' ? 'teamAPlayerNames' : 'teamBPlayerNames';
+
+                if (config.savedTeams && config.savedTeams[teamName]) {
+                    const savedNames = config.savedTeams[teamName];
+                    set((store) => ({
+                        config: {
+                            ...store.config,
+                            [key]: savedNames,
+                            isCustomNamesEnabled: true
+                        }
+                    }));
+                } else {
+                    // Start generating default names if team is new/unsaved
+                    const displayTeamName = teamName || (teamKey === 'teamA' ? config.teamA || "Team A" : config.teamB || "Team B");
+                    const defaultNames = Array.from({ length: config.playersPerTeam }, (_, i) => `${displayTeamName} Player ${i + 1}`);
+
+                    set((store) => ({
+                        config: {
+                            ...store.config,
+                            [key]: defaultNames,
+                            // We don't force enable custom names here, but we update the values 
+                            // so if it IS enabled, they show correctly.
+                        }
+                    }));
+                }
+            },
+
+            saveTeamRoster: (teamName, playerNames) => {
+                set((store) => ({
+                    config: {
+                        ...store.config,
+                        savedTeams: {
+                            ...(store.config.savedTeams || {}),
+                            [teamName]: playerNames
+                        }
+                    }
+                }));
+            },
+
             startMatch: () => {
                 const { config } = get();
                 // Generate Rosters
@@ -85,6 +130,27 @@ export const useMatchStore = create<MatchStore>()(
                         ? config.teamBPlayerNames[i]
                         : `${config.teamB} Player ${i + 1}`,
                 }));
+
+                // Auto-save teams on start match
+                const savedTeams = config.savedTeams || {};
+                const nextSavedTeams = { ...savedTeams };
+                let hasUpdates = false;
+
+                if (config.isCustomNamesEnabled) {
+                    // Only save if custom names are enabled, otherwise we are saving default names
+                    if (config.teamAPlayerNames && config.teamA) {
+                        nextSavedTeams[config.teamA] = config.teamAPlayerNames;
+                        hasUpdates = true;
+                    }
+                    if (config.teamBPlayerNames && config.teamB) {
+                        nextSavedTeams[config.teamB] = config.teamBPlayerNames;
+                        hasUpdates = true;
+                    }
+                }
+
+                if (hasUpdates) {
+                    set(s => ({ config: { ...s.config, savedTeams: nextSavedTeams } }));
+                }
 
                 // Determine Batting First Team based on Toss
                 let battingFirstKey: 'teamA' | 'teamB' = 'teamA';
@@ -176,9 +242,54 @@ export const useMatchStore = create<MatchStore>()(
                 });
             },
 
-            recordBall: (runs, extraType, isWicket, wicketType = 'none', fielderId, isByeForNoBall) => {
+            endInnings: () => {
                 set((store) => {
-                    const nextState = processBall(store.state, store.config, runs, extraType, isWicket, wicketType, fielderId, isByeForNoBall);
+                    const { state, config } = store;
+
+                    if (state.currentInnings === 1) {
+                        // End 1st innings
+                        return {
+                            state: {
+                                ...state,
+                                isInningsBreak: true
+                            }
+                        };
+                    } else {
+                        let resultText = '';
+                        let winner: string | 'Draw' = 'Draw';
+                        const runs1 = state.innings1.totalRuns;
+                        const runs2 = state.innings2.totalRuns;
+
+                        if (runs2 > runs1) {
+                            winner = state.innings2.battingTeam;
+                            const wicketsLeft = config.playersPerTeam - 1 - state.innings2.totalWickets;
+                            resultText = `${winner} won by ${wicketsLeft} wickets`;
+                        } else if (runs2 === runs1) {
+                            resultText = `Match Tied`;
+                        } else {
+                            winner = state.innings1.battingTeam;
+                            resultText = `${winner} won by ${runs1 - runs2} runs`;
+                        }
+
+                        const matchResult = {
+                            winner: winner,
+                            reason: resultText
+                        };
+
+                        const completedMatch = { ...state, matchResult, isPlaying: false, completedAt: new Date().toISOString() };
+
+                        return {
+                            state: completedMatch,
+                            history: [completedMatch, ...store.history],
+                            ballHistory: []
+                        };
+                    }
+                });
+            },
+
+            recordBall: (runs, extraType, isWicket, wicketType = 'none', fielderId, isByeForNoBall, whoIsOut) => {
+                set((store) => {
+                    const nextState = processBall(store.state, store.config, runs, extraType, isWicket, wicketType, fielderId, isByeForNoBall, whoIsOut);
 
                     // If match just finished, save to history
                     if (nextState.matchResult && !store.state.matchResult) {
@@ -336,6 +447,8 @@ export const useMatchStore = create<MatchStore>()(
 
                     // 2. Persist to Global Config
                     const nextConfig = { ...store.config };
+                    let teamNameKey = '';
+                    let updatedNames: string[] = [];
 
                     // Parse ID (A1...A11 or B1...B11)
                     if (playerId.startsWith('A')) {
@@ -351,6 +464,9 @@ export const useMatchStore = create<MatchStore>()(
                             }
                             nextConfig.teamAPlayerNames[index] = newName;
                             nextConfig.isCustomNamesEnabled = true;
+
+                            teamNameKey = nextConfig.teamA;
+                            updatedNames = nextConfig.teamAPlayerNames;
                         }
                     } else if (playerId.startsWith('B')) {
                         const index = parseInt(playerId.substring(1)) - 1;
@@ -363,7 +479,16 @@ export const useMatchStore = create<MatchStore>()(
                             }
                             nextConfig.teamBPlayerNames[index] = newName;
                             nextConfig.isCustomNamesEnabled = true;
+
+                            teamNameKey = nextConfig.teamB;
+                            updatedNames = nextConfig.teamBPlayerNames;
                         }
+                    }
+
+                    // Update Saved Teams
+                    if (teamNameKey && updatedNames.length > 0) {
+                        if (!nextConfig.savedTeams) nextConfig.savedTeams = {};
+                        nextConfig.savedTeams[teamNameKey] = updatedNames;
                     }
 
                     return {
