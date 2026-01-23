@@ -15,7 +15,7 @@ export default function MatchSetupScreen({ navigation }: any) {
 
     const handleStartMatch = () => {
         if (!canStartMatch()) {
-            alert('Please select toss winner and decision before starting.');
+            Alert.alert('Incomplete Setup', 'Please select toss winner and decision before starting.');
             return;
         }
         startMatch();

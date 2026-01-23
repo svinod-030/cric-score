@@ -1,0 +1,9 @@
+---
+description: Verify App Launches
+---
+
+# Launch the App
+launchApp
+
+# Assert we see Home/Match Setup or Navigation
+- assertTrue: ${output.home || output.navigation}

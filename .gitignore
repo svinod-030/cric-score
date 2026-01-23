@@ -52,3 +52,5 @@ ios/*.xcuserdata
 ios/*.moved-aside
 ios/*/*.xcuserdata
 ios/*/*.xccheckout
+
+coverage/

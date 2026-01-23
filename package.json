@@ -9,7 +9,9 @@
     "android:apk": "eas build --platform android --profile preview",
     "ios": "expo run:ios",
     "compile": "tsc --noEmit",
-    "test": "echo \"No tests specified\" && exit 0",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "local:apk": "cd android && ./gradlew assembleRelease",
     "local:aab": "cd android && ./gradlew bundleRelease"
   },
@@ -34,8 +36,15 @@
   },
   "devDependencies": {
     "@expo/metro-config": "^54.0.12",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.0",
     "babel-preset-expo": "^54.0.9",
+    "expo-asset": "^12.0.12",
+    "jest": "^29.7.0",
+    "jest-expo": "^54.0.16",
+    "react-test-renderer": "^19.1.0",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.9.2"
   },
