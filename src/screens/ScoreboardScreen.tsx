@@ -14,6 +14,7 @@ import { WicketTypeSelectionModal } from '../components/WicketTypeSelectionModal
 import { FielderSelectionModal } from '../components/FielderSelectionModal';
 import { WhoIsOutModal } from '../components/WhoIsOutModal';
 import { OverHistory } from '../components/OverHistory';
+import { MatchStartModal } from '../components/MatchStartModal';
 import { Ionicons } from '@expo/vector-icons';
 import { WicketType } from '../types/match';
 import { Alert } from 'react-native';
@@ -86,6 +87,10 @@ export default function ScoreboardScreen({ navigation }: any) {
     const lastBowlerId = lastOver ? lastOver.bowlerId : null;
     const availableBowlers = bowlingTeamPlayers.filter(p => p.id !== lastBowlerId);
 
+    // Check if it's the very start of an innings (no balls bowled, no players selected)
+    const isStartOfInnings = innings.overs.length === 0 && innings.currentOver.length === 0 && !innings.strikerId;
+
+    const [isMatchStartModalVisible, setMatchStartModalVisible] = useState(false);
     const [isBowlerModalVisible, setBowlerModalVisible] = useState(false);
     const [runModalVisible, setRunModalVisible] = useState(false);
     const [wicketModalVisible, setWicketModalVisible] = useState(false);
@@ -115,32 +120,49 @@ export default function ScoreboardScreen({ navigation }: any) {
         handleMatchEnd();
     }, [state.isPlaying, state.matchResult]);
 
-    // Check for missing bowler
-    useEffect(() => {
-        if (state.isPlaying && !state.isInningsBreak && !innings.currentBowlerId) {
-            setBowlerModalVisible(true);
-        } else {
-            setBowlerModalVisible(false);
-        }
-    }, [state.isPlaying, state.isInningsBreak, innings.currentBowlerId]);
-
-    // Check for missing batsmen
+    // Check for start of innings vs other states
     useEffect(() => {
         if (state.isPlaying && !state.isInningsBreak) {
-            if (!innings.strikerId) {
-                setBatterSelectionType('striker');
-                setBatterSelectionVisible(true);
-            } else if (!innings.nonStrikerId) {
-                setBatterSelectionType('nonStriker');
-                setBatterSelectionVisible(true);
-            } else {
+            if (isStartOfInnings) {
+                setMatchStartModalVisible(true);
+                setBowlerModalVisible(false);
                 setBatterSelectionVisible(false);
-                setBatterSelectionType(null);
+            } else {
+                setMatchStartModalVisible(false);
+
+                // Normal checks for missing players during match
+                if (!innings.currentBowlerId) {
+                    setBowlerModalVisible(true);
+                } else {
+                    setBowlerModalVisible(false);
+                }
+
+                if (!innings.strikerId) {
+                    setBatterSelectionType('striker');
+                    setBatterSelectionVisible(true);
+                } else if (!innings.nonStrikerId) {
+                    setBatterSelectionType('nonStriker');
+                    setBatterSelectionVisible(true);
+                } else {
+                    setBatterSelectionVisible(false);
+                    setBatterSelectionType(null);
+                }
             }
+        } else {
+            setMatchStartModalVisible(false);
+            setBowlerModalVisible(false);
+            setBatterSelectionVisible(false);
         }
-    }, [state.isPlaying, state.isInningsBreak, innings.strikerId, innings.nonStrikerId]);
+    }, [state.isPlaying, state.isInningsBreak, isStartOfInnings, innings.currentBowlerId, innings.strikerId, innings.nonStrikerId]);
 
     const [isBatterSelectionVisible, setBatterSelectionVisible] = useState(false);
+
+    const handleMatchStart = (strikerId: string, nonStrikerId: string, bowlerId: string) => {
+        setStriker(strikerId);
+        setNonStriker(nonStrikerId);
+        setBowler(bowlerId);
+        setMatchStartModalVisible(false);
+    };
 
     const handleBatterSelect = (playerId: string) => {
         if (batterSelectionType === 'striker') {
@@ -581,6 +603,13 @@ export default function ScoreboardScreen({ navigation }: any) {
                 nonStrikerName={getPlayerName(innings.nonStrikerId)}
                 onSelect={handleWhoIsOutSelect}
                 onCancel={() => setWhoIsOutModalVisible(false)}
+            />
+            <MatchStartModal
+                visible={isMatchStartModalVisible}
+                battingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
+                bowlingTeamPlayers={bowlingTeamPlayers}
+                onStart={handleMatchStart}
+                title={state.currentInnings === 1 ? "Start 1st Innings" : "Start 2nd Innings"}
             />
         </SafeAreaView>
     );
