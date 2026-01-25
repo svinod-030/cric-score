@@ -346,8 +346,10 @@ export const useMatchStore = create<MatchStore>()(
                     const innings = store.state[currentInningsKey];
 
                     // Mark player as retired hurt
-                    const strikerStats = { ...(innings.battingStats[playerId] || { playerId, runs: 0, ballsFaced: 0, fours: 0, sixes: 0, isOut: false }) };
-                    strikerStats.isRetired = true;
+                    const currentStats = { ...(innings.battingStats[playerId] || { playerId, runs: 0, ballsFaced: 0, fours: 0, sixes: 0, isOut: false }) };
+                    currentStats.isRetired = true;
+                    currentStats.isOut = false;
+                    currentStats.dismissal = 'retired-hurt';
 
                     // Find next player
                     const roster = innings.battingTeam === store.state.teamA ? store.state.teamAPlayers : store.state.teamBPlayers;
@@ -369,7 +371,7 @@ export const useMatchStore = create<MatchStore>()(
                                 nonStrikerId: !isStriker ? "" : innings.nonStrikerId,
                                 battingStats: {
                                     ...innings.battingStats,
-                                    [playerId]: strikerStats
+                                    [playerId]: currentStats
                                 }
                             }
                         }

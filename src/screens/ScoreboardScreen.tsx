@@ -515,12 +515,6 @@ export default function ScoreboardScreen({ navigation }: any) {
 
                             {/* Full Scorecard Section */}
                             <View className="mt-10 mb-20">
-                                <OverHistory
-                                    overs={innings.overs}
-                                    runsForNoBall={state.runsForNoBall}
-                                    runsForWide={state.runsForWide}
-                                />
-
                                 <Text className="text-white text-2xl font-bold mb-4 px-2">Scorecard</Text>
 
                                 {state.currentInnings === 2 && (

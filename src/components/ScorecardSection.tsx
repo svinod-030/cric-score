@@ -84,7 +84,7 @@ export const ScorecardSection = ({
                             <View key={player.id} className="flex-row p-3 border-b border-gray-700/50">
                                 <View className="flex-[3] pr-2">
                                     <Text className="text-white font-medium">{player.name}</Text>
-                                    {stats.isOut ? (
+                                    {(stats.isOut || stats.isRetired) ? (
                                         <Text className="text-gray-500 text-[10px] leading-tight mt-0.5">
                                             {stats.dismissal === 'bowled' && `b ${bowlingTeamPlayers.find(p => p.id === stats.bowlerId)?.name || 'Bowler'}`}
                                             {stats.dismissal === 'caught' && `c ${bowlingTeamPlayers.find(p => p.id === stats.fielderId)?.name || 'Fielder'} b ${bowlingTeamPlayers.find(p => p.id === stats.bowlerId)?.name || 'Bowler'}`}

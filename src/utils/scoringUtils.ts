@@ -113,11 +113,15 @@ export const processBall = (
         const isNonStrikerOut = whoIsOut === 'non-striker';
         dismissedPlayerId = isNonStrikerOut ? nonStrikerId : strikerId;
 
+        const isActualOut = wicketType !== 'retired-hurt';
         const statsToUpdate = isNonStrikerOut ? nonStrikerStats : strikerStats;
-        statsToUpdate.isOut = true;
+        statsToUpdate.isOut = isActualOut;
+        statsToUpdate.isRetired = !isActualOut;
         statsToUpdate.dismissal = wicketType;
-        statsToUpdate.fielderId = fielderId;
-        statsToUpdate.bowlerId = innings.currentBowlerId!;
+        if (isActualOut) {
+            statsToUpdate.fielderId = fielderId;
+            statsToUpdate.bowlerId = innings.currentBowlerId!;
+        }
     }
 
     // Bowling Updates
@@ -144,7 +148,7 @@ export const processBall = (
 
     // --- Update Innings Totals ---
     const newTotalRuns = innings.totalRuns + runsToAdd;
-    const newTotalWickets = isWicket ? innings.totalWickets + 1 : innings.totalWickets;
+    const newTotalWickets = (isWicket && wicketType !== 'retired-hurt') ? innings.totalWickets + 1 : innings.totalWickets;
 
     const newBall = {
         runs: runsToAdd,

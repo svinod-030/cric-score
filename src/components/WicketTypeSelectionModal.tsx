@@ -15,7 +15,6 @@ export const WicketTypeSelectionModal = ({ visible, onSelect, onClose }: WicketT
         { label: 'LBW', value: 'lbw' },
         { label: 'Run Out', value: 'run-out' },
         { label: 'Stumped', value: 'stumped' },
-        { label: 'Retired Hurt', value: 'retired-hurt' },
         { label: 'Other', value: 'other' },
     ];
 
