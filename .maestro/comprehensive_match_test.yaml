@@ -1,0 +1,101 @@
+---
+appId: com.vinodsigadana.cricscore
+---
+
+- launchApp
+
+# --- SETUP ---
+- tapOn: "Start Match"
+
+# Set Players to 8 (Default 11, tap - 3 times)
+- tapOn:
+    text: "-"
+    index: 1
+- tapOn:
+    text: "-"
+    index: 1
+- tapOn:
+    text: "-"
+    index: 1
+
+# Enable Custom Names
+- tapOn: "Custom Player Names"
+
+# Enter key player names
+- tapOn:
+    text: "Player 1"
+    index: 0
+- inputText: "Sachin"
+- tapOn:
+    text: "Player 2"
+    index: 0
+- inputText: "Sourav"
+- tapOn:
+    text: "Player 3"
+    index: 0
+- inputText: "Rahul"
+
+- tapOn: "Toss Winner"
+- tapOn: "TEAM A"
+- tapOn: "Bat First"
+- tapOn: "Start Match"
+- tapOn: "Start Innings"
+
+# --- 1ST INNINGS (Natural Flow) ---
+
+# Over 1
+- tapOn: "4" # Ball 1
+- tapOn: "6" # Ball 2
+- tapOn: "1" # Ball 3 (Strike Swap)
+- tapOn: "Wicket" # Ball 4
+- tapOn: "Bowled"
+- tapOn: "Rahul" # Select new batter
+- tapOn: "0" # Ball 5
+- tapOn: "1" # Ball 6 (Strike Swap + Over Change)
+
+# Select New Bowler
+- tapOn: "Select Bowler"
+- tapOn:
+    text: "Team B Player 2"
+    optional: true
+- tapOn: 
+    text: /Team B Player .*/
+    index: 0
+
+# Over 2
+- tapOn: "Bye" # Extra
+- tapOn: "4"
+- tapOn: "Retire" # Testing Retire
+- tapOn:
+    text: /Team A Player .*/
+    index: 0 # Select next batter
+- tapOn: "0"
+- tapOn: "1"
+- tapOn: "Wicket"
+- tapOn: "Caught"
+- tapOn:
+    text: /Team B Player .*/
+    index: 0
+- tapOn:
+    text: /Team A Player .*/
+    index: 0
+- tapOn: "2"
+
+# End 1st Innings Naturally (Wickets or manual if needed for test length)
+- tapOn: "END"
+- tapOn: "End Innings"
+
+# --- 2ND INNINGS ---
+- tapOn: "START 2ND INNINGS"
+- tapOn: "Start Innings"
+
+# Chase down target
+- tapOn: "6"
+- tapOn: "6"
+- tapOn: "6"
+- tapOn: "6"
+- tapOn: "6"
+
+# Verify Match Result
+- assertVisible: "Result"
+- assertVisible: /Won by .*/

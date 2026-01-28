@@ -1,0 +1,75 @@
+---
+appId: com.vinodsigadana.cricscore
+---
+
+- launchApp
+
+# Setup Match
+- tapOn: "Start Match"
+- tapOn: "Toss Winner"
+- tapOn: "TEAM A"
+- tapOn: "Bat First"
+
+# Start Match
+- tapOn: "Start Match"
+
+# Handle MatchStartModal (Pre-selected)
+- tapOn: "Start Innings"
+
+# --- 1st Innings ---
+
+# 1. Bowled
+- tapOn: "Wicket"
+- tapOn: "Bowled"
+
+# 2. Caught
+- tapOn: "Wicket"
+- tapOn: "Caught"
+- tapOn:
+    text: /Team B Player .*/
+    index: 0
+
+# 3. LBW
+- tapOn: "Wicket"
+- tapOn: "LBW"
+
+# 4. Run Out
+- tapOn: "Wicket"
+- tapOn: "Run Out"
+- tapOn:
+    text: /Team B Player .*/
+    index: 0
+- tapOn: "0" # Run scored
+- tapOn:
+    text: /.* \(Striker\)/
+
+# 5. Stumped
+- tapOn: "Wicket"
+- tapOn: "Stumped"
+- tapOn:
+    text: /Team B Player .*/
+    index: 0
+
+# 6. Other (Ends Innings if 7 players per team)
+# But wait, default is 11. Let's adjust players in setup if I can.
+# For now assume default 11 and just do one more wicket.
+- tapOn: "Wicket"
+- tapOn: "Other"
+
+# End 1st Innings manually since 11 players
+- tapOn: "END"
+- tapOn: "End Innings"
+
+# Start 2nd Innings
+- tapOn: "START 2ND INNINGS"
+- tapOn: "Start Innings"
+
+# Score some runs to finish match
+- tapOn: "6"
+- tapOn: "6"
+- tapOn: "6"
+# (Assuming target is small since few runs in 1st innings)
+
+# Verify Match Result
+- assertVisible: "Result"
+- assertVisible: /India|Australia|TEAM A|TEAM B/

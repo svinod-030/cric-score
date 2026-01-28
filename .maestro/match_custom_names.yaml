@@ -1,0 +1,97 @@
+---
+appId: com.vinodsigadana.cricscore
+---
+
+- launchApp
+
+# Setup Match
+- tapOn: "Start Match"
+
+# Set Custom Team Names
+- tapOn:
+    text: "Team A"
+    index: 0
+- eraseText: 10
+- inputText: "India"
+
+- tapOn:
+    text: "Team B"
+    index: 0
+- eraseText: 10
+- inputText: "Australia"
+
+# Set players per team to 2 for quick test with custom names
+- tapOn:
+    text: "-"
+    index: 1 # Assuming index 1 is for players per team counter
+- tapOn:
+    text: "-"
+    index: 1
+- tapOn:
+    text: "-"
+    index: 1
+- tapOn:
+    text: "-"
+    index: 1
+- tapOn:
+    text: "-"
+    index: 1
+- tapOn:
+    text: "-"
+    index: 1
+- tapOn:
+    text: "-"
+    index: 1
+- tapOn:
+    text: "-"
+    index: 1
+- tapOn:
+    text: "-"
+    index: 1
+
+# Enable Custom Names
+- tapOn:
+    point: "85%, 45%" # Target the switch since it doesn't have a label Maestro likes easily or use text
+- tapOn: "Custom Player Names"
+
+# Input Player Names (2 per team as set above)
+- tapOn:
+    text: "Player 1"
+    index: 0
+- inputText: "Virat"
+- tapOn:
+    text: "Player 2"
+    index: 0
+- inputText: "Rohit"
+- tapOn:
+    text: "Player 1"
+    index: 1
+- inputText: "Warner"
+- tapOn:
+    text: "Player 2"
+    index: 1
+- inputText: "Smith"
+
+# Toss
+- tapOn: "Toss Winner"
+- tapOn: "India"
+- tapOn: "Bat First"
+
+# Start Match
+- tapOn: "Start Match"
+- tapOn: "Start Innings"
+
+# Wickets
+- tapOn: "6"
+- tapOn: "Wicket"
+- tapOn: "Bowled"
+
+# Match should end if 2 players per team
+- assertVisible: "Innings Over!"
+- tapOn: "START 2ND INNINGS"
+- tapOn: "Start Innings"
+
+# Finish Match
+- tapOn: "6"
+- tapOn: "6"
+- assertVisible: "Result"
