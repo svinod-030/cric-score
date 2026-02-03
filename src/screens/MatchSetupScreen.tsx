@@ -5,9 +5,10 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
 import { MatchConfig } from '../types/match';
+import { LiveMatchCard } from '../components/LiveMatchCard';
 
 export default function MatchSetupScreen({ navigation }: any) {
-    const { config, setConfig, startMatch, loadTeamRoster } = useMatchStore();
+    const { state, config, setConfig, startMatch, loadTeamRoster, resetMatch } = useMatchStore();
 
     const canStartMatch = () => {
         return config.tossWinner && config.tossDecision && config.teamA && config.teamB;
@@ -37,6 +38,11 @@ export default function MatchSetupScreen({ navigation }: any) {
                 className="p-6"
             >
                 <Text className="text-3xl font-bold text-white mb-8">New Match</Text>
+
+                <LiveMatchCard
+                    onClear={resetMatch}
+                    containerStyle="mb-8"
+                />
 
                 {/* Teams Section */}
                 <View className="mb-6">
