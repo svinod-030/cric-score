@@ -6,6 +6,7 @@ interface OverSummarySectionProps {
     title: string;
     innings: InningsState;
     defaultExpanded?: boolean;
+    expanded?: boolean;
 }
 
 const OverRow = ({ overNum, balls, runs, wickets }: { overNum: string, balls: Ball[], runs: number, wickets: number }) => {
@@ -36,10 +37,11 @@ const OverRow = ({ overNum, balls, runs, wickets }: { overNum: string, balls: Ba
     );
 };
 
-export const OverSummarySection = ({ title, innings, defaultExpanded = false }: OverSummarySectionProps) => {
-    const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+export const OverSummarySection = ({ title, innings, defaultExpanded = false, expanded }: OverSummarySectionProps) => {
+    const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
+    const isExpanded = expanded !== undefined ? expanded : internalExpanded;
 
-    const toggleExpanded = () => setIsExpanded(!isExpanded);
+    const toggleExpanded = () => setInternalExpanded(!internalExpanded);
 
     const calcIntervalStats = (balls: Ball[]) => {
         const totalRuns = balls.reduce((acc, b) => acc + b.runs, 0);

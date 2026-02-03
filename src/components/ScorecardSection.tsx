@@ -25,22 +25,25 @@ export const ScorecardSection = ({
     battingTeamPlayers,
     bowlingTeamPlayers,
     isCollapsible = false,
-    defaultExpanded = true
+    defaultExpanded = true,
+    expanded
 }: {
     title: string,
     innings: InningsState,
     battingTeamPlayers: Player[],
     bowlingTeamPlayers: Player[],
     isCollapsible?: boolean,
-    defaultExpanded?: boolean
+    defaultExpanded?: boolean,
+    expanded?: boolean
 }) => {
-    const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
+    const [internalExpanded, setInternalExpanded] = React.useState(defaultExpanded);
+    const isExpanded = expanded !== undefined ? expanded : internalExpanded;
     const validBalls = innings.currentOver.filter(b => b.isValidBall).length;
     const totalOvers = `${innings.overs.length}.${validBalls}`;
 
     const toggleExpanded = () => {
         if (isCollapsible) {
-            setIsExpanded(!isExpanded);
+            setInternalExpanded(!internalExpanded);
         }
     };
 
