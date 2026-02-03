@@ -6,9 +6,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
 import { MatchConfig } from '../types/match';
 import { LiveMatchCard } from '../components/LiveMatchCard';
+import { CoinFlipModal } from '../components/CoinFlipModal';
 
 export default function MatchSetupScreen({ navigation }: any) {
-    const { state, config, setConfig, startMatch, loadTeamRoster, resetMatch } = useMatchStore();
+    const { config, setConfig, startMatch, loadTeamRoster, resetMatch } = useMatchStore();
+    const [isCoinFlipVisible, setIsCoinFlipVisible] = React.useState(false);
 
     const canStartMatch = () => {
         return config.tossWinner && config.tossDecision && config.teamA && config.teamB;
@@ -42,6 +44,14 @@ export default function MatchSetupScreen({ navigation }: any) {
                 <LiveMatchCard
                     onClear={resetMatch}
                     containerStyle="mb-8"
+                />
+
+                <CoinFlipModal
+                    isVisible={isCoinFlipVisible}
+                    onClose={() => setIsCoinFlipVisible(false)}
+                    onResult={(winner) => updateConfig('tossWinner', winner)}
+                    teamAName={config.teamA || 'Team A'}
+                    teamBName={config.teamB || 'Team B'}
                 />
 
                 {/* Teams Section */}
@@ -184,7 +194,16 @@ export default function MatchSetupScreen({ navigation }: any) {
 
                 {/* Toss Section */}
                 <View className="mb-8 bg-gray-800 p-5 rounded-2xl border border-gray-700">
-                    <Text className="text-lg font-semibold text-white mb-4">Toss</Text>
+                    <View className="flex-row justify-between items-center mb-4">
+                        <Text className="text-lg font-semibold text-white">Toss</Text>
+                        <TouchableOpacity
+                            onPress={() => setIsCoinFlipVisible(true)}
+                            className="flex-row items-center gap-1 bg-blue-600/10 px-3 py-1.5 rounded-lg border border-blue-500/20"
+                        >
+                            <Ionicons name="infinite-outline" size={16} color="#3B82F6" />
+                            <Text className="text-blue-500 text-xs font-bold uppercase tracking-wider">Online Toss</Text>
+                        </TouchableOpacity>
+                    </View>
 
                     <View className="mb-4">
                         <Text className="text-gray-300 mb-2">Who won the toss?</Text>
