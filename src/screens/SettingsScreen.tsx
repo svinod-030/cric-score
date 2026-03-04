@@ -93,30 +93,6 @@ export default function SettingsScreen() {
                 <View className="mb-6">
                     <Text className="text-gray-500 font-bold mb-3 uppercase text-xs tracking-wider">{t('common.general')}</Text>
 
-                    {/* Language Switcher */}
-                    <View className="bg-gray-800 p-4 rounded-xl mb-3 border border-gray-700">
-                        <View className="flex-row items-center mb-3">
-                            <View className="w-10 h-10 rounded-full items-center justify-center mr-4 bg-purple-500/20">
-                                <Ionicons name="language" size={20} color="#A855F7" />
-                            </View>
-                            <Text className="text-white font-semibold text-lg flex-1">{t('common.language')} / Language</Text>
-                        </View>
-                        <View className="flex-row gap-2">
-                            <TouchableOpacity
-                                onPress={() => toggleLanguage('en')}
-                                className={`flex-1 py-2 rounded-lg items-center border ${i18n.language === 'en' ? 'bg-purple-600 border-purple-500' : 'bg-gray-700 border-gray-600'}`}
-                            >
-                                <Text className="text-white font-bold">English</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => toggleLanguage('te')}
-                                className={`flex-1 py-2 rounded-lg items-center border ${i18n.language === 'te' ? 'bg-purple-600 border-purple-500' : 'bg-gray-700 border-gray-600'}`}
-                            >
-                                <Text className="text-white font-bold">తెలుగు</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
                     <SettingItem
                         icon="star"
                         title={t('common.rateApp')}

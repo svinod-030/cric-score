@@ -17,12 +17,16 @@ import SettingsScreen from '../screens/SettingsScreen';
 import LicensesScreen from '../screens/LicensesScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 
+import LanguageSelectionModal from '../components/LanguageSelectionModal';
+import { useSettingsStore } from '../store/useSettingsStore';
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function LogoTitle() {
     const navigation = useNavigation<any>();
     const { user, isAuthenticated } = useAuthStore();
+    const [showLangModal, setShowLangModal] = React.useState(false);
 
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%', paddingRight: 10 }}>
@@ -34,16 +38,22 @@ function LogoTitle() {
                 />
                 <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 20 }}>Cric Score</Text>
             </View>
-            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                {isAuthenticated && user?.picture ? (
-                    <Image
-                        source={{ uri: user.picture }}
-                        style={{ width: 36, height: 36, borderRadius: 18, borderWidth: 2, borderColor: '#3B82F6' }}
-                    />
-                ) : (
-                    <Ionicons name="person-circle-outline" size={36} color="#9CA3AF" />
-                )}
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+                <TouchableOpacity onPress={() => setShowLangModal(true)}>
+                    <Ionicons name="language" size={24} color="#A855F7" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                    {isAuthenticated && user?.picture ? (
+                        <Image
+                            source={{ uri: user.picture }}
+                            style={{ width: 36, height: 36, borderRadius: 18, borderWidth: 2, borderColor: '#3B82F6' }}
+                        />
+                    ) : (
+                        <Ionicons name="person-circle-outline" size={36} color="#9CA3AF" />
+                    )}
+                </TouchableOpacity>
+            </View>
+            <LanguageSelectionModal visible={showLangModal} onClose={() => setShowLangModal(false)} />
         </View>
     );
 }
@@ -86,6 +96,16 @@ function HomeTabs() {
 }
 
 export default function AppNavigator() {
+    const { language } = useSettingsStore();
+
+    React.useEffect(() => {
+        if (language) {
+            import('../i18n').then(i18n => {
+                i18n.default.changeLanguage(language);
+            });
+        }
+    }, [language]);
+
     return (
         <NavigationContainer>
             <Stack.Navigator

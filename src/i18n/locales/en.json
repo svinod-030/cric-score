@@ -188,6 +188,8 @@
         "viewLicense": "View License",
         "attributionNotice": "The following sets forth attribution notices for third party software that may be contained in this application.",
         "resumeMatch": "Resume Match",
-        "brandingFooter": "Cric-Score - Your Cricket Companion"
+        "brandingFooter": "Cric-Score - Your Cricket Companion",
+        "selectLanguage": "Select Language",
+        "changeInSettings": "You can always change this in Settings"
     }
 }

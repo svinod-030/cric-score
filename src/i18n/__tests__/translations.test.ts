@@ -1,5 +1,11 @@
 import en from '../locales/en.json';
 import te from '../locales/te.json';
+import hi from '../locales/hi.json';
+import ta from '../locales/ta.json';
+import kn from '../locales/kn.json';
+import ml from '../locales/ml.json';
+
+const translations: { [key: string]: any } = { en, te, hi, ta, kn, ml };
 
 describe('Translation Synchronization', () => {
     const getKeys = (obj: any, prefix = ''): string[] => {
@@ -14,22 +20,26 @@ describe('Translation Synchronization', () => {
     };
 
     const enKeys = getKeys(en).sort();
-    const teKeys = getKeys(te).sort();
 
-    test('English and Telugu translation files should have the same keys', () => {
-        const missingInTe = enKeys.filter(key => !teKeys.includes(key));
-        const extraInTe = teKeys.filter(key => !enKeys.includes(key));
+    Object.keys(translations).forEach(lang => {
+        if (lang === 'en') return;
 
-        if (missingInTe.length > 0 || extraInTe.length > 0) {
-            const message = [
-                missingInTe.length > 0 ? `Missing keys in te.json:\n${missingInTe.join('\n')}` : '',
-                extraInTe.length > 0 ? `Extra keys in te.json (missing in en.json):\n${extraInTe.join('\n')}` : ''
-            ].filter(Boolean).join('\n\n');
+        test(`English and ${lang} translation files should have the same keys`, () => {
+            const langKeys = getKeys(translations[lang]).sort();
+            const missingInLang = enKeys.filter(key => !langKeys.includes(key));
+            const extraInLang = langKeys.filter(key => !enKeys.includes(key));
 
-            throw new Error(message);
-        }
+            if (missingInLang.length > 0 || extraInLang.length > 0) {
+                const message = [
+                    missingInLang.length > 0 ? `Missing keys in ${lang}.json:\n${missingInLang.join('\n')}` : '',
+                    extraInLang.length > 0 ? `Extra keys in ${lang}.json (missing in en.json):\n${extraInLang.join('\n')}` : ''
+                ].filter(Boolean).join('\n\n');
 
-        expect(teKeys).toEqual(enKeys);
+                throw new Error(message);
+            }
+
+            expect(langKeys).toEqual(enKeys);
+        });
     });
 
     test('All translation keys should have a non-empty value', () => {
@@ -43,7 +53,8 @@ describe('Translation Synchronization', () => {
             });
         };
 
-        checkValues(en, 'en.json');
-        checkValues(te, 'te.json');
+        Object.keys(translations).forEach(lang => {
+            checkValues(translations[lang], `${lang}.json`);
+        });
     });
 });
