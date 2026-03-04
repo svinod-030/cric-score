@@ -9,6 +9,15 @@ jest.mock('../../store/useMatchStore');
 jest.mock('react-native-keyboard-aware-scroll-view', () => ({
     KeyboardAwareScrollView: ({ children }: any) => children,
 }));
+jest.mock('../../components/CoinFlipModal', () => ({
+    CoinFlipModal: () => null,
+}));
+jest.mock('@react-navigation/native', () => ({
+    ...jest.requireActual('@react-navigation/native'),
+    useNavigation: () => ({
+        navigate: jest.fn(),
+    }),
+}));
 
 // Mock Alert
 jest.spyOn(Alert, 'alert');
@@ -25,6 +34,7 @@ describe('MatchSetupScreen', () => {
         jest.clearAllMocks();
 
         (useMatchStore as unknown as jest.Mock).mockReturnValue({
+            state: { isPlaying: false },
             config: {
                 teamA: 'Team A',
                 teamB: 'Team B',
@@ -75,6 +85,7 @@ describe('MatchSetupScreen', () => {
 
     test('calls startMatch and navigates when start button is pressed', () => {
         (useMatchStore as unknown as jest.Mock).mockReturnValue({
+            state: { isPlaying: false },
             config: {
                 teamA: 'India',
                 teamB: 'Australia',
@@ -102,6 +113,7 @@ describe('MatchSetupScreen', () => {
 
     test('start match button is disabled if toss is incomplete', () => {
         (useMatchStore as unknown as jest.Mock).mockReturnValue({
+            state: { isPlaying: false },
             config: {
                 teamA: 'India',
                 teamB: 'Australia',

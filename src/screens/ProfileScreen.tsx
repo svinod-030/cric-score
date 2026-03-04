@@ -34,7 +34,7 @@ export default function ProfileScreen({ navigation }: any) {
                     onPress: async () => {
                         await signOutGoogle();
                         signOut();
-                        Alert.alert(t('common.signOut'), t('common.signedOutSuccess'));
+                        Alert.alert(t('common.signedOut'), t('common.signedOutSuccess'));
                     },
                 },
             ]

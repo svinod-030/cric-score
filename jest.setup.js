@@ -74,6 +74,51 @@ jest.mock('react-native-css-interop', () => ({
     remapProps: jest.fn(),
 }));
 
+// Mock react-native-reanimated
+jest.mock('react-native-reanimated', () => require('react-native-reanimated/mock'));
+
+// Mock react-native-worklets
+global._WORKLET_RUNTIME = { set: jest.fn(), get: jest.fn() };
+jest.mock('react-native-worklets', () => ({
+    Worklets: {
+        createContext: jest.fn(),
+    },
+    createSerializable: jest.fn(v => v),
+    isWorklet: jest.fn(() => false),
+}));
+
+// Mock react-i18next
+const mockEn = require('./src/i18n/locales/en.json');
+jest.mock('react-i18next', () => ({
+    useTranslation: () => ({
+        t: (key, options) => {
+            const parts = key.split('.');
+            let val = mockEn;
+            for (const part of parts) {
+                if (val && val[part]) {
+                    val = val[part];
+                } else {
+                    return key;
+                }
+            }
+            if (typeof val === 'string' && options) {
+                Object.keys(options).forEach(opt => {
+                    val = val.replace(new RegExp(`{{${opt}}}`, 'g'), options[opt]);
+                });
+            }
+            return val;
+        },
+        i18n: {
+            changeLanguage: jest.fn(() => Promise.resolve()),
+            language: 'en',
+        },
+    }),
+    initReactI18next: {
+        type: '3rdParty',
+        init: jest.fn(),
+    },
+}));
+
 // Suppress console errors and warnings during tests
 global.console = {
     ...console,

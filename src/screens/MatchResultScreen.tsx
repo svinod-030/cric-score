@@ -87,7 +87,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                         <View className="p-6 items-center border-b border-gray-800 mb-4">
                             <Text className="text-gray-400 text-lg mb-1">{t('common.matchResult')}</Text>
                             <Text className="text-3xl font-black text-white text-center mb-1">
-                                {matchResult.winner === 'Draw' ? t('common.matchDrawn') : `${matchResult.winner} ${t('common.wins')}`}
+                                {matchResult.winner === 'Draw' ? t('common.matchDrawn') : `${matchResult.winner} ${t('common.winsExclamation')}`}
                             </Text>
                             <Text className="text-lg text-yellow-500 font-medium lowercase">
                                 {matchResult.resultType === 'runs'
