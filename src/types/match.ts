@@ -88,6 +88,8 @@ export type InningsState = {
 export type MatchResult = {
     winner: string | 'Draw';
     reason: string; // e.g. "By 20 runs" or "By 4 wickets"
+    resultType?: 'runs' | 'wickets' | 'tied';
+    margin?: number;
 } | null;
 
 export interface MatchState extends MatchConfig {

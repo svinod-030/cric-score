@@ -4,8 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/useAuthStore';
 import { signInWithGoogle, signOutGoogle } from '../utils/googleAuth';
+import { useTranslation } from 'react-i18next';
 
 export default function ProfileScreen({ navigation }: any) {
+    const { t } = useTranslation();
     const { user, isAuthenticated, setUser, signOut } = useAuthStore();
 
     const handleGoogleSignIn = async () => {
@@ -13,26 +15,26 @@ export default function ProfileScreen({ navigation }: any) {
             const result = await signInWithGoogle();
             if (result) {
                 setUser(result.user, result.accessToken);
-                Alert.alert('Success', 'Signed in successfully!');
+                Alert.alert(t('common.success'), t('common.signedInSuccess'));
             }
         } catch (error: any) {
-            Alert.alert('Error', error.message || 'Authentication failed');
+            Alert.alert(t('common.error'), error.message || t('common.authenticationFailed'));
         }
     };
 
     const handleSignOut = async () => {
         Alert.alert(
-            'Sign Out',
-            'Are you sure you want to sign out?',
+            t('common.signOut'),
+            t('common.signOutConfirm'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('common.cancel'), style: 'cancel' },
                 {
-                    text: 'Sign Out',
+                    text: t('common.signOut'),
                     style: 'destructive',
                     onPress: async () => {
                         await signOutGoogle();
                         signOut();
-                        Alert.alert('Signed Out', 'You have been signed out successfully.');
+                        Alert.alert(t('common.signOut'), t('common.signedOutSuccess'));
                     },
                 },
             ]
@@ -44,9 +46,9 @@ export default function ProfileScreen({ navigation }: any) {
             <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
                 <View className="flex-1 items-center justify-center p-6">
                     <Ionicons name="person-circle-outline" size={120} color="#6B7280" />
-                    <Text className="text-white text-2xl font-bold mt-6 mb-2">Welcome to Cric Score</Text>
+                    <Text className="text-white text-2xl font-bold mt-6 mb-2">{t('common.welcomeToCricScore')}</Text>
                     <Text className="text-gray-400 text-center mb-8">
-                        Sign in with Google to sync your matches and access premium features
+                        {t('common.signInGoogleSync')}
                     </Text>
 
                     <TouchableOpacity
@@ -57,7 +59,7 @@ export default function ProfileScreen({ navigation }: any) {
                             source={{ uri: 'https://www.google.com/favicon.ico' }}
                             style={{ width: 24, height: 24, marginRight: 12 }}
                         />
-                        <Text className="text-gray-900 font-bold text-lg">Sign in with Google</Text>
+                        <Text className="text-gray-900 font-bold text-lg">{t('common.signInWithGoogle')}</Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -81,10 +83,10 @@ export default function ProfileScreen({ navigation }: any) {
                 </View>
 
                 <View className="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700">
-                    <Text className="text-gray-500 text-xs uppercase tracking-wider mb-3">Account</Text>
+                    <Text className="text-gray-500 text-xs uppercase tracking-wider mb-3">{t('common.account')}</Text>
                     <View className="flex-row items-center mb-2">
                         <Ionicons name="checkmark-circle" size={20} color="#10B981" />
-                        <Text className="text-white ml-2">Signed in with Google</Text>
+                        <Text className="text-white ml-2">{t('common.signedInWithGoogle')}</Text>
                     </View>
                 </View>
 
@@ -92,7 +94,7 @@ export default function ProfileScreen({ navigation }: any) {
                     onPress={handleSignOut}
                     className="bg-red-600 p-4 rounded-xl items-center mt-4"
                 >
-                    <Text className="text-white font-bold text-lg">Sign Out</Text>
+                    <Text className="text-white font-bold text-lg">{t('common.signOut')}</Text>
                 </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>

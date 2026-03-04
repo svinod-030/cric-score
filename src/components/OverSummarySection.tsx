@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { InningsState, Over, Ball } from '../types/match';
+import { useTranslation } from 'react-i18next';
 
 interface OverSummarySectionProps {
     title: string;
@@ -10,6 +11,7 @@ interface OverSummarySectionProps {
 }
 
 const OverRow = ({ overNum, balls, runs, wickets }: { overNum: string, balls: Ball[], runs: number, wickets: number }) => {
+    const { t } = useTranslation();
     return (
         <View className="flex-row justify-between items-center p-3 border-b border-gray-700/50">
             <View className="flex-row items-center flex-1">
@@ -23,21 +25,22 @@ const OverRow = ({ overNum, balls, runs, wickets }: { overNum: string, balls: Ba
                         >
                             <Text className={`text-[8px] font-bold ${ball.isWicket ? 'text-red-400' : ball.runs >= 4 ? 'text-green-400' : 'text-gray-400'
                                 }`}>
-                                {ball.isWicket ? 'W' : ball.extraType !== 'none' ? (ball.extraType === 'wide' ? 'wd' : ball.extraType === 'no-ball' ? 'nb' : 'ex') : ball.runs}
+                                {ball.isWicket ? t('common.wicketsAbbr') : ball.extraType !== 'none' ? (ball.extraType === 'wide' ? t('common.wideAbbr') : ball.extraType === 'no-ball' ? t('common.noBallAbbr') : 'ex') : ball.runs}
                             </Text>
                         </View>
                     ))}
                 </View>
             </View>
             <View className="flex-row gap-4 w-24 justify-end">
-                <Text className="text-gray-300 font-bold">{runs} runs</Text>
-                <Text className="text-red-400 font-bold">{wickets > 0 ? `${wickets} wkt` : '-'}</Text>
+                <Text className="text-gray-300 font-bold">{runs} {t('common.runsLabel')}</Text>
+                <Text className="text-red-400 font-bold">{wickets > 0 ? `${wickets} ${t('common.wktLabel')}` : '-'}</Text>
             </View>
         </View>
     );
 };
 
 export const OverSummarySection = ({ title, innings, defaultExpanded = false, expanded }: OverSummarySectionProps) => {
+    const { t } = useTranslation();
     const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
     const isExpanded = expanded !== undefined ? expanded : internalExpanded;
 
@@ -68,11 +71,11 @@ export const OverSummarySection = ({ title, innings, defaultExpanded = false, ex
                 <View>
                     {/* Header */}
                     <View className="flex-row justify-between bg-gray-900/50 p-2 border-b border-gray-700">
-                        <Text className="text-gray-500 text-xs font-bold uppercase w-16">Over</Text>
-                        <Text className="text-gray-500 text-xs font-bold uppercase flex-1">Details</Text>
+                        <Text className="text-gray-500 text-xs font-bold uppercase w-16">{t('common.over')}</Text>
+                        <Text className="text-gray-500 text-xs font-bold uppercase flex-1">{t('common.details')}</Text>
                         <View className="flex-row gap-4 w-24 justify-end">
-                            <Text className="text-gray-500 text-xs font-bold uppercase text-right">Runs</Text>
-                            <Text className="text-gray-500 text-xs font-bold uppercase text-right">Wks</Text>
+                            <Text className="text-gray-500 text-xs font-bold uppercase text-right">{t('common.runs')}</Text>
+                            <Text className="text-gray-500 text-xs font-bold uppercase text-right">{t('common.wks')}</Text>
                         </View>
                     </View>
 
@@ -81,7 +84,7 @@ export const OverSummarySection = ({ title, innings, defaultExpanded = false, ex
                         return (
                             <OverRow
                                 key={idx}
-                                overNum={`Over ${idx + 1}`}
+                                overNum={`${t('common.over')} ${idx + 1}`}
                                 balls={over.balls}
                                 runs={totalRuns}
                                 wickets={wickets}
@@ -92,7 +95,7 @@ export const OverSummarySection = ({ title, innings, defaultExpanded = false, ex
                     {/* Current Over */}
                     {innings.currentOver.length > 0 && (
                         <OverRow
-                            overNum={`Over ${innings.overs.length + 1}`}
+                            overNum={`${t('common.over')} ${innings.overs.length + 1}`}
                             balls={innings.currentOver}
                             runs={calcIntervalStats(innings.currentOver).totalRuns}
                             wickets={calcIntervalStats(innings.currentOver).wickets}
@@ -101,7 +104,7 @@ export const OverSummarySection = ({ title, innings, defaultExpanded = false, ex
 
                     {innings.overs.length === 0 && innings.currentOver.length === 0 && (
                         <View className="p-4 items-center">
-                            <Text className="text-gray-500 italic">No overs bowled yet</Text>
+                            <Text className="text-gray-500 italic">{t('common.noOversBowled')}</Text>
                         </View>
                     )}
                 </View>

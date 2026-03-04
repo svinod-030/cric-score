@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useMatchStore } from '../store/useMatchStore';
+import { useTranslation } from 'react-i18next';
 
 interface LiveMatchCardProps {
     onClear?: () => void;
@@ -17,6 +18,7 @@ export const LiveMatchCard: React.FC<LiveMatchCardProps> = ({
     variant = 'blue',
     containerStyle = ''
 }) => {
+    const { t } = useTranslation();
     const { state } = useMatchStore();
     const navigation = useNavigation<any>();
 
@@ -31,9 +33,9 @@ export const LiveMatchCard: React.FC<LiveMatchCardProps> = ({
         <View className={`${bgClass} rounded-2xl p-5 border ${shadowClass} ${containerStyle}`}>
             <View className="flex-row justify-between items-start mb-4">
                 <View>
-                    <Text className={`${tagClass} font-bold tracking-wider text-xs uppercase mb-1`}>Live Now</Text>
+                    <Text className={`${tagClass} font-bold tracking-wider text-xs uppercase mb-1`}>{t('common.liveNow')}</Text>
                     <Text className="text-white text-xl font-bold">
-                        {state.teamA} vs {state.teamB}
+                        {state.teamA} {t('common.vs')} {state.teamB}
                     </Text>
                 </View>
 
@@ -41,7 +43,7 @@ export const LiveMatchCard: React.FC<LiveMatchCardProps> = ({
                     {showInningsBadge && (
                         <View className="bg-green-500/10 px-3 py-1 rounded-full">
                             <Text className="text-green-500 text-xs font-bold">
-                                Innings {state.currentInnings}
+                                {t('common.innings')} {state.currentInnings}
                             </Text>
                         </View>
                     )}
@@ -50,11 +52,11 @@ export const LiveMatchCard: React.FC<LiveMatchCardProps> = ({
                         <TouchableOpacity
                             onPress={() => {
                                 Alert.alert(
-                                    "Clear Match",
-                                    "Are you sure you want to clear the ongoing match? This will move it to history if it was finished, or just delete it if not.",
+                                    t('common.clearMatch'),
+                                    t('common.clearMatchConfirm'),
                                     [
-                                        { text: "Cancel", style: "cancel" },
-                                        { text: "Clear", style: "destructive", onPress: onClear }
+                                        { text: t('common.cancel'), style: "cancel" },
+                                        { text: t('common.clear'), style: "destructive", onPress: onClear }
                                     ]
                                 );
                             }}
@@ -90,7 +92,7 @@ export const LiveMatchCard: React.FC<LiveMatchCardProps> = ({
                 className="bg-blue-600 p-4 rounded-xl flex-row items-center justify-center gap-2 active:bg-blue-700"
             >
                 <Ionicons name="play" size={20} color="white" />
-                <Text className="text-white font-bold text-lg">Resume Match</Text>
+                <Text className="text-white font-bold text-lg">{t('common.resumeMatch')}</Text>
             </TouchableOpacity>
         </View>
     );

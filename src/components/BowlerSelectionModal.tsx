@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import { Player } from '../types/match';
+import { useTranslation } from 'react-i18next';
 
 interface BowlerSelectionModalProps {
     visible: boolean;
@@ -9,6 +10,7 @@ interface BowlerSelectionModalProps {
 }
 
 export const BowlerSelectionModal = ({ visible, players, onSelect }: BowlerSelectionModalProps) => {
+    const { t } = useTranslation();
     return (
         <Modal
             visible={visible}
@@ -18,7 +20,7 @@ export const BowlerSelectionModal = ({ visible, players, onSelect }: BowlerSelec
         >
             <View className="flex-1 bg-black/80 justify-end">
                 <View className="bg-gray-900 rounded-t-3xl p-6 h-2/3">
-                    <Text className="text-white text-xl font-bold mb-4 text-center">Select Bowler</Text>
+                    <Text className="text-white text-xl font-bold mb-4 text-center">{t('common.selectBowler')}</Text>
                     <ScrollView>
                         {players.map(player => (
                             <TouchableOpacity

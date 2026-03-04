@@ -7,8 +7,10 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { LiveMatchCard } from '../components/LiveMatchCard';
+import { useTranslation } from 'react-i18next';
 
 export default function MatchesHistoryScreen() {
+    const { t } = useTranslation();
     const { state, history, restoreMatches } = useMatchStore();
     const { isAuthenticated } = useAuthStore();
     const [isRestoring, setIsRestoring] = useState(false);
@@ -18,24 +20,24 @@ export default function MatchesHistoryScreen() {
         if (!isAuthenticated) return;
 
         Alert.alert(
-            "Restore Matches",
-            "This will merge your cloud backup with your current matches. Do you want to proceed?",
+            t('common.restoreMatches'),
+            t('common.restoreMatchesMsg'),
             [
-                { text: "Cancel", style: "cancel" },
+                { text: t('common.cancel'), style: "cancel" },
                 {
-                    text: "Restore",
+                    text: t('common.restore'),
                     onPress: async () => {
                         setIsRestoring(true);
                         try {
                             const backupData = await restoreFromDrive();
                             if (backupData) {
                                 restoreMatches(backupData);
-                                Alert.alert("Success", "Matches restored successfully!");
+                                Alert.alert(t('common.success'), t('common.matchesRestored'));
                             } else {
-                                Alert.alert("Not Found", "No backup file found on Google Drive.");
+                                Alert.alert(t('common.notFound'), t('common.noBackupFound'));
                             }
                         } catch (error) {
-                            Alert.alert("Error", "Failed to restore matches. Please try again.");
+                            Alert.alert(t('common.error'), t('common.failedRestore'));
                         } finally {
                             setIsRestoring(false);
                         }
@@ -49,7 +51,7 @@ export default function MatchesHistoryScreen() {
         <SafeAreaView className="flex-1 bg-gray-900" edges={['left', 'right']}>
             <ScrollView className="p-4">
                 <View className="flex-row justify-between items-center mb-6">
-                    <Text className="text-white text-3xl font-bold">Matches</Text>
+                    <Text className="text-white text-3xl font-bold">{t('common.matches')}</Text>
                     {isAuthenticated && (
                         <TouchableOpacity
                             onPress={handleRestore}
@@ -61,7 +63,7 @@ export default function MatchesHistoryScreen() {
                             ) : (
                                 <Ionicons name="cloud-download" size={18} color="#3B82F6" className="mr-2" />
                             )}
-                            <Text className="text-blue-500 font-bold">Restore</Text>
+                            <Text className="text-blue-500 font-bold">{t('common.restore')}</Text>
                         </TouchableOpacity>
                     )}
                 </View>
@@ -72,10 +74,10 @@ export default function MatchesHistoryScreen() {
                     containerStyle="mb-6"
                 />
 
-                <Text className="text-white text-xl font-bold mb-4">History</Text>
+                <Text className="text-white text-xl font-bold mb-4">{t('common.history')}</Text>
 
                 {history.length === 0 ? (
-                    <Text className="text-gray-500 text-center py-10">No completed matches yet.</Text>
+                    <Text className="text-gray-500 text-center py-10">{t('common.noCompletedMatches')}</Text>
                 ) : (
                     history.map((match, index) => (
                         <TouchableOpacity
@@ -88,16 +90,24 @@ export default function MatchesHistoryScreen() {
                                     <Text className="text-white font-bold text-lg">{match.teamA} vs {match.teamB}</Text>
                                     {match.completedAt && (
                                         <Text className="text-[10px] text-gray-500 font-medium">
-                                            {new Date(match.completedAt).toLocaleDateString()} at {new Date(match.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            {new Date(match.completedAt).toLocaleDateString()} {t('common.at')} {new Date(match.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </Text>
                                     )}
                                 </View>
-                                <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Completed</Text>
+                                <Text className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{t('common.completed')}</Text>
                             </View>
                             <Text className="text-yellow-500 font-medium">
-                                {match.matchResult?.winner === 'Draw' ? 'Match Drawn' : `${match.matchResult?.winner} Won`}
+                                {match.matchResult?.winner === 'Draw' ? t('common.matchDrawn') : `${match.matchResult?.winner} ${t('common.wins')}`}
                             </Text>
-                            <Text className="text-gray-400 text-xs mt-1">{match.matchResult?.reason}</Text>
+                            <Text className="text-gray-400 text-xs mt-1">
+                                {match.matchResult?.resultType === 'runs'
+                                    ? t('common.wonByRuns', { count: match.matchResult.margin })
+                                    : match.matchResult?.resultType === 'wickets'
+                                        ? t('common.wonByWickets', { count: match.matchResult.margin })
+                                        : match.matchResult?.resultType === 'tied'
+                                            ? t('common.scoresTied')
+                                            : match.matchResult?.reason}
+                            </Text>
                         </TouchableOpacity>
                     ))
                 )}

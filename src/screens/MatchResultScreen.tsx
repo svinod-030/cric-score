@@ -8,8 +8,10 @@ import { useMatchStore } from '../store/useMatchStore';
 import { ScorecardSection } from '../components/ScorecardSection';
 import { OverSummarySection } from '../components/OverSummarySection';
 import { APP_CONFIG } from '../utils/constants';
+import { useTranslation } from 'react-i18next';
 
 export default function MatchResultScreen({ navigation, route }: any) {
+    const { t } = useTranslation();
     const { state, resetMatch } = useMatchStore();
     const viewShotRef = useRef<any>(null);
     const [isSharing, setIsSharing] = React.useState(false);
@@ -31,9 +33,9 @@ export default function MatchResultScreen({ navigation, route }: any) {
     if (!matchResult) {
         return (
             <SafeAreaView className="flex-1 bg-gray-900 items-center justify-center" edges={['bottom', 'left', 'right']}>
-                <Text className="text-white mb-4">No Result Yet</Text>
+                <Text className="text-white mb-4">{t('common.noResultYet')}</Text>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Text className="text-blue-500">Go Back</Text>
+                    <Text className="text-blue-500">{t('common.goBack')}</Text>
                 </TouchableOpacity>
             </SafeAreaView>
         )
@@ -60,16 +62,16 @@ export default function MatchResultScreen({ navigation, route }: any) {
             if (await Sharing.isAvailableAsync()) {
                 await Sharing.shareAsync(uri, {
                     mimeType: 'image/png',
-                    dialogTitle: 'Share Match Scoreboard',
+                    dialogTitle: t('common.shareScoreboard'),
                     UTI: 'public.png',
                 });
             } else {
-                Alert.alert("Error", "Sharing is not available on this device");
+                Alert.alert(t('common.error'), t('common.sharingNotAvailable'));
             }
         } catch (error) {
             console.error("Failed to share scoreboard:", error);
             setIsSharing(false);
-            Alert.alert("Error", "Failed to capture scoreboard image");
+            Alert.alert(t('common.error'), t('common.failedCaptureScoreboard'));
         }
     };
 
@@ -83,18 +85,24 @@ export default function MatchResultScreen({ navigation, route }: any) {
                 >
                     <View className="bg-gray-900">
                         <View className="p-6 items-center border-b border-gray-800 mb-4">
-                            <Text className="text-gray-400 text-lg mb-1">Match Result</Text>
+                            <Text className="text-gray-400 text-lg mb-1">{t('common.matchResult')}</Text>
                             <Text className="text-3xl font-black text-white text-center mb-1">
-                                {matchResult.winner === 'Draw' ? 'Match Drawn' : `${matchResult.winner} Wins!`}
+                                {matchResult.winner === 'Draw' ? t('common.matchDrawn') : `${matchResult.winner} ${t('common.wins')}`}
                             </Text>
                             <Text className="text-lg text-yellow-500 font-medium lowercase">
-                                {matchResult.reason}
+                                {matchResult.resultType === 'runs'
+                                    ? t('common.wonByRuns', { count: matchResult.margin })
+                                    : matchResult.resultType === 'wickets'
+                                        ? t('common.wonByWickets', { count: matchResult.margin })
+                                        : matchResult.resultType === 'tied'
+                                            ? t('common.scoresTied')
+                                            : matchResult.reason}
                             </Text>
                         </View>
 
                         <View className="px-4">
                             <ScorecardSection
-                                title={`1st Innings: ${innings1.battingTeam}`}
+                                title={`${t('common.stInnings')}: ${innings1.battingTeam}`}
                                 innings={innings1}
                                 battingTeamPlayers={innings1.battingTeam === state.teamA ? teamAPlayers : teamBPlayers}
                                 bowlingTeamPlayers={innings1.battingTeam === state.teamA ? teamBPlayers : teamAPlayers}
@@ -104,7 +112,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                             />
 
                             <OverSummarySection
-                                title={`1st Innings Over Summary`}
+                                title={t('common.overSummaryTitle', { innings: t('common.stInnings') })}
                                 innings={innings1}
                                 defaultExpanded={false}
                                 expanded={isSharing ? true : undefined}
@@ -113,7 +121,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                             {(innings2.totalRuns > 0 || innings2.overs.length > 0 || innings2.currentOver.length > 0) && (
                                 <>
                                     <ScorecardSection
-                                        title={`2nd Innings: ${innings2.battingTeam}`}
+                                        title={`${t('common.ndInnings')}: ${innings2.battingTeam}`}
                                         innings={innings2}
                                         battingTeamPlayers={innings2.battingTeam === state.teamA ? teamAPlayers : teamBPlayers}
                                         bowlingTeamPlayers={innings2.battingTeam === state.teamA ? teamBPlayers : teamAPlayers}
@@ -122,7 +130,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                                         expanded={isSharing ? true : undefined}
                                     />
                                     <OverSummarySection
-                                        title={`2nd Innings Over Summary`}
+                                        title={t('common.overSummaryTitle', { innings: t('common.ndInnings') })}
                                         innings={innings2}
                                         defaultExpanded={false}
                                         expanded={isSharing ? true : undefined}
@@ -132,7 +140,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                         </View>
                         {/* Add branding or footer for the screenshot */}
                         <View className="p-4 items-center">
-                            <Text className="text-gray-600 text-xs italic">Cric-Score - Your Cricket Companion</Text>
+                            <Text className="text-gray-600 text-xs italic">{t('common.brandingFooter')}</Text>
                         </View>
                     </View>
                 </ViewShot>
@@ -143,21 +151,21 @@ export default function MatchResultScreen({ navigation, route }: any) {
                         onPress={handleShare}
                     >
                         <Ionicons name="share-social" size={20} color="white" />
-                        <Text className="text-white text-lg font-bold">Share Scoreboard</Text>
+                        <Text className="text-white text-lg font-bold">{t('common.shareScoreboard')}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         className="bg-blue-600 w-full p-4 rounded-xl items-center shadow-lg shadow-blue-900/50 mb-4"
                         onPress={handleRateApp}
                     >
-                        <Text className="text-white text-lg font-bold">Rate App</Text>
+                        <Text className="text-white text-lg font-bold">{t('common.rateApp')}</Text>
                     </TouchableOpacity>
                     {!isHistoryView && (
                         <TouchableOpacity
                             className="bg-blue-600 w-full p-4 rounded-xl items-center shadow-lg shadow-blue-900/50 mb-4"
                             onPress={handleNewMatch}
                         >
-                            <Text className="text-white text-lg font-bold">Start New Match</Text>
+                            <Text className="text-white text-lg font-bold">{t('common.startNewMatch')}</Text>
                         </TouchableOpacity>
                     )}
                 </View>

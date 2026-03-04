@@ -11,6 +11,8 @@ export const calculateMatchResult = (
         return {
             winner: state.innings1.battingTeam,
             reason: `Won by ${runs1 - runs2} runs`,
+            resultType: 'runs',
+            margin: runs1 - runs2
         };
     } else if (runs2 > runs1) {
         const wicketsLeft =
@@ -18,9 +20,15 @@ export const calculateMatchResult = (
         return {
             winner: state.innings2.battingTeam,
             reason: `Won by ${wicketsLeft} wickets`,
+            resultType: 'wickets',
+            margin: wicketsLeft
         };
     } else {
-        return { winner: 'Draw', reason: 'Scores are tied' };
+        return {
+            winner: 'Draw',
+            reason: 'Scores are tied',
+            resultType: 'tied'
+        };
     }
 };
 

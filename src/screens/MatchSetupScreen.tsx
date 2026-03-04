@@ -7,8 +7,10 @@ import { useMatchStore } from '../store/useMatchStore';
 import { MatchConfig } from '../types/match';
 import { LiveMatchCard } from '../components/LiveMatchCard';
 import { CoinFlipModal } from '../components/CoinFlipModal';
+import { useTranslation } from 'react-i18next';
 
 export default function MatchSetupScreen({ navigation }: any) {
+    const { t } = useTranslation();
     const { config, setConfig, startMatch, loadTeamRoster, resetMatch } = useMatchStore();
     const [isCoinFlipVisible, setIsCoinFlipVisible] = React.useState(false);
 
@@ -18,7 +20,7 @@ export default function MatchSetupScreen({ navigation }: any) {
 
     const handleStartMatch = () => {
         if (!canStartMatch()) {
-            Alert.alert('Incomplete Setup', 'Please select toss winner and decision before starting.');
+            Alert.alert(t('common.incompleteSetup'), t('common.pleaseSelectTossWinner'));
             return;
         }
         startMatch();
@@ -39,7 +41,7 @@ export default function MatchSetupScreen({ navigation }: any) {
                 style={{ flex: 1 }}
                 className="p-6"
             >
-                <Text className="text-3xl font-bold text-white mb-8">New Match</Text>
+                <Text className="text-3xl font-bold text-white mb-8">{t('common.newMatch')}</Text>
 
                 <LiveMatchCard
                     onClear={resetMatch}
@@ -50,13 +52,13 @@ export default function MatchSetupScreen({ navigation }: any) {
                     isVisible={isCoinFlipVisible}
                     onClose={() => setIsCoinFlipVisible(false)}
                     onResult={(winner) => updateConfig('tossWinner', winner)}
-                    teamAName={config.teamA || 'Team A'}
-                    teamBName={config.teamB || 'Team B'}
+                    teamAName={config.teamA || t('common.teamA')}
+                    teamBName={config.teamB || t('common.teamB')}
                 />
 
                 {/* Teams Section */}
                 <View className="mb-6">
-                    <Text className="text-lg font-semibold text-gray-300 mb-2">Teams</Text>
+                    <Text className="text-lg font-semibold text-gray-300 mb-2">{t('common.teams')}</Text>
                     <View className="flex-row gap-4">
                         <View className="flex-1">
                             <TextInput
@@ -67,10 +69,10 @@ export default function MatchSetupScreen({ navigation }: any) {
                                     updateConfig('teamA', teamName);
                                     loadTeamRoster('teamA', teamName);
                                 }}
-                                placeholder="Team A"
+                                placeholder={t('common.teamA')}
                                 placeholderTextColor="#666"
                             />
-                            {!config.teamA && <Text className="text-red-500 mt-2">Please provide a name</Text>}
+                            {!config.teamA && <Text className="text-red-500 mt-2">{t('common.pleaseProvideName')}</Text>}
                         </View>
                         <View className="flex-1">
                             <TextInput
@@ -81,20 +83,20 @@ export default function MatchSetupScreen({ navigation }: any) {
                                     updateConfig('teamB', teamName);
                                     loadTeamRoster('teamB', teamName);
                                 }}
-                                placeholder="Team B"
+                                placeholder={t('common.teamB')}
                                 placeholderTextColor="#666"
                             />
-                            {!config.teamB && <Text className="text-red-500 mt-2">Please provide a name</Text>}
+                            {!config.teamB && <Text className="text-red-500 mt-2">{t('common.pleaseProvideName')}</Text>}
                         </View>
                     </View>
                 </View>
 
                 {/* Match Settings */}
                 <View className="mb-6 bg-gray-800 p-5 rounded-2xl border border-gray-700">
-                    <Text className="text-lg font-semibold text-white mb-4">Match Settings</Text>
+                    <Text className="text-lg font-semibold text-white mb-4">{t('common.matchSettings')}</Text>
 
                     <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-gray-300">Overs per Innings</Text>
+                        <Text className="text-gray-300">{t('common.oversPerInnings')}</Text>
                         <View className="flex-row items-center gap-3">
                             <TouchableOpacity
                                 onPress={() => updateConfig('overs', Math.max(1, config.overs - 1))}
@@ -113,7 +115,7 @@ export default function MatchSetupScreen({ navigation }: any) {
                     </View>
 
                     <View className="flex-row justify-between items-center">
-                        <Text className="text-gray-300">Players per Team</Text>
+                        <Text className="text-gray-300">{t('common.playersPerTeam')}</Text>
                         <View className="flex-row items-center gap-3">
                             <TouchableOpacity
                                 onPress={() => updateConfig('playersPerTeam', Math.max(2, config.playersPerTeam - 1))}
@@ -133,10 +135,10 @@ export default function MatchSetupScreen({ navigation }: any) {
 
                     <View className="flex-row justify-between items-center mt-4 pt-4 border-t border-gray-700">
                         <View className="flex-row items-center gap-2">
-                            <Text className="text-gray-300">Custom Player Names</Text>
+                            <Text className="text-gray-300">{t('common.customPlayerNames')}</Text>
                             <TouchableOpacity onPress={() => Alert.alert(
-                                "Custom Player Names",
-                                "Enable this to enter specific names for your players. If disabled, default names (e.g., 'Team A Player 1') will be used, allowing for automated player selection."
+                                t('common.customPlayerNames'),
+                                t('common.customNamesDescription')
                             )}>
                                 <Ionicons name="information-circle-outline" size={20} color="#9ca3af" />
                             </TouchableOpacity>
@@ -152,15 +154,15 @@ export default function MatchSetupScreen({ navigation }: any) {
 
                 {config.isCustomNamesEnabled && (
                     <View className="mb-8 bg-gray-800 p-5 rounded-2xl border border-gray-700">
-                        <Text className="text-lg font-semibold text-white mb-4">Player Names</Text>
+                        <Text className="text-lg font-semibold text-white mb-4">{t('common.playerNames')}</Text>
                         <View className="flex-row gap-6">
                             <View className="flex-1">
-                                <Text className="text-gray-400 text-sm mb-2 font-bold">{config.teamA || 'Team A'}</Text>
+                                <Text className="text-gray-400 text-sm mb-2 font-bold">{config.teamA || t('common.teamA')}</Text>
                                 {Array.from({ length: config.playersPerTeam }).map((_, i) => (
                                     <TextInput
                                         key={`A${i}`}
                                         className="bg-gray-700 text-white p-2 rounded-lg border border-gray-600 mb-2 text-sm"
-                                        placeholder={`Player ${i + 1}`}
+                                        placeholder={t('common.playerPlaceholder', { index: i + 1 })}
                                         placeholderTextColor="#666"
                                         value={config.teamAPlayerNames?.[i] || ''}
                                         onChangeText={(text) => {
@@ -172,12 +174,12 @@ export default function MatchSetupScreen({ navigation }: any) {
                                 ))}
                             </View>
                             <View className="flex-1">
-                                <Text className="text-gray-400 text-sm mb-2 font-bold">{config.teamB || 'Team B'}</Text>
+                                <Text className="text-gray-400 text-sm mb-2 font-bold">{config.teamB || t('common.teamB')}</Text>
                                 {Array.from({ length: config.playersPerTeam }).map((_, i) => (
                                     <TextInput
                                         key={`B${i}`}
                                         className="bg-gray-700 text-white p-2 rounded-lg border border-gray-600 mb-2 text-sm"
-                                        placeholder={`Player ${i + 1}`}
+                                        placeholder={t('common.playerPlaceholder', { index: i + 1 })}
                                         placeholderTextColor="#666"
                                         value={config.teamBPlayerNames?.[i] || ''}
                                         onChangeText={(text) => {
@@ -195,49 +197,49 @@ export default function MatchSetupScreen({ navigation }: any) {
                 {/* Toss Section */}
                 <View className="mb-8 bg-gray-800 p-5 rounded-2xl border border-gray-700">
                     <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-lg font-semibold text-white">Toss</Text>
+                        <Text className="text-lg font-semibold text-white">{t('common.toss')}</Text>
                         <TouchableOpacity
                             onPress={() => setIsCoinFlipVisible(true)}
                             className="flex-row items-center gap-1 bg-blue-600/10 px-3 py-1.5 rounded-lg border border-blue-500/20"
                         >
                             <Ionicons name="infinite-outline" size={16} color="#3B82F6" />
-                            <Text className="text-blue-500 text-xs font-bold uppercase tracking-wider">Online Toss</Text>
+                            <Text className="text-blue-500 text-xs font-bold uppercase tracking-wider">{t('common.onlineToss')}</Text>
                         </TouchableOpacity>
                     </View>
 
                     <View className="mb-4">
-                        <Text className="text-gray-300 mb-2">Who won the toss?</Text>
+                        <Text className="text-gray-300 mb-2">{t('common.whoWonToss')}</Text>
                         <View className="flex-row gap-4">
                             <TouchableOpacity
                                 onPress={() => updateConfig('tossWinner', 'teamA')}
                                 className={`flex-1 p-3 rounded-xl border ${config.tossWinner === 'teamA' ? 'bg-blue-600 border-blue-500' : 'bg-gray-700 border-gray-600'}`}
                             >
-                                <Text className="text-white text-center font-bold">{config.teamA || 'Team A'}</Text>
+                                <Text className="text-white text-center font-bold">{config.teamA || t('common.teamA')}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={() => updateConfig('tossWinner', 'teamB')}
                                 className={`flex-1 p-3 rounded-xl border ${config.tossWinner === 'teamB' ? 'bg-blue-600 border-blue-500' : 'bg-gray-700 border-gray-600'}`}
                             >
-                                <Text className="text-white text-center font-bold">{config.teamB || 'Team B'}</Text>
+                                <Text className="text-white text-center font-bold">{config.teamB || t('common.teamB')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
 
                     {config.tossWinner && (
                         <View>
-                            <Text className="text-gray-300 mb-2">{config.tossWinner === 'teamA' ? (config.teamA || 'Team A') : (config.teamB || 'Team B')} elected to?</Text>
+                            <Text className="text-gray-300 mb-2">{config.tossWinner === 'teamA' ? (config.teamA || t('common.teamA')) : (config.teamB || t('common.teamB'))} {t('common.electedTo')}</Text>
                             <View className="flex-row gap-4">
                                 <TouchableOpacity
                                     onPress={() => updateConfig('tossDecision', 'bat')}
                                     className={`flex-1 p-3 rounded-xl border ${config.tossDecision === 'bat' ? 'bg-green-600 border-green-500' : 'bg-gray-700 border-gray-600'}`}
                                 >
-                                    <Text className="text-white text-center font-bold">Bat</Text>
+                                    <Text className="text-white text-center font-bold">{t('common.bat')}</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => updateConfig('tossDecision', 'bowl')}
                                     className={`flex-1 p-3 rounded-xl border ${config.tossDecision === 'bowl' ? 'bg-green-600 border-green-500' : 'bg-gray-700 border-gray-600'}`}
                                 >
-                                    <Text className="text-white text-center font-bold">Bowl</Text>
+                                    <Text className="text-white text-center font-bold">{t('common.bowl')}</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -246,10 +248,10 @@ export default function MatchSetupScreen({ navigation }: any) {
 
                 {/* Rules */}
                 <View className="mb-8 bg-gray-800 p-5 rounded-2xl border border-gray-700">
-                    <Text className="text-lg font-semibold text-white mb-4">Extras & Rules</Text>
+                    <Text className="text-lg font-semibold text-white mb-4">{t('common.extrasRules')}</Text>
 
                     <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-gray-300">Run for Wide (1)</Text>
+                        <Text className="text-gray-300">{t('common.runForWide')}</Text>
                         <Switch
                             value={config.runsForWide > 0}
                             onValueChange={(v) => updateConfig('runsForWide', v ? 1 : 0)}
@@ -258,7 +260,7 @@ export default function MatchSetupScreen({ navigation }: any) {
                         />
                     </View>
                     <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-gray-300">Run for No Ball (1)</Text>
+                        <Text className="text-gray-300">{t('common.runForNoBall')}</Text>
                         <Switch
                             value={config.runsForNoBall > 0}
                             onValueChange={(v) => updateConfig('runsForNoBall', v ? 1 : 0)}
@@ -267,7 +269,7 @@ export default function MatchSetupScreen({ navigation }: any) {
                         />
                     </View>
                     <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-gray-300">Re-ball for Wide</Text>
+                        <Text className="text-gray-300">{t('common.reballForWide')}</Text>
                         <Switch
                             value={config.reballForWide}
                             onValueChange={(v) => updateConfig('reballForWide', v)}
@@ -276,7 +278,7 @@ export default function MatchSetupScreen({ navigation }: any) {
                         />
                     </View>
                     <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-gray-300">Re-ball for No Ball</Text>
+                        <Text className="text-gray-300">{t('common.reballForNoBall')}</Text>
                         <Switch
                             value={config.reballForNoBall}
                             onValueChange={(v) => updateConfig('reballForNoBall', v)}
@@ -290,7 +292,7 @@ export default function MatchSetupScreen({ navigation }: any) {
                     onPress={handleStartMatch}
                     disabled={!canStartMatch()}
                 >
-                    <Text className="text-white text-lg font-bold">Start Match</Text>
+                    <Text className="text-white text-lg font-bold">{t('common.startMatch')}</Text>
                 </TouchableOpacity>
 
             </KeyboardAwareScrollView>

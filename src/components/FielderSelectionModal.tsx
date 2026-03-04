@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import { Player } from '../types/match';
+import { useTranslation } from 'react-i18next';
 
 interface FielderSelectionModalProps {
     visible: boolean;
@@ -10,7 +11,10 @@ interface FielderSelectionModalProps {
     onCancel?: () => void;
 }
 
-export const FielderSelectionModal = ({ visible, players, onSelect, title = "Select Fielder", onCancel }: FielderSelectionModalProps) => {
+export const FielderSelectionModal = ({ visible, players, onSelect, title, onCancel }: FielderSelectionModalProps) => {
+    const { t } = useTranslation();
+    const modalTitle = title || t('common.selectFielder');
+
     return (
         <Modal
             visible={visible}
@@ -19,7 +23,7 @@ export const FielderSelectionModal = ({ visible, players, onSelect, title = "Sel
         >
             <View className="flex-1 bg-black/80 justify-end">
                 <View className="bg-gray-900 rounded-t-3xl p-6 h-2/3">
-                    <Text className="text-white text-xl font-bold mb-4 text-center">{title}</Text>
+                    <Text className="text-white text-xl font-bold mb-4 text-center">{modalTitle}</Text>
                     <ScrollView>
                         {players.map(player => (
                             <TouchableOpacity
@@ -36,7 +40,7 @@ export const FielderSelectionModal = ({ visible, players, onSelect, title = "Sel
                             onPress={onCancel}
                             className="p-4 bg-gray-800 rounded-xl items-center mt-2"
                         >
-                            <Text className="text-gray-400 font-bold">Cancel</Text>
+                            <Text className="text-gray-400 font-bold">{t('common.cancel')}</Text>
                         </TouchableOpacity>
                     )}
                 </View>

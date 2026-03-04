@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 const licenses = [
     {
@@ -70,18 +71,19 @@ const licenses = [
 ];
 
 export default function LicensesScreen({ navigation }: any) {
+    const { t } = useTranslation();
     return (
         <SafeAreaView className="flex-1 bg-gray-900">
             <View className="flex-row items-center p-4 border-b border-gray-800">
                 <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
                     <Ionicons name="arrow-back" size={24} color="white" />
                 </TouchableOpacity>
-                <Text className="text-white text-xl font-bold">Open Source Licenses</Text>
+                <Text className="text-white text-xl font-bold">{t('common.openSourceLicenses')}</Text>
             </View>
 
             <ScrollView className="flex-1 p-4">
                 <Text className="text-gray-400 mb-6">
-                    The following sets forth attribution notices for third party software that may be contained in this application.
+                    {t('common.attributionNotice')}
                 </Text>
 
                 {licenses.map((lib, index) => (
@@ -95,7 +97,7 @@ export default function LicensesScreen({ navigation }: any) {
                             <Text className="text-gray-500 text-xs">{lib.license}</Text>
                         </View>
                         <Text className="text-gray-400 text-sm mb-2">{lib.copyright}</Text>
-                        <Text className="text-blue-500 text-xs">View License</Text>
+                        <Text className="text-blue-500 text-xs">{t('common.viewLicense')}</Text>
                     </TouchableOpacity>
                 ))}
 

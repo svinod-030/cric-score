@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Modal, Alert, StyleSheet } from 'react-na
 import { Player } from '../types/match';
 import { Ionicons } from '@expo/vector-icons';
 import { Dropdown as ElementDropdown } from 'react-native-element-dropdown';
+import { useTranslation } from 'react-i18next';
 
 interface MatchStartModalProps {
     visible: boolean;
@@ -13,6 +14,7 @@ interface MatchStartModalProps {
 }
 
 export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayers, onStart, title }: MatchStartModalProps) => {
+    const { t } = useTranslation();
     const [strikerId, setStrikerId] = useState<string | null>(battingTeamPlayers[0].id);
     const [nonStrikerId, setNonStrikerId] = useState<string | null>(battingTeamPlayers[1].id);
     const [bowlerId, setBowlerId] = useState<string | null>(bowlingTeamPlayers[0].id);
@@ -28,11 +30,11 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
 
     const handleStart = () => {
         if (!strikerId || !nonStrikerId || !bowlerId) {
-            Alert.alert("Incomplete Selection", "Please select Striker, Non-Striker, and Bowler.");
+            Alert.alert(t('common.incompleteSelection'), t('common.pleaseSelectPlayers'));
             return;
         }
         if (strikerId === nonStrikerId) {
-            Alert.alert("Invalid Selection", "Striker and Non-Striker cannot be the same player.");
+            Alert.alert(t('common.invalidSelection'), t('common.strikerNonStrikerSame'));
             return;
         }
         onStart(strikerId, nonStrikerId, bowlerId);
@@ -62,7 +64,7 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
                 <View className="bg-gray-900 rounded-3xl p-6 border border-gray-800 w-full max-w-lg self-center">
                     <Text className="text-white text-2xl font-black mb-6 text-center">{title}</Text>
 
-                    <Text className="text-gray-400 mb-2 font-bold uppercase text-xs">Striker</Text>
+                    <Text className="text-gray-400 mb-2 font-bold uppercase text-xs">{t('common.striker')}</Text>
                     <ElementDropdown
                         style={styles.dropdown}
                         placeholderStyle={styles.placeholderStyle}
@@ -72,7 +74,7 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
                         maxHeight={300}
                         labelField="label"
                         valueField="value"
-                        placeholder="Select Striker..."
+                        placeholder={`${t('common.selectStriker')}...`}
                         value={strikerId}
                         onChange={item => setStrikerId(item.value)}
                         renderItem={renderDropdownItem}
@@ -81,7 +83,7 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
                         )}
                     />
 
-                    <Text className="text-gray-400 mt-4 mb-2 font-bold uppercase text-xs">Non-Striker</Text>
+                    <Text className="text-gray-400 mt-4 mb-2 font-bold uppercase text-xs">{t('common.nonStriker')}</Text>
                     <ElementDropdown
                         style={styles.dropdown}
                         placeholderStyle={styles.placeholderStyle}
@@ -91,7 +93,7 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
                         maxHeight={300}
                         labelField="label"
                         valueField="value"
-                        placeholder="Select Non-Striker..."
+                        placeholder={`${t('common.selectNonStriker')}...`}
                         value={nonStrikerId}
                         onChange={item => setNonStrikerId(item.value)}
                         renderItem={renderDropdownItem}
@@ -102,7 +104,7 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
 
                     <View className="h-[1px] bg-gray-800 my-6" />
 
-                    <Text className="text-gray-400 mb-2 font-bold uppercase text-xs">Opening Bowler</Text>
+                    <Text className="text-gray-400 mb-2 font-bold uppercase text-xs">{t('common.openingBowler')}</Text>
                     <ElementDropdown
                         style={styles.dropdown}
                         placeholderStyle={styles.placeholderStyle}
@@ -112,7 +114,7 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
                         maxHeight={300}
                         labelField="label"
                         valueField="value"
-                        placeholder="Select Bowler..."
+                        placeholder={`${t('common.selectBowler')}...`}
                         value={bowlerId}
                         onChange={item => setBowlerId(item.value)}
                         renderItem={renderDropdownItem}
@@ -131,7 +133,7 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
                     >
                         <Text className={`text-lg font-bold ${(strikerId && nonStrikerId && bowlerId) ? 'text-white' : 'text-gray-500'
                             }`}>
-                            Start Innings
+                            {t('common.startInnings')}
                         </Text>
                     </TouchableOpacity>
                 </View>

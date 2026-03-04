@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, Switch } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 interface RunSelectionModalProps {
     visible: boolean;
@@ -10,14 +11,15 @@ interface RunSelectionModalProps {
     showByeToggle?: boolean;
 }
 
-export const RunSelectionModal = ({ 
-    visible, 
-    title, 
-    onSelect, 
-    onClose, 
+export const RunSelectionModal = ({
+    visible,
+    title,
+    onSelect,
+    onClose,
     options = [0, 1, 2, 3, 4, 6],
     showByeToggle = false
 }: RunSelectionModalProps) => {
+    const { t } = useTranslation();
     const [isBye, setIsBye] = useState(false);
 
     // Reset state when modal opens
@@ -33,7 +35,7 @@ export const RunSelectionModal = ({
 
                     {showByeToggle && (
                         <View className="flex-row items-center justify-between mb-6 bg-gray-700/50 p-4 rounded-xl">
-                            <Text className="text-white font-medium text-lg">Byes (Not from Bat)</Text>
+                            <Text className="text-white font-medium text-lg">{t('common.byesNotFromBat')}</Text>
                             <Switch
                                 value={isBye}
                                 onValueChange={setIsBye}
@@ -59,7 +61,7 @@ export const RunSelectionModal = ({
                         onPress={onClose}
                         className="mt-8 p-4 bg-gray-700 rounded-xl items-center"
                     >
-                        <Text className="text-gray-300 font-bold">Cancel</Text>
+                        <Text className="text-gray-300 font-bold">{t('common.cancel')}</Text>
                     </TouchableOpacity>
                 </View>
             </View>

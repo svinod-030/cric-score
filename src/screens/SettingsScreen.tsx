@@ -2,6 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, Alert, Linking, Platform } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { APP_CONFIG } from '../utils/constants';
+import { useTranslation } from 'react-i18next';
 
 type SettingItemProps = {
     icon: keyof typeof Ionicons.glyphMap;
@@ -33,13 +34,14 @@ import { backupToDrive } from '../utils/backupService';
 import React, { useState } from 'react';
 
 export default function SettingsScreen() {
+    const { t, i18n } = useTranslation();
     const navigation = useNavigation<any>();
     const { isAuthenticated } = useAuthStore();
     const [isBackingUp, setIsBackingUp] = useState(false);
 
     const handleBackup = async () => {
         if (!isAuthenticated) {
-            Alert.alert("Sign In Required", "Please sign in with Google in the Profile tab to backup your data.");
+            Alert.alert(t('common.signInRequired'), t('common.pleaseSignInGoogle'));
             return;
         }
 
@@ -48,10 +50,14 @@ export default function SettingsScreen() {
         setIsBackingUp(false);
 
         if (success) {
-            Alert.alert("Backup Success", "Your data has been successfully backed up to Google Drive.");
+            Alert.alert(t('common.backupSuccess'), t('common.backupSuccessMsg'));
         } else {
-            Alert.alert("Backup Failed", "There was an error backing up your data. Please try again later.");
+            Alert.alert(t('common.backupFailed'), t('common.backupFailedMsg'));
         }
+    };
+
+    const toggleLanguage = (lang: string) => {
+        i18n.changeLanguage(lang);
     };
 
     const handlePress = (action: string) => {
@@ -76,45 +82,70 @@ export default function SettingsScreen() {
             return;
         }
 
-        Alert.alert("Coming Soon", `${action} feature is under development.`);
+        Alert.alert(t('common.comingSoon'), t('common.featureUnderDevelopment', { feature: action }));
     };
 
     return (
         <SafeAreaView className="flex-1 bg-gray-900" edges={['left', 'right']}>
             <ScrollView className="p-4">
-                <Text className="text-white text-3xl font-bold mb-6">Settings</Text>
+                <Text className="text-white text-3xl font-bold mb-6">{t('common.settings')}</Text>
 
                 <View className="mb-6">
-                    <Text className="text-gray-500 font-bold mb-3 uppercase text-xs tracking-wider">General</Text>
+                    <Text className="text-gray-500 font-bold mb-3 uppercase text-xs tracking-wider">{t('common.general')}</Text>
+
+                    {/* Language Switcher */}
+                    <View className="bg-gray-800 p-4 rounded-xl mb-3 border border-gray-700">
+                        <View className="flex-row items-center mb-3">
+                            <View className="w-10 h-10 rounded-full items-center justify-center mr-4 bg-purple-500/20">
+                                <Ionicons name="language" size={20} color="#A855F7" />
+                            </View>
+                            <Text className="text-white font-semibold text-lg flex-1">{t('common.language')} / Language</Text>
+                        </View>
+                        <View className="flex-row gap-2">
+                            <TouchableOpacity
+                                onPress={() => toggleLanguage('en')}
+                                className={`flex-1 py-2 rounded-lg items-center border ${i18n.language === 'en' ? 'bg-purple-600 border-purple-500' : 'bg-gray-700 border-gray-600'}`}
+                            >
+                                <Text className="text-white font-bold">English</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => toggleLanguage('te')}
+                                className={`flex-1 py-2 rounded-lg items-center border ${i18n.language === 'te' ? 'bg-purple-600 border-purple-500' : 'bg-gray-700 border-gray-600'}`}
+                            >
+                                <Text className="text-white font-bold">తెలుగు</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
                     <SettingItem
                         icon="star"
-                        title="Rate App"
-                        subtitle="Rate us on the App Store"
+                        title={t('common.rateApp')}
+                        subtitle={t('common.rateUsOnStore')}
                         onPress={() => handlePress("Rate App")}
                         color="#F59E0B"
                     />
 
                     <SettingItem
                         icon="cloud-upload"
-                        title="Backup"
-                        subtitle={isBackingUp ? "Backing up..." : "Save your data safely"}
+                        title={t('common.backup')}
+                        subtitle={isBackingUp ? "Backing up..." : t('common.saveDataSafely')}
                         onPress={() => handlePress("Backup")}
                         color="#10B981"
                     />
                 </View>
 
                 <View className="mb-6">
-                    <Text className="text-gray-500 font-bold mb-3 uppercase text-xs tracking-wider">About</Text>
+                    <Text className="text-gray-500 font-bold mb-3 uppercase text-xs tracking-wider">{t('common.about')}</Text>
                     <SettingItem
                         icon="document-text"
-                        title="Open Source Licenses"
+                        title={t('common.openSourceLicenses')}
                         onPress={() => handlePress("Licenses")}
                         color="#6366F1"
                     />
                     <SettingItem
                         icon="chatbubble-ellipses"
-                        title="Contact Us"
-                        subtitle="Support & Feedback"
+                        title={t('common.contactUs')}
+                        subtitle={t('common.supportFeedback')}
                         onPress={() => handlePress("Contact Us")}
                         color="#3B82F6"
                     />
@@ -122,7 +153,7 @@ export default function SettingsScreen() {
 
                 <View className="items-center mt-4 mb-10">
                     <Text className="text-gray-500 font-bold text-lg">Cric Score</Text>
-                    <Text className="text-gray-600 text-sm">Version {APP_CONFIG.APP_VERSION}</Text>
+                    <Text className="text-gray-600 text-sm">{t('common.version')} {APP_CONFIG.APP_VERSION}</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>

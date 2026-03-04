@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { WicketType } from '../types/match';
+import { useTranslation } from 'react-i18next';
 
 interface WicketTypeSelectionModalProps {
     visible: boolean;
@@ -9,20 +10,21 @@ interface WicketTypeSelectionModalProps {
 }
 
 export const WicketTypeSelectionModal = ({ visible, onSelect, onClose }: WicketTypeSelectionModalProps) => {
+    const { t } = useTranslation();
     const wicketTypes: { label: string; value: WicketType }[] = [
-        { label: 'Bowled', value: 'bowled' },
-        { label: 'Caught', value: 'caught' },
-        { label: 'LBW', value: 'lbw' },
-        { label: 'Run Out', value: 'run-out' },
-        { label: 'Stumped', value: 'stumped' },
-        { label: 'Other', value: 'other' },
+        { label: t('common.bowled'), value: 'bowled' },
+        { label: t('common.caught'), value: 'caught' },
+        { label: t('common.lbw'), value: 'lbw' },
+        { label: t('common.runOut'), value: 'run-out' },
+        { label: t('common.stumped'), value: 'stumped' },
+        { label: t('common.other'), value: 'other' },
     ];
 
     return (
         <Modal visible={visible} transparent animationType="slide">
             <View className="flex-1 justify-end bg-black/60">
                 <View className="bg-gray-800 rounded-t-3xl p-6 border-t border-gray-700">
-                    <Text className="text-white text-xl font-bold mb-6 text-center">Select Mode of Out</Text>
+                    <Text className="text-white text-xl font-bold mb-6 text-center">{t('common.selectModeOfOut')}</Text>
 
                     <View className="flex-row flex-wrap gap-3 justify-center mb-6">
                         {wicketTypes.map((type) => (
@@ -40,7 +42,7 @@ export const WicketTypeSelectionModal = ({ visible, onSelect, onClose }: WicketT
                         onPress={onClose}
                         className="p-4 bg-gray-900 rounded-xl items-center"
                     >
-                        <Text className="text-gray-400 font-bold">Cancel</Text>
+                        <Text className="text-gray-400 font-bold">{t('common.cancel')}</Text>
                     </TouchableOpacity>
                 </View>
             </View>

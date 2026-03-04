@@ -9,6 +9,7 @@ import Animated, {
     Easing
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 interface CoinFlipModalProps {
     isVisible: boolean;
@@ -25,6 +26,7 @@ export const CoinFlipModal: React.FC<CoinFlipModalProps> = ({
     teamAName,
     teamBName
 }) => {
+    const { t } = useTranslation();
     const [isFlipping, setIsFlipping] = useState(false);
     const [result, setResult] = useState<'teamA' | 'teamB' | null>(null);
 
@@ -94,9 +96,9 @@ export const CoinFlipModal: React.FC<CoinFlipModalProps> = ({
         >
             <View className="flex-1 justify-center items-center bg-black/80 p-6">
                 <View className="bg-gray-900 w-full rounded-3xl p-8 border border-gray-800 items-center">
-                    <Text className="text-2xl font-bold text-white mb-2">Online Toss</Text>
+                    <Text className="text-2xl font-bold text-white mb-2">{t('common.onlineToss')}</Text>
                     <Text className="text-gray-400 text-center mb-10">
-                        Feeling lucky? Flip the digital coin to decide who wins the toss!
+                        {t('common.feelingLucky')}
                     </Text>
 
                     <View className="h-48 justify-center items-center mb-10 w-full">
@@ -129,11 +131,11 @@ export const CoinFlipModal: React.FC<CoinFlipModalProps> = ({
 
                     {result ? (
                         <View className="items-center mb-8">
-                            <Text className="text-gray-400 text-sm mb-1 uppercase tracking-widest font-bold">Winner</Text>
+                            <Text className="text-gray-400 text-sm mb-1 uppercase tracking-widest font-bold">{t('common.winner')}</Text>
                             <Text className="text-green-500 text-3xl font-black text-center">
                                 {result === 'teamA' ? teamAName : teamBName}
                             </Text>
-                            <Text className="text-gray-500 text-xs mt-2 italic">Congratulations!</Text>
+                            <Text className="text-gray-500 text-xs mt-2 italic">{t('common.congratulations')}</Text>
                         </View>
                     ) : (
                         <View className="h-20" />
@@ -145,7 +147,7 @@ export const CoinFlipModal: React.FC<CoinFlipModalProps> = ({
                             disabled={isFlipping}
                             className="flex-1 bg-gray-800 p-4 rounded-xl items-center border border-gray-700"
                         >
-                            <Text className="text-gray-300 font-bold">Cancel</Text>
+                            <Text className="text-gray-300 font-bold">{t('common.cancel')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -153,7 +155,7 @@ export const CoinFlipModal: React.FC<CoinFlipModalProps> = ({
                             disabled={isFlipping}
                             className={`flex-2 p-4 rounded-xl items-center shadow-lg shadow-blue-500/30 ${isFlipping ? 'bg-blue-600/50' : 'bg-blue-600'}`}
                         >
-                            <Text className="text-white font-bold">{isFlipping ? 'Flipping...' : 'Flip Coin'}</Text>
+                            <Text className="text-white font-bold">{isFlipping ? t('common.flipping') : t('common.flipCoin')}</Text>
                         </TouchableOpacity>
 
                         {result && (
@@ -161,7 +163,7 @@ export const CoinFlipModal: React.FC<CoinFlipModalProps> = ({
                                 onPress={handleDone}
                                 className="flex-2 bg-green-600 p-4 rounded-xl items-center shadow-lg shadow-green-500/30"
                             >
-                                <Text className="text-white font-bold">Use Result</Text>
+                                <Text className="text-white font-bold">{t('common.useResult')}</Text>
                             </TouchableOpacity>
                         )}
                     </View>

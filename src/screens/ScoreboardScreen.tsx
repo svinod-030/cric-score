@@ -18,6 +18,7 @@ import { MatchStartModal } from '../components/MatchStartModal';
 import { Ionicons } from '@expo/vector-icons';
 import { WicketType } from '../types/match';
 import { Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const EditablePlayerName = ({
     name,
@@ -75,6 +76,7 @@ const EditablePlayerName = ({
 };
 
 export default function ScoreboardScreen({ navigation }: any) {
+    const { t } = useTranslation();
     const { state, config, recordBall, endInnings, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings, renamePlayer } = useMatchStore();
     const innings = state.currentInnings === 1 ? state.innings1 : state.innings2;
     const currentOverValidBalls = innings.currentOver.filter(b => b.isValidBall).length;
@@ -185,10 +187,10 @@ export default function ScoreboardScreen({ navigation }: any) {
 
         // For ALL extras (Wide, No Ball, Bye, Leg Bye), allow run selection
         const titleMap: Record<string, string> = {
-            'wide': 'Wide Ball',
-            'no-ball': 'No Ball',
-            'bye': 'Byes',
-            'leg-bye': 'Leg Byes'
+            'wide': t('common.wideBall'),
+            'no-ball': t('common.noBall'),
+            'bye': t('common.byes'),
+            'leg-bye': t('common.legByes')
         };
 
         let options = [0, 1, 2, 3, 4, 6];
@@ -197,7 +199,7 @@ export default function ScoreboardScreen({ navigation }: any) {
         }
 
         setRunModalConfig({
-            title: titleMap[type] || 'Select Extras',
+            title: titleMap[type] || t('common.selectExtras'),
             type,
             runs: 0,
             options,
@@ -228,7 +230,7 @@ export default function ScoreboardScreen({ navigation }: any) {
 
         if (nextPending.type === 'run-out') {
             setRunModalConfig({
-                title: 'Select runs (for Run-Out)',
+                title: t('common.selectRunsForRunOut'),
                 type: 'wicket',
                 runs: 0,
                 options: [0, 1, 2, 3]
@@ -262,13 +264,13 @@ export default function ScoreboardScreen({ navigation }: any) {
 
     const handleEndInnings = () => {
         Alert.alert(
-            "End Innings",
+            t('common.endInnings'),
             state.currentInnings === 1
-                ? "Are you sure you want to end the 1st innings?"
-                : "Are you sure you want to end the match and calculate result?",
+                ? t('common.end1stInningsConfirm')
+                : t('common.endMatchConfirm'),
             [
-                { text: "Cancel", style: "cancel" },
-                { text: "End Innings", style: "destructive", onPress: () => endInnings() }
+                { text: t('common.cancel'), style: "cancel" },
+                { text: t('common.endInnings'), style: "destructive", onPress: () => endInnings() }
             ]
         );
     };
@@ -278,7 +280,7 @@ export default function ScoreboardScreen({ navigation }: any) {
     const getBowlerStats = (id: string | null) => id ? innings.bowlingStats[id] || { overs: 0, runsConceded: 0, wickets: 0, balls: 0 } : null;
 
     const getPlayerName = (id: string) => {
-        if (!id) return "Select Player";
+        if (!id) return t('common.selectPlayer');
         const player = [...state.teamAPlayers, ...state.teamBPlayers].find(p => p.id === id);
         return player ? player.name : id;
     };
@@ -300,10 +302,10 @@ export default function ScoreboardScreen({ navigation }: any) {
                     <View className="flex-row justify-between items-center mb-1">
                         <View style={{ width: 40 }} />
                         <Text className="text-gray-400 text-center font-medium flex-1">
-                            {innings.battingTeam} Batting
+                            {innings.battingTeam} {t('common.batting')}
                         </Text>
                         <TouchableOpacity onPress={handleEndInnings} className="p-1 px-3 bg-red-900/30 rounded border border-red-800/50">
-                            <Text className="text-red-500 text-[10px] font-bold">END</Text>
+                            <Text className="text-red-500 text-[10px] font-bold">{t('common.end')}</Text>
                         </TouchableOpacity>
                     </View>
                     <View className="items-center mb-6">
@@ -311,16 +313,19 @@ export default function ScoreboardScreen({ navigation }: any) {
                             {innings.totalRuns}/{innings.totalWickets}
                         </Text>
                         <Text className="text-xl text-gray-400 mt-2">
-                            Overs: {innings.overs.length}.{currentOverValidBalls} ({state.overs})
+                            {t('common.overs')}: {innings.overs.length}.{currentOverValidBalls} ({state.overs})
                         </Text>
 
                         {state.currentInnings === 2 && (
                             <View className="mt-4 bg-gray-800 px-4 py-2 rounded-lg">
                                 <Text className="text-yellow-500 font-bold text-lg text-center">
-                                    Target: {state.innings1.totalRuns + 1}
+                                    {t('common.target')}: {state.innings1.totalRuns + 1}
                                 </Text>
                                 <Text className="text-gray-300 text-sm text-center mt-1">
-                                    Need {state.innings1.totalRuns + 1 - innings.totalRuns} runs in {(state.overs * 6) - (innings.overs.length * 6 + currentOverValidBalls)} balls
+                                    {t('common.needRunsInBalls', {
+                                        runs: state.innings1.totalRuns + 1 - innings.totalRuns,
+                                        balls: (state.overs * 6) - (innings.overs.length * 6 + currentOverValidBalls)
+                                    })}
                                 </Text>
                             </View>
                         )}
@@ -351,14 +356,14 @@ export default function ScoreboardScreen({ navigation }: any) {
                     {/* Current Bowler Bar */}
                     <View className="flex-row justify-between items-center bg-gray-800 p-3 rounded-xl mb-4">
                         <View>
-                            <Text className="text-gray-400 text-xs uppercase font-bold">Bowler</Text>
+                            <Text className="text-gray-400 text-xs uppercase font-bold">{t('common.bowler')}</Text>
                             {innings.currentBowlerId ? (
                                 <EditablePlayerName
                                     name={getPlayerName(innings.currentBowlerId)}
                                     onSave={(newName) => renamePlayer(innings.currentBowlerId!, newName)}
                                 />
                             ) : (
-                                <Text className="text-white font-bold text-lg">Select Bowler</Text>
+                                <Text className="text-white font-bold text-lg">{t('common.selectBowler')}</Text>
                             )}
                         </View>
                         <View className="items-end">
@@ -366,14 +371,14 @@ export default function ScoreboardScreen({ navigation }: any) {
                                 {currentBowlerStats ? `${currentBowlerStats.wickets}-${currentBowlerStats.runsConceded}` : "0-0"}
                             </Text>
                             <Text className="text-gray-400 text-xs">
-                                {bowlerOversDisplay} Overs
+                                {bowlerOversDisplay} {t('common.overs')}
                             </Text>
                         </View>
                     </View>
 
 
                     <View className="mb-4">
-                        <Text className="text-gray-400 mb-2 text-sm">This Over:</Text>
+                        <Text className="text-gray-400 mb-2 text-sm">{t('common.thisOver')}</Text>
                         <View className="flex-row gap-2 min-h-[32px] flex-wrap">
                             {innings.currentOver.length > 0 ? (
                                 innings.currentOver.map((ball, idx) => (
@@ -404,21 +409,21 @@ export default function ScoreboardScreen({ navigation }: any) {
                             className="flex-1 bg-red-900/30 py-2 rounded-lg flex-row items-center justify-center border border-red-800/50"
                         >
                             <Ionicons name="arrow-undo" size={16} color="#ef4444" />
-                            <Text className="text-red-500 font-bold ml-2">Undo</Text>
+                            <Text className="text-red-500 font-bold ml-2">{t('common.undo')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={swapBatsmen}
                             className="flex-1 bg-blue-900/30 py-2 rounded-lg flex-row items-center justify-center border border-blue-800/50"
                         >
                             <Ionicons name="swap-horizontal" size={16} color="#3b82f6" />
-                            <Text className="text-blue-500 font-bold ml-2">Swap</Text>
+                            <Text className="text-blue-500 font-bold ml-2">{t('common.swap')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => retirePlayer(innings.strikerId)}
                             className="flex-1 bg-orange-900/30 py-2 rounded-lg flex-row items-center justify-center border border-orange-800/50"
                         >
                             <Ionicons name="exit-outline" size={16} color="#f97316" />
-                            <Text className="text-orange-500 font-bold ml-2">Retire</Text>
+                            <Text className="text-orange-500 font-bold ml-2">{t('common.retire')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -427,8 +432,8 @@ export default function ScoreboardScreen({ navigation }: any) {
                     <View className="flex-1 p-6">
                         <View className="items-center mb-8 bg-gray-800 p-8 rounded-3xl border border-blue-900/30">
                             <Ionicons name="trophy" size={64} color="#fbbf24" className="mb-4" />
-                            <Text className="text-white text-3xl font-black text-center">Innings Over!</Text>
-                            <Text className="text-gray-400 text-lg mt-2">{state.innings1.battingTeam} finished their innings</Text>
+                            <Text className="text-white text-3xl font-black text-center">{t('common.inningsOver')}</Text>
+                            <Text className="text-gray-400 text-lg mt-2">{t('common.finishedTheirInnings', { team: state.innings1.battingTeam })}</Text>
                             <View className="mt-6 flex-row items-baseline">
                                 <Text className="text-5xl font-bold text-white">{state.innings1.totalRuns}</Text>
                                 <Text className="text-2xl text-gray-500 font-medium ml-2">/ {state.innings1.totalWickets}</Text>
@@ -436,7 +441,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                         </View>
 
                         <ScorecardSection
-                            title={`1st Innings: ${state.innings1.battingTeam}`}
+                            title={`${t('common.stInnings')}: ${state.innings1.battingTeam}`}
                             innings={state.innings1}
                             battingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
                             bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
@@ -446,8 +451,8 @@ export default function ScoreboardScreen({ navigation }: any) {
                             onPress={startSecondInnings}
                             className="mt-10 mb-20 bg-blue-600 p-5 rounded-2xl items-center shadow-lg shadow-blue-500/30 active:bg-blue-700"
                         >
-                            <Text className="text-white text-xl font-black">START 2ND INNINGS</Text>
-                            <Text className="text-blue-200 text-sm mt-1 uppercase tracking-widest font-bold">Target: {state.innings1.totalRuns + 1}</Text>
+                            <Text className="text-white text-xl font-black">{t('common.start2ndInnings')}</Text>
+                            <Text className="text-blue-200 text-sm mt-1 uppercase tracking-widest font-bold">{t('common.target')}: {state.innings1.totalRuns + 1}</Text>
                         </TouchableOpacity>
                     </View>
                 ) : (
@@ -480,47 +485,47 @@ export default function ScoreboardScreen({ navigation }: any) {
                                     onPress={handleWicket}
                                     className="flex-1 aspect-video bg-red-900/50 rounded-2xl items-center justify-center border border-red-700 active:bg-red-800/50"
                                 >
-                                    <Text className="text-red-500 text-2xl font-bold">Wicket</Text>
+                                    <Text className="text-red-500 text-2xl font-bold">{t('common.wicket')}</Text>
                                 </TouchableOpacity>
                             </View>
 
                             {/* Extras */}
-                            <Text className="text-gray-400 mt-4 mb-2">Extras</Text>
+                            <Text className="text-gray-400 mt-4 mb-2">{t('common.extras')}</Text>
                             <View className="flex-row gap-4">
                                 <TouchableOpacity
                                     onPress={() => handleExtra('wide')}
                                     className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
                                 >
-                                    <Text className="text-yellow-500 font-bold text-lg">Wide</Text>
+                                    <Text className="text-yellow-500 font-bold text-lg">{t('common.wide')}</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => handleExtra('no-ball')}
                                     className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
                                 >
-                                    <Text className="text-yellow-500 font-bold text-lg">No Ball</Text>
+                                    <Text className="text-yellow-500 font-bold text-lg">{t('common.noBall')}</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => handleExtra('bye')}
                                     className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
                                 >
-                                    <Text className="text-yellow-500 font-bold text-lg">Bye</Text>
+                                    <Text className="text-yellow-500 font-bold text-lg">{t('common.byes')}</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => handleExtra('leg-bye')}
                                     className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
                                 >
-                                    <Text className="text-yellow-500 font-bold text-lg">L-Bye</Text>
+                                    <Text className="text-yellow-500 font-bold text-lg">{t('common.lBye')}</Text>
                                 </TouchableOpacity>
                             </View>
 
                             {/* Full Scorecard Section */}
                             <View className="mt-10 mb-20">
-                                <Text className="text-white text-2xl font-bold mb-4 px-2">Scorecard</Text>
+                                <Text className="text-white text-2xl font-bold mb-4 px-2">{t('common.scorecard')}</Text>
 
                                 {state.currentInnings === 2 && (
                                     <View className="mb-4">
                                         <ScorecardSection
-                                            title={`1st Innings: ${state.innings1.battingTeam}`}
+                                            title={`${t('common.stInnings')}: ${state.innings1.battingTeam}`}
                                             innings={state.innings1}
                                             battingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
                                             bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
@@ -528,7 +533,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                                             defaultExpanded={true}
                                         />
                                         <OverSummarySection
-                                            title={`1st Innings Over Summary`}
+                                            title={t('common.overSummaryTitle', { innings: t('common.stInnings') })}
                                             innings={state.innings1}
                                             defaultExpanded={false}
                                         />
@@ -536,16 +541,16 @@ export default function ScoreboardScreen({ navigation }: any) {
                                 )}
 
                                 <ScorecardSection
-                                    title={`${state.currentInnings === 2 ? '2nd Innings' : '1st Innings'}: ${innings.battingTeam}`}
+                                    title={`${state.currentInnings === 2 ? t('common.ndInnings') : t('common.stInnings')}: ${innings.battingTeam}`}
                                     innings={innings}
                                     battingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
-                                    bowlingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
+                                    bowlingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
                                     isCollapsible={true}
                                     defaultExpanded={state.currentInnings === 1}
                                 />
 
                                 <OverSummarySection
-                                    title={`${state.currentInnings === 2 ? '2nd Innings' : '1st Innings'} Over Summary`}
+                                    title={t('common.overSummaryTitle', { innings: state.currentInnings === 2 ? t('common.ndInnings') : t('common.stInnings') })}
                                     innings={innings}
                                     defaultExpanded={false}
                                 />
@@ -564,7 +569,7 @@ export default function ScoreboardScreen({ navigation }: any) {
             />
             <BatterSelectionModal
                 visible={isBatterSelectionVisible}
-                title={batterSelectionType === 'striker' ? "Select Striker" : "Select Non-Striker"}
+                title={batterSelectionType === 'striker' ? t('common.selectStriker') : t('common.selectNonStriker')}
                 players={(innings.battingTeam === state.teamA ? state.teamAPlayers : state.teamBPlayers).filter(p => {
                     const stats = innings.battingStats[p.id];
                     const isOtherBatter = batterSelectionType === 'striker' ? p.id === innings.nonStrikerId : p.id === innings.strikerId;
@@ -588,7 +593,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                 visible={fielderModalVisible}
                 players={bowlingTeamPlayers}
                 onSelect={handleFielderSelect}
-                title={pendingWicket.type === 'caught' ? "Who caught it?" : pendingWicket.type === 'stumped' ? "Who stumped it?" : "Who made the run out?"}
+                title={pendingWicket.type === 'caught' ? t('common.whoCaughtIt') : pendingWicket.type === 'stumped' ? t('common.whoStumpedIt') : t('common.whoMadeRunOut')}
                 onCancel={() => setFielderModalVisible(false)}
             />
             <WhoIsOutModal
@@ -603,7 +608,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                 battingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
                 bowlingTeamPlayers={bowlingTeamPlayers}
                 onStart={handleMatchStart}
-                title={state.currentInnings === 1 ? "Start 1st Innings" : "Start 2nd Innings"}
+                title={state.currentInnings === 1 ? t('common.start1stInnings') : t('common.start2ndInningsTitle')}
             />
         </SafeAreaView>
     );
