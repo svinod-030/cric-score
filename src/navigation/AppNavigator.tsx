@@ -39,8 +39,8 @@ function LogoTitle() {
                 <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 20 }}>Cric Score</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
-                <TouchableOpacity onPress={() => setShowLangModal(true)}>
-                    <Ionicons name="language" size={24} color="#A855F7" />
+                <TouchableOpacity onPress={() => setShowLangModal(true)} style={{ justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ color: '#A855F7', fontWeight: 'bold', fontSize: 16 }}>अ/A</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
                     {isAuthenticated && user?.picture ? (
