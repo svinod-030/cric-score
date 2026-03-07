@@ -121,17 +121,24 @@ describe('ScoreboardScreen', () => {
         // Assuming the button is pressable.
     });
 
-    test('renders innings break correctly', () => {
-        (useMatchStore as unknown as jest.Mock).mockReturnValue({
+    test('renders innings break correctly and hides score card', () => {
+        const breakState = {
             ...mockState,
             state: {
                 ...mockState.state,
                 isInningsBreak: true,
             }
-        });
+        };
+        (useMatchStore as unknown as jest.Mock).mockReturnValue(breakState);
 
-        const { getByText } = render(<ScoreboardScreen />);
+        const { getByText, queryByText } = render(<ScoreboardScreen />);
+
+        // Should show break UI
         expect(getByText('Innings Over!')).toBeTruthy();
         expect(getByText('START 2ND INNINGS')).toBeTruthy();
+
+        // Should NOT show header score elements
+        expect(queryByText('Team A Batting')).toBeNull();
+        expect(queryByText('100/2')).toBeNull();
     });
 });
