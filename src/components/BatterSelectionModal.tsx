@@ -1,15 +1,19 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Modal } from 'react-native';
-import { Player } from '../types/match';
+import { useTranslation } from 'react-i18next';
+import { Player, BattingStats } from '../types/match';
 
 interface BatterSelectionModalProps {
     visible: boolean;
     players: Player[];
+    battingStats: Record<string, BattingStats>;
     onSelect: (playerId: string) => void;
     title: string;
 }
 
-export const BatterSelectionModal = ({ visible, players, onSelect, title }: BatterSelectionModalProps) => {
+export const BatterSelectionModal = ({ visible, players, battingStats, onSelect, title }: BatterSelectionModalProps) => {
+    const { t } = useTranslation();
+
     return (
         <Modal
             visible={visible}
@@ -27,7 +31,14 @@ export const BatterSelectionModal = ({ visible, players, onSelect, title }: Batt
                                 className="p-4 border-b border-gray-800 active:bg-gray-800"
                                 onPress={() => onSelect(player.id)}
                             >
-                                <Text className="text-white text-lg">{player.name}</Text>
+                                <View className="flex-row items-center justify-between">
+                                    <Text className="text-white text-lg">{player.name}</Text>
+                                    {battingStats[player.id]?.isRetired && (
+                                        <Text className="text-orange-500 text-sm italic font-bold">
+                                            ({t('common.retired')})
+                                        </Text>
+                                    )}
+                                </View>
                             </TouchableOpacity>
                         ))}
                     </ScrollView>

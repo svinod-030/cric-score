@@ -175,37 +175,21 @@ export const processBall = (
     let newNonStrikerId = nonStrikerId;
 
     // Standard Swap on odd runs
-    if (runs % 2 !== 0) {
+    if (runs % 2 !== 0 && !innings.isLastManStanding) {
         [newStrikerId, newNonStrikerId] = [newNonStrikerId, newStrikerId];
     }
 
     // Handle Wicket Fall - Logic for replacement
     if (isWicket && dismissedPlayerId) {
-        if (!config.isCustomNamesEnabled) {
-            // Auto-select next batter
-            const roster = innings.battingTeam === state.teamA ? state.teamAPlayers : state.teamBPlayers;
-            const nextBatter = roster.find(p => {
-                const pStats = innings.battingStats[p.id];
-                const isPlaying = p.id === strikerId || p.id === innings.nonStrikerId;
-                return !isPlaying && (!pStats || (!pStats.isOut && !pStats.isRetired));
-            });
-
-            const nextPlayerId = nextBatter ? nextBatter.id : "";
-
-            // Replace the dismissed player
-            if (newStrikerId === dismissedPlayerId) {
-                newStrikerId = nextPlayerId;
-            } else if (newNonStrikerId === dismissedPlayerId) {
-                newNonStrikerId = nextPlayerId;
-            }
-        } else {
-            // Manual selection
-            if (newStrikerId === dismissedPlayerId) {
-                newStrikerId = "";
-            } else if (newNonStrikerId === dismissedPlayerId) {
-                newNonStrikerId = "";
-            }
+        // Always clear the dismissed player to force manual selection in UI
+        if (newStrikerId === dismissedPlayerId) {
+            newStrikerId = "";
+        } else if (newNonStrikerId === dismissedPlayerId) {
+            newNonStrikerId = "";
         }
+
+        // In LMS, if we swap ends at end of over, we might need to ensure the player is striker
+        // But we handle that in Over Completion
     }
 
 
@@ -219,8 +203,10 @@ export const processBall = (
         finalOvers = [...finalOvers, { balls: newCurrentOver, bowlerId }];
         finalCurrentOver = [];
 
-        // Swap Ends at end of over
-        [newStrikerId, newNonStrikerId] = [newNonStrikerId, newStrikerId];
+        // Swap Ends at end of over (except in LMS)
+        if (!innings.isLastManStanding) {
+            [newStrikerId, newNonStrikerId] = [newNonStrikerId, newStrikerId];
+        }
 
         finalBowlerId = null as any;
     }
@@ -248,7 +234,7 @@ export const processBall = (
         },
     };
 
-    const isAllOut = newTotalWickets >= config.playersPerTeam - 1;
+    const isAllOut = newTotalWickets >= config.playersPerTeam;
     const isMaxOvers = finalOvers.length >= config.overs;
     const isTargetReached = state.currentInnings === 2 && newTotalRuns > state.innings1.totalRuns;
 

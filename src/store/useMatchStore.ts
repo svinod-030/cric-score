@@ -25,6 +25,7 @@ interface MatchStore {
     renamePlayer: (playerId: string, newName: string) => void;
     loadTeamRoster: (teamKey: 'teamA' | 'teamB', teamName: string) => void;
     saveTeamRoster: (teamName: string, playerNames: string[]) => void;
+    toggleLastManStanding: () => void;
 }
 
 const INITIAL_CONFIG: MatchConfig = {
@@ -220,7 +221,15 @@ export const useMatchStore = create<MatchStore>()(
                             ...store.state,
                             [currentInningsKey]: {
                                 ...store.state[currentInningsKey],
-                                strikerId: playerId
+                                strikerId: playerId,
+                                battingStats: {
+                                    ...store.state[currentInningsKey].battingStats,
+                                    [playerId]: {
+                                        ...(store.state[currentInningsKey].battingStats[playerId] || { playerId, runs: 0, ballsFaced: 0, fours: 0, sixes: 0, isOut: false }),
+                                        isRetired: false,
+                                        dismissal: undefined
+                                    }
+                                }
                             }
                         }
                     };
@@ -235,7 +244,15 @@ export const useMatchStore = create<MatchStore>()(
                             ...store.state,
                             [currentInningsKey]: {
                                 ...store.state[currentInningsKey],
-                                nonStrikerId: playerId
+                                nonStrikerId: playerId,
+                                battingStats: {
+                                    ...store.state[currentInningsKey].battingStats,
+                                    [playerId]: {
+                                        ...(store.state[currentInningsKey].battingStats[playerId] || { playerId, runs: 0, ballsFaced: 0, fours: 0, sixes: 0, isOut: false }),
+                                        isRetired: false,
+                                        dismissal: undefined
+                                    }
+                                }
                             }
                         }
                     };
@@ -359,9 +376,27 @@ export const useMatchStore = create<MatchStore>()(
                         return !isPlaying && (!stats || (!stats.isOut && !stats.isRetired));
                     });
 
-                    if (!nextBatter) return store; // No more players
-
                     const isStriker = innings.strikerId === playerId;
+
+                    if (!nextBatter) {
+                        // If no more batters, check if we should allow LMS or just end
+                        // For now just clear the slot and let the UI handle LMS prompt
+                        return {
+                            state: {
+                                ...store.state,
+                                [currentInningsKey]: {
+                                    ...innings,
+                                    strikerId: isStriker ? "" : innings.strikerId,
+                                    nonStrikerId: !isStriker ? "" : innings.nonStrikerId,
+                                    battingStats: {
+                                        ...innings.battingStats,
+                                        [playerId]: currentStats
+                                    }
+                                }
+                            }
+                        };
+                    }
+
                     return {
                         state: {
                             ...store.state,
@@ -496,6 +531,34 @@ export const useMatchStore = create<MatchStore>()(
                     return {
                         config: nextConfig,
                         state: nextState
+                    };
+                });
+            },
+            toggleLastManStanding: () => {
+                set((store) => {
+                    const currentInningsKey = store.state.currentInnings === 1 ? 'innings1' : 'innings2';
+                    const innings = store.state[currentInningsKey];
+                    let nextStrikerId = innings.strikerId;
+                    let nextNonStrikerId = innings.nonStrikerId;
+
+                    // If we are starting LMS, ensure the remaining player is the striker
+                    if (!innings.isLastManStanding) {
+                        if (!nextStrikerId && nextNonStrikerId) {
+                            nextStrikerId = nextNonStrikerId;
+                            nextNonStrikerId = "";
+                        }
+                    }
+
+                    return {
+                        state: {
+                            ...store.state,
+                            [currentInningsKey]: {
+                                ...innings,
+                                isLastManStanding: !innings.isLastManStanding,
+                                strikerId: nextStrikerId,
+                                nonStrikerId: nextNonStrikerId
+                            }
+                        }
                     };
                 });
             },

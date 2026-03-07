@@ -139,10 +139,32 @@ export default function ScoreboardScreen({ navigation }: any) {
                     setBowlerModalVisible(false);
                 }
 
-                if (!innings.strikerId) {
+                if (!innings.strikerId || !innings.nonStrikerId) {
+                    const roster = innings.battingTeam === state.teamA ? state.teamAPlayers : state.teamBPlayers;
+                    const availableBatters = roster.filter(p => {
+                        const stats = innings.battingStats[p.id];
+                        const isOtherBatter = p.id === (innings.strikerId || innings.nonStrikerId);
+                        return !isOtherBatter && (!stats || !stats.isOut);
+                    });
+                    const retiredBatters = roster.filter(p => innings.battingStats[p.id]?.isRetired && !innings.battingStats[p.id]?.isOut);
+
+                    if (availableBatters.length === 0 && retiredBatters.length === 0 && !innings.isLastManStanding && innings.totalWickets === config.playersPerTeam - 1) {
+                        Alert.alert(
+                            t('common.lastManStanding'),
+                            t('common.continueBattingAlone'),
+                            [
+                                { text: t('common.no'), style: 'cancel', onPress: () => endInnings() },
+                                { text: t('common.yes'), onPress: () => useMatchStore.getState().toggleLastManStanding() }
+                            ]
+                        );
+                        return; // Don't show batter selection if we are showing LMS prompt
+                    }
+                }
+
+                if (!innings.strikerId && (innings.nonStrikerId || innings.isLastManStanding)) {
                     setBatterSelectionType('striker');
                     setBatterSelectionVisible(true);
-                } else if (!innings.nonStrikerId) {
+                } else if (!innings.nonStrikerId && !innings.isLastManStanding) {
                     setBatterSelectionType('nonStriker');
                     setBatterSelectionVisible(true);
                 } else {
@@ -332,8 +354,8 @@ export default function ScoreboardScreen({ navigation }: any) {
                     </View>
 
                     {/* Player Stats Bar */}
-                    <View className="flex-row justify-between bg-gray-800 p-3 rounded-xl mb-4">
-                        <View>
+                    <View className={`flex-row ${innings.isLastManStanding ? 'justify-center' : 'justify-between'} bg-gray-800 p-3 rounded-xl mb-4`}>
+                        <View className={innings.isLastManStanding ? 'items-center' : ''}>
                             <EditablePlayerName
                                 name={getPlayerName(innings.strikerId) + "*"}
                                 onSave={(newName) => renamePlayer(innings.strikerId, newName.replace('*', ''))}
@@ -342,15 +364,17 @@ export default function ScoreboardScreen({ navigation }: any) {
                                 {strikerStats.runs} ({strikerStats.ballsFaced})
                             </Text>
                         </View>
-                        <View className="items-end">
-                            <EditablePlayerName
-                                name={getPlayerName(innings.nonStrikerId)}
-                                onSave={(newName) => renamePlayer(innings.nonStrikerId, newName)}
-                            />
-                            <Text className="text-gray-400">
-                                {nonStrikerStats.runs} ({nonStrikerStats.ballsFaced})
-                            </Text>
-                        </View>
+                        {!innings.isLastManStanding && (
+                            <View className="items-end">
+                                <EditablePlayerName
+                                    name={getPlayerName(innings.nonStrikerId)}
+                                    onSave={(newName) => renamePlayer(innings.nonStrikerId, newName)}
+                                />
+                                <Text className="text-gray-400">
+                                    {nonStrikerStats.runs} ({nonStrikerStats.ballsFaced})
+                                </Text>
+                            </View>
+                        )}
                     </View>
 
                     {/* Current Bowler Bar */}
@@ -411,13 +435,15 @@ export default function ScoreboardScreen({ navigation }: any) {
                             <Ionicons name="arrow-undo" size={16} color="#ef4444" />
                             <Text className="text-red-500 font-bold ml-2">{t('common.undo')}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={swapBatsmen}
-                            className="flex-1 bg-blue-900/30 py-2 rounded-lg flex-row items-center justify-center border border-blue-800/50"
-                        >
-                            <Ionicons name="swap-horizontal" size={16} color="#3b82f6" />
-                            <Text className="text-blue-500 font-bold ml-2">{t('common.swap')}</Text>
-                        </TouchableOpacity>
+                        {!innings.isLastManStanding && (
+                            <TouchableOpacity
+                                onPress={swapBatsmen}
+                                className="flex-1 bg-blue-900/30 py-2 rounded-lg flex-row items-center justify-center border border-blue-800/50"
+                            >
+                                <Ionicons name="swap-horizontal" size={16} color="#3b82f6" />
+                                <Text className="text-blue-500 font-bold ml-2">{t('common.swap')}</Text>
+                            </TouchableOpacity>
+                        )}
                         <TouchableOpacity
                             onPress={() => retirePlayer(innings.strikerId)}
                             className="flex-1 bg-orange-900/30 py-2 rounded-lg flex-row items-center justify-center border border-orange-800/50"
@@ -570,10 +596,11 @@ export default function ScoreboardScreen({ navigation }: any) {
             <BatterSelectionModal
                 visible={isBatterSelectionVisible}
                 title={batterSelectionType === 'striker' ? t('common.selectStriker') : t('common.selectNonStriker')}
+                battingStats={innings.battingStats}
                 players={(innings.battingTeam === state.teamA ? state.teamAPlayers : state.teamBPlayers).filter(p => {
                     const stats = innings.battingStats[p.id];
                     const isOtherBatter = batterSelectionType === 'striker' ? p.id === innings.nonStrikerId : p.id === innings.strikerId;
-                    return !isOtherBatter && (!stats || (!stats.isOut && !stats.isRetired));
+                    return !isOtherBatter && (!stats || !stats.isOut);
                 })}
                 onSelect={handleBatterSelect}
             />

@@ -61,6 +61,7 @@
         "undo": "Undo",
         "swap": "Swap",
         "retire": "Retire",
+        "retired": "Retired",
         "inningsOver": "Innings Over!",
         "finishedTheirInnings": "{{team}} finished their innings",
         "start2ndInnings": "START 2ND INNINGS",
@@ -179,6 +180,8 @@
         "o": "O",
         "m": "M",
         "eco": "Eco",
+        "lastManStanding": "Last Man Standing",
+        "continueBattingAlone": "Would you like the last player to continue batting alone?",
         "whoIsOut": "Who is out?",
         "liveNow": "Live Now",
         "innings": "Innings",
@@ -190,6 +193,8 @@
         "resumeMatch": "Resume Match",
         "brandingFooter": "Cric-Score - Your Cricket Companion",
         "selectLanguage": "Select Language",
-        "changeInSettings": "You can always change this in Settings"
+        "changeInSettings": "You can always change this in Settings",
+        "yes": "Yes",
+        "no": "No"
     }
 }

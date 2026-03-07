@@ -83,6 +83,7 @@ export type InningsState = {
 
     // Tracking
     fallOfWickets: { runs: number; wicket: number; over: string }[];
+    isLastManStanding?: boolean;
 };
 
 export type MatchResult = {
