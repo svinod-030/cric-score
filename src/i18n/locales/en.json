@@ -195,6 +195,11 @@
         "selectLanguage": "Select Language",
         "changeInSettings": "You can always change this in Settings",
         "yes": "Yes",
-        "no": "No"
+        "no": "No",
+        "potm": "Player of the Match",
+        "bestBatsman": "Best Batsman",
+        "bestBowler": "Best Bowler",
+        "bestFielder": "Best Fielder",
+        "matchAwards": "Match Awards"
     }
 }

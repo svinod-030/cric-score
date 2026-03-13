@@ -10,6 +10,7 @@ import { OverSummarySection } from '../components/OverSummarySection';
 import { APP_CONFIG } from '../utils/constants';
 import { useTranslation } from 'react-i18next';
 import { Confetti } from '../components/Confetti';
+import { calculateAwards } from '../utils/awardsUtils';
 
 export default function MatchResultScreen({ navigation, route }: any) {
     const { t } = useTranslation();
@@ -99,6 +100,30 @@ export default function MatchResultScreen({ navigation, route }: any) {
                                             ? t('common.scoresTied')
                                             : matchResult.reason}
                             </Text>
+                        </View>
+
+                        <View className="px-4 mb-6">
+                            <View className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700">
+                                <Text className="text-white text-lg font-bold mb-4 flex-row items-center">
+                                    <Ionicons name="trophy-outline" size={20} color="#EAB308" /> {t('common.matchAwards')}
+                                </Text>
+                                <View className="flex-row flex-wrap justify-between" style={{ gap: 12 }}>
+                                    {calculateAwards(matchData).map((award, idx) => (
+                                        <View key={idx} className="bg-gray-900/80 p-3 rounded-xl border border-gray-800 items-center justify-center mb-3" style={{ width: '47%' }}>
+                                            <View className="mb-2">
+                                                <Ionicons 
+                                                    name={award.type === 'potm' ? "star" : award.type === 'bestBatsman' ? "medal" : award.type === 'bestBowler' ? "flash" : "hand-right"} 
+                                                    size={24} 
+                                                    color={award.type === 'potm' ? "#EAB308" : award.type === 'bestBatsman' ? "#FCA5A5" : award.type === 'bestBowler' ? "#93C5FD" : "#86EFAC"} 
+                                                />
+                                            </View>
+                                            <Text className="text-gray-400 text-[10px] uppercase font-bold tracking-tighter mb-1 text-center">{t(`common.${award.type}`)}</Text>
+                                            <Text className="text-white font-bold text-center text-xs" numberOfLines={1}>{award.playerName}</Text>
+                                            <Text className="text-gray-500 text-[10px] mt-1 text-center">{award.stats}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
                         </View>
 
                         <View className="px-4">
