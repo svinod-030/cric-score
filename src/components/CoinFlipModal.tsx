@@ -141,29 +141,29 @@ export const CoinFlipModal: React.FC<CoinFlipModalProps> = ({
                         <View className="h-20" />
                     )}
 
-                    <View className="flex-row gap-4 w-full">
+                    <View className="flex-row flex-wrap gap-3 w-full justify-center">
                         <TouchableOpacity
                             onPress={onClose}
                             disabled={isFlipping}
-                            className="flex-1 bg-gray-800 p-4 rounded-xl items-center border border-gray-700"
+                            className="flex-1 min-w-[30%] bg-gray-800 p-4 rounded-xl items-center border border-gray-700"
                         >
-                            <Text className="text-gray-300 font-bold">{t('common.cancel')}</Text>
+                            <Text className="text-gray-300 font-bold" numberOfLines={1}>{t('common.cancel')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
                             onPress={handleFlip}
                             disabled={isFlipping}
-                            className={`flex-2 p-4 rounded-xl items-center shadow-lg shadow-blue-500/30 ${isFlipping ? 'bg-blue-600/50' : 'bg-blue-600'}`}
+                            className={`flex-[1.5] min-w-[45%] p-4 rounded-xl items-center shadow-lg shadow-blue-500/30 ${isFlipping ? 'bg-blue-600/50' : 'bg-blue-600'}`}
                         >
-                            <Text className="text-white font-bold">{isFlipping ? t('common.flipping') : t('common.flipCoin')}</Text>
+                            <Text className="text-white font-bold" numberOfLines={1}>{isFlipping ? t('common.flipping') : t('common.flipCoin')}</Text>
                         </TouchableOpacity>
 
                         {result && (
                             <TouchableOpacity
                                 onPress={handleDone}
-                                className="flex-2 bg-green-600 p-4 rounded-xl items-center shadow-lg shadow-green-500/30"
+                                className="w-full bg-green-600 p-4 rounded-xl items-center shadow-lg shadow-green-500/30"
                             >
-                                <Text className="text-white font-bold">{t('common.useResult')}</Text>
+                                <Text className="text-white font-bold" numberOfLines={1}>{t('common.useResult')}</Text>
                             </TouchableOpacity>
                         )}
                     </View>
