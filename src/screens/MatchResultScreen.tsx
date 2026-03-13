@@ -9,6 +9,7 @@ import { ScorecardSection } from '../components/ScorecardSection';
 import { OverSummarySection } from '../components/OverSummarySection';
 import { APP_CONFIG } from '../utils/constants';
 import { useTranslation } from 'react-i18next';
+import { Confetti } from '../components/Confetti';
 
 export default function MatchResultScreen({ navigation, route }: any) {
     const { t } = useTranslation();
@@ -170,6 +171,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                     )}
                 </View>
             </ScrollView>
+            {!isSharing && matchResult.winner !== 'Draw' && <Confetti />}
         </SafeAreaView>
     );
 }
