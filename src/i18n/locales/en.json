@@ -200,6 +200,10 @@
         "bestBatsman": "Best Batsman",
         "bestBowler": "Best Bowler",
         "bestFielder": "Best Fielder",
-        "matchAwards": "Match Awards"
+        "matchAwards": "Match Awards",
+        "updateAvailable": "Update Available!",
+        "newVersionMsg": "A new version ({{version}}) of Cric Score is available with new features and improvements.",
+        "updateNow": "Update Now",
+        "maybeLater": "Maybe Later"
     }
 }

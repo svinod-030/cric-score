@@ -14,7 +14,7 @@
         "comingSoon": "త్వరలో వస్తుంది",
         "language": "భాష",
         "striker": "స్ట్రైకర్",
-        "nonStriker": "నాన్-స్ట్రైకర్",
+        "nonStriker": "నాన్-స్ట్రైకర్‌",
         "fielder": "ఫీల్డర్",
         "retiredHurt": "రిటైర్డ్ హర్ట్",
         "featureUnderDevelopment": "{{feature}} ఫీచర్ అభివృద్ధిలో ఉంది.",
@@ -200,6 +200,10 @@
         "bestBatsman": "బెస్ట్ బ్యాట్స్‌మెన్",
         "bestBowler": "బెస్ట్ బౌలర్",
         "bestFielder": "బెస్ట్ ఫీల్డర్",
-        "matchAwards": "మ్యాచ్ అవార్డులు"
+        "matchAwards": "మ్యాచ్ అవార్డులు",
+        "updateAvailable": "అప్‌డేట్ అందుబాటులో ఉంది!",
+        "newVersionMsg": "క్రిక్ స్కోర్ యొక్క కొత్త వెర్షన్ ({{version}}) అందుబాటులో ఉంది.",
+        "updateNow": "ఇప్పుడే అప్‌డేట్ చేయండి",
+        "maybeLater": "తర్వాత"
     }
 }

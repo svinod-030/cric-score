@@ -200,6 +200,10 @@
         "bestBatsman": "ಅತ್ಯುತ್ತಮ ಬ್ಯಾಟ್ಸ್‌ಮನ್",
         "bestBowler": "ಅತ್ಯುತ್ತಮ ಬೌಲರ್",
         "bestFielder": "ಅತ್ಯುತ್ತಮ ಫೀಲ್ಡರ್",
-        "matchAwards": "ಪಂದ್ಯದ ಪ್ರಶಸ್ತಿಗಳು"
+        "matchAwards": "ಪಂದ್ಯದ ಪ್ರಶಸ್ತಿಗಳು",
+        "updateAvailable": "ಅಪ್‌ಡೇಟ್ ಲಭ್ಯವಿದೆ!",
+        "newVersionMsg": "ಕ್ರಿಕ್ ಸ್ಕೋರ್‌ನ ಹೊಸ ಆವೃತ್ತಿ ({{version}}) ಲಭ್ಯವಿದೆ.",
+        "updateNow": "ಈಗ ಅಪ್‌ಡೇಟ್ ಮಾಡಿ",
+        "maybeLater": "ನಂತರ"
     }
 }

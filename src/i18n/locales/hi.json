@@ -200,6 +200,10 @@
         "bestBatsman": "सर्वश्रेष्ठ बल्लेबाज",
         "bestBowler": "सर्वश्रेष्ठ गेंदबाज",
         "bestFielder": "सर्वश्रेष्ठ फील्डर",
-        "matchAwards": "मैच पुरस्कार"
+        "matchAwards": "मैच पुरस्कार",
+        "updateAvailable": "अपडेट उपलब्ध है!",
+        "newVersionMsg": "क्रिक स्कोर का एक नया संस्करण ({{version}}) उपलब्ध है।",
+        "updateNow": "अभी अपडेट करें",
+        "maybeLater": "बाद में"
     }
 }

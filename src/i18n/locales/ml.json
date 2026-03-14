@@ -200,6 +200,10 @@
         "bestBatsman": "മികച്ച ബാറ്റർ",
         "bestBowler": "മികച്ച ബൗളർ",
         "bestFielder": "മികച്ച ഫീൽഡർ",
-        "matchAwards": "മാച്ച് അവാർഡുകൾ"
+        "matchAwards": "മാച്ച് അവാർഡുകൾ",
+        "updateAvailable": "അപ്‌ഡേറ്റ് ലഭ്യമാണ്!",
+        "newVersionMsg": "ക്രിക് സ്കോറിന്റെ പുതിയ പതിപ്പ് ({{version}}) ലഭ്യമാണ്.",
+        "updateNow": "ഇപ്പോൾ അപ്‌ഡേറ്റ് ചെയ്യുക",
+        "maybeLater": "പിന്നീട്"
     }
 }

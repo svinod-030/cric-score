@@ -200,6 +200,10 @@
         "bestBatsman": "சிறந்த பேட்ஸ்மேன்",
         "bestBowler": "சிறந்த பந்துவீச்சாளர்",
         "bestFielder": "சிறந்த பீல்டர்",
-        "matchAwards": "போட்டி விருதுகள்"
+        "matchAwards": "போட்டி விருதுகள்",
+        "updateAvailable": "புதுப்பிப்பு உள்ளது!",
+        "newVersionMsg": "கிரிக் ஸ்கோரின் புதிய பதிப்பு ({{version}}) கிடைக்கிறது.",
+        "updateNow": "இப்போது புதுப்பிக்கவும்",
+        "maybeLater": "பிறகு"
     }
 }
