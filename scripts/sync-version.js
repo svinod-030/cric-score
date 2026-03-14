@@ -11,25 +11,13 @@ const version = packageJson.version;
 
 console.log(`Syncing version to ${version}...`);
 
-let versionCode = null;
-
 // Update app.json
 if (fs.existsSync(appJsonPath)) {
     const appJson = JSON.parse(fs.readFileSync(appJsonPath, 'utf8'));
-    
-    // Auto-bump versionCode
-    if (appJson.expo.android && typeof appJson.expo.android.versionCode === 'number') {
-        appJson.expo.android.versionCode += 1;
-        versionCode = appJson.expo.android.versionCode;
-        console.log(`Bumping versionCode from ${versionCode - 1} to ${versionCode} in app.json`);
-    } else if (appJson.expo.android) {
-        appJson.expo.android.versionCode = 1;
-        versionCode = 1;
-    }
 
     appJson.expo.version = version;
     fs.writeFileSync(appJsonPath, JSON.stringify(appJson, null, 2) + '\n');
-    console.log(`Updated app.json: version=${version}, versionCode=${versionCode}`);
+    console.log(`Updated app.json: version=${version}`);
 }
 
 // Update src/utils/constants.ts
@@ -46,23 +34,15 @@ if (fs.existsSync(constantsPath)) {
 // Update android/app/build.gradle
 if (fs.existsSync(buildGradlePath)) {
     let gradleContent = fs.readFileSync(buildGradlePath, 'utf8');
-    
+
     // Sync versionName
     gradleContent = gradleContent.replace(
         /versionName\s+["'][^"']*["']/,
         `versionName "${version}"`
     );
-    
-    // Sync versionCode
-    if (versionCode !== null) {
-        gradleContent = gradleContent.replace(
-            /versionCode\s+\d+/,
-            `versionCode ${versionCode}`
-        );
-    }
-    
+
     fs.writeFileSync(buildGradlePath, gradleContent);
-    console.log(`Updated android/app/build.gradle: versionName=${version}, versionCode=${versionCode}`);
+    console.log(`Updated android/app/build.gradle: versionName=${version}`);
 }
 
 console.log('Advanced version sync complete!');
