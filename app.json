@@ -17,7 +17,7 @@
     },
     "android": {
       "package": "com.vinodsigadana.cricscore",
-      "versionCode": 3,
+      "versionCode": 33,
       "googleServicesFile": "./google-services.json",
       "permissions": [],
       "adaptiveIcon": {
