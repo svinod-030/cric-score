@@ -79,9 +79,11 @@ export const ScorecardSection = ({
                         <Text className="flex-1 text-gray-400 text-xs uppercase font-bold text-center">{t('common.sr')}</Text>
                     </View>
 
-                    {battingTeamPlayers.map(player => {
+                    {battingTeamPlayers
+                        .filter(player => !!innings.battingStats[player.id])
+                        .sort((a, b) => (innings.battingStats[a.id]?.battingOrder || 0) - (innings.battingStats[b.id]?.battingOrder || 0))
+                        .map(player => {
                         const stats = innings.battingStats[player.id];
-                        if (!stats && !innings.battingStats[player.id]) return null;
                         if (!stats) return null;
 
                         const sr = stats.ballsFaced > 0 ? ((stats.runs / stats.ballsFaced) * 100).toFixed(0) : "0";

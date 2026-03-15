@@ -225,7 +225,16 @@ export const useMatchStore = create<MatchStore>()(
                                 battingStats: {
                                     ...store.state[currentInningsKey].battingStats,
                                     [playerId]: {
-                                        ...(store.state[currentInningsKey].battingStats[playerId] || { playerId, runs: 0, ballsFaced: 0, fours: 0, sixes: 0, isOut: false }),
+                                        ...(store.state[currentInningsKey].battingStats[playerId] || { 
+                                            playerId, 
+                                            runs: 0, 
+                                            ballsFaced: 0, 
+                                            fours: 0, 
+                                            sixes: 0, 
+                                            isOut: false, 
+                                            isRetired: false,
+                                            battingOrder: Object.keys(store.state[currentInningsKey].battingStats).length + 1 
+                                        }),
                                         isRetired: false,
                                         dismissal: undefined
                                     }
@@ -248,7 +257,16 @@ export const useMatchStore = create<MatchStore>()(
                                 battingStats: {
                                     ...store.state[currentInningsKey].battingStats,
                                     [playerId]: {
-                                        ...(store.state[currentInningsKey].battingStats[playerId] || { playerId, runs: 0, ballsFaced: 0, fours: 0, sixes: 0, isOut: false }),
+                                        ...(store.state[currentInningsKey].battingStats[playerId] || { 
+                                            playerId, 
+                                            runs: 0, 
+                                            ballsFaced: 0, 
+                                            fours: 0, 
+                                            sixes: 0, 
+                                            isOut: false, 
+                                            isRetired: false,
+                                            battingOrder: Object.keys(store.state[currentInningsKey].battingStats).length + 1 
+                                        }),
                                         isRetired: false,
                                         dismissal: undefined
                                     }
@@ -363,7 +381,16 @@ export const useMatchStore = create<MatchStore>()(
                     const innings = store.state[currentInningsKey];
 
                     // Mark player as retired hurt
-                    const currentStats = { ...(innings.battingStats[playerId] || { playerId, runs: 0, ballsFaced: 0, fours: 0, sixes: 0, isOut: false }) };
+                    const currentStats = { ...(innings.battingStats[playerId] || { 
+                        playerId, 
+                        runs: 0, 
+                        ballsFaced: 0, 
+                        fours: 0, 
+                        sixes: 0, 
+                        isOut: false, 
+                        isRetired: false,
+                        battingOrder: Object.keys(innings.battingStats).length + 1
+                    }) };
                     currentStats.isRetired = true;
                     currentStats.isOut = false;
                     currentStats.dismissal = 'retired-hurt';

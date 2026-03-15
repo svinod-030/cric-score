@@ -123,7 +123,40 @@ describe('useMatchStore', () => {
 
         state = useMatchStore.getState();
         expect(state.state.innings1.totalRuns).toBe(0);
-        expect(state.state.innings1.totalRuns).toBe(0);
-        // expect(state.state.innings1.battingStats['A1'].runs).toBe(0); // Stats might be reset to empty
+    });
+
+    test('assigns batting order correctly', () => {
+        act(() => {
+            useMatchStore.getState().setConfig({
+                teamA: 'Team A',
+                teamB: 'Team B',
+                overs: 5,
+                playersPerTeam: 11,
+                tossWinner: 'teamA',
+                tossDecision: 'bat'
+            });
+            useMatchStore.getState().startMatch();
+
+            // Set A2 as striker first, then A4
+            useMatchStore.getState().setStriker('A2');
+            useMatchStore.getState().setNonStriker('A4');
+        });
+
+        let state = useMatchStore.getState();
+        expect(state.state.innings1.battingStats['A2'].battingOrder).toBe(1);
+        expect(state.state.innings1.battingStats['A4'].battingOrder).toBe(2);
+
+        // Record a wicket for A2
+        act(() => {
+            useMatchStore.getState().recordBall(0, 'none', true, 'bowled');
+        });
+
+        // Set A3 as new striker
+        act(() => {
+            useMatchStore.getState().setStriker('A3');
+        });
+
+        state = useMatchStore.getState();
+        expect(state.state.innings1.battingStats['A3'].battingOrder).toBe(3);
     });
 });

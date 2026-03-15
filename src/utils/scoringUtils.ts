@@ -1,4 +1,4 @@
-import { MatchConfig, MatchState, InningsState, ExtraType, MatchResult, WicketType } from '../types/match';
+import { MatchConfig, MatchState, InningsState, ExtraType, MatchResult, WicketType, BattingStats } from '../types/match';
 
 export const calculateMatchResult = (
     state: MatchState,
@@ -33,14 +33,19 @@ export const calculateMatchResult = (
 };
 
 // Helper to init player stats if missing
-const getBattingStats = (state: MatchState, inning: InningsState, playerId: string) => {
-    return inning.battingStats[playerId] || {
+const getBattingStats = (state: MatchState, inning: InningsState, playerId: string): BattingStats => {
+    if (inning.battingStats[playerId]) return inning.battingStats[playerId];
+
+    const currentBatters = Object.keys(inning.battingStats).length;
+    return {
         playerId,
         runs: 0,
         ballsFaced: 0,
         fours: 0,
         sixes: 0,
         isOut: false,
+        isRetired: false,
+        battingOrder: currentBatters + 1,
     };
 };
 

@@ -30,6 +30,7 @@ export type BattingStats = {
     sixes: number;
     isOut: boolean;
     isRetired: boolean;
+    battingOrder: number;
     dismissal?: string;
     fielderId?: string;
     bowlerId?: string;
