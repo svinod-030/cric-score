@@ -74,7 +74,7 @@ export default function SettingsScreen() {
             return;
         }
         if (action === "Contact Us") {
-            Linking.openURL(`mailto:${APP_CONFIG.SUPPORT_EMAIL}?subject=CricScore Support`);
+            Linking.openURL(`mailto:${APP_CONFIG.SUPPORT_EMAIL}?subject=CricScore Support ${APP_CONFIG.APP_VERSION}`);
             return;
         }
         if (action === "Backup") {
