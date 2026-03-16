@@ -8,25 +8,20 @@ describe('OverHistory', () => {
         {
             runs: 1,
             isWicket: false,
-            timestamp: 123,
-            isExtra: false,
+            wicketType: 'none',
             extraType: 'none',
-            isByeForNoBall: false,
             isValidBall: true,
-            overNumber: 1,
-            ballNumber: 1
+            batsmanId: 'p1',
+            bowlerId: 'b1',
         },
         {
             runs: 0,
             isWicket: true,
-            timestamp: 124,
-            isExtra: false,
-            extraType: 'none',
-            isByeForNoBall: false,
-            isValidBall: true,
             wicketType: 'bowled',
-            overNumber: 1,
-            ballNumber: 2
+            extraType: 'none',
+            isValidBall: true,
+            batsmanId: 'p2',
+            bowlerId: 'b1',
         }
     ];
 
@@ -66,13 +61,11 @@ describe('OverHistory', () => {
             {
                 runs: 1,
                 isWicket: false,
-                timestamp: 125,
-                isExtra: true,
+                wicketType: 'none',
                 extraType: 'wide',
-                isByeForNoBall: false,
                 isValidBall: false,
-                overNumber: 2,
-                ballNumber: 1
+                batsmanId: 'p1',
+                bowlerId: 'b1',
             }
         ];
 

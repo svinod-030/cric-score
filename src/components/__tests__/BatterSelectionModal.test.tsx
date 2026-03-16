@@ -20,7 +20,7 @@ describe.skip('BatterSelectionModal', () => {
     ];
 
     const mockOnSelect = jest.fn();
-    const mockOnClose = jest.fn();
+    const mockBattingStats = {};
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -33,6 +33,7 @@ describe.skip('BatterSelectionModal', () => {
                 players={mockPlayers}
                 onSelect={mockOnSelect}
                 title="Select Batsman"
+                battingStats={mockBattingStats}
             />
         );
 
@@ -46,6 +47,7 @@ describe.skip('BatterSelectionModal', () => {
                 players={mockPlayers}
                 onSelect={mockOnSelect}
                 title="Select Batsman"
+                battingStats={mockBattingStats}
             />
         );
 
@@ -61,6 +63,7 @@ describe.skip('BatterSelectionModal', () => {
                 players={mockPlayers}
                 onSelect={mockOnSelect}
                 title="Select Batsman"
+                battingStats={mockBattingStats}
             />
         );
 
@@ -76,6 +79,7 @@ describe.skip('BatterSelectionModal', () => {
                 players={mockPlayers}
                 onSelect={mockOnSelect}
                 title="Select Batsman"
+                battingStats={mockBattingStats}
             />
         );
 

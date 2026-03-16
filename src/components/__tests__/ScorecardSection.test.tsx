@@ -14,21 +14,24 @@ describe('ScorecardSection', () => {
     ];
 
     const mockInnings: InningsState = {
-        battingTeamId: 'team1',
-        bowlingTeamId: 'team2',
+        battingTeam: 'team1',
+        battingTeamKey: 'teamA',
         totalRuns: 120,
         totalWickets: 3,
         overs: [],
         currentOver: [],
+        strikerId: 'p1',
+        nonStrikerId: 'p2',
+        currentBowlerId: 'b1',
         battingStats: {
-            'p1': { runs: 50, ballsFaced: 30, fours: 4, sixes: 2, isOut: false, playerId: 'p1' },
-            'p2': { runs: 10, ballsFaced: 10, fours: 1, sixes: 0, isOut: true, dismissal: 'bowled', bowlerId: 'b1', playerId: 'p2' }
+            'p1': { runs: 50, ballsFaced: 30, fours: 4, sixes: 2, isOut: false, isRetired: false, battingOrder: 1, playerId: 'p1' },
+            'p2': { runs: 10, ballsFaced: 10, fours: 1, sixes: 0, isOut: true, isRetired: false, battingOrder: 2, dismissal: 'bowled', bowlerId: 'b1', playerId: 'p2' }
         },
         bowlingStats: {
             'b1': { runsConceded: 20, wickets: 1, overs: 4, balls: 0, maidens: 0, playerId: 'b1' }
         },
-        fow: [],
-        isCompleted: false
+        fallOfWickets: [],
+        isLastManStanding: false,
     };
 
     test('renders correctly with title and total score', () => {

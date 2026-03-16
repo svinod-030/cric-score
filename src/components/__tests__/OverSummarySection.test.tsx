@@ -7,13 +7,11 @@ describe('OverSummarySection', () => {
     const mockBall: Ball = {
         runs: 1,
         isWicket: false,
-        timestamp: 123,
-        isExtra: false,
+        wicketType: 'none',
         extraType: 'none',
-        isByeForNoBall: false,
         isValidBall: true,
-        overNumber: 1,
-        ballNumber: 1
+        batsmanId: 'p1',
+        bowlerId: 'b1',
     };
 
     const mockWicketBall: Ball = {
@@ -24,18 +22,21 @@ describe('OverSummarySection', () => {
     };
 
     const mockInnings: InningsState = {
-        battingTeamId: 'team1',
-        bowlingTeamId: 'team2',
+        battingTeam: 'team1',
+        battingTeamKey: 'teamA',
         totalRuns: 10,
         totalWickets: 1,
         overs: [
             { balls: [mockBall, mockBall, mockBall, mockBall, mockBall, mockBall], bowlerId: 'b1' } // 6 runs
         ],
         currentOver: [mockWicketBall], // 0 runs, 1 wicket
+        strikerId: 'p1',
+        nonStrikerId: 'p2',
+        currentBowlerId: 'b1',
         battingStats: {},
         bowlingStats: {},
-        fow: [],
-        isCompleted: false
+        fallOfWickets: [],
+        isLastManStanding: false,
     };
 
     test('renders correctly with title', () => {
