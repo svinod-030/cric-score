@@ -11,13 +11,25 @@ const version = packageJson.version;
 
 console.log(`Syncing version to ${version}...`);
 
+let currentVersionCode = 1;
+
 // Update app.json
 if (fs.existsSync(appJsonPath)) {
     const appJson = JSON.parse(fs.readFileSync(appJsonPath, 'utf8'));
 
     appJson.expo.version = version;
+    
+    // Increment Android versionCode
+    if (appJson.expo.android && typeof appJson.expo.android.versionCode === 'number') {
+        appJson.expo.android.versionCode += 1;
+        currentVersionCode = appJson.expo.android.versionCode;
+    } else {
+        if (!appJson.expo.android) appJson.expo.android = {};
+        appJson.expo.android.versionCode = currentVersionCode;
+    }
+
     fs.writeFileSync(appJsonPath, JSON.stringify(appJson, null, 2) + '\n');
-    console.log(`Updated app.json: version=${version}`);
+    console.log(`Updated app.json: version=${version}, versionCode=${currentVersionCode}`);
 }
 
 // Update src/utils/constants.ts
@@ -41,8 +53,14 @@ if (fs.existsSync(buildGradlePath)) {
         `versionName "${version}"`
     );
 
+    // Sync versionCode
+    gradleContent = gradleContent.replace(
+        /versionCode\s+\d+/,
+        `versionCode ${currentVersionCode}`
+    );
+
     fs.writeFileSync(buildGradlePath, gradleContent);
-    console.log(`Updated android/app/build.gradle: versionName=${version}`);
+    console.log(`Updated android/app/build.gradle: versionName=${version}, versionCode=${currentVersionCode}`);
 }
 
 console.log('Advanced version sync complete!');
