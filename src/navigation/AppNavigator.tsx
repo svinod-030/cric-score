@@ -4,6 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MatchSetupScreen from '../screens/MatchSetupScreen';
 import ScoreboardScreen from '../screens/ScoreboardScreen';
 import MatchResultScreen from '../screens/MatchResultScreen';
+import JoinLiveMatchScreen from '../screens/JoinLiveMatchScreen';
+import LiveViewerScreen from '../screens/LiveViewerScreen';
 
 import { Image, Text, View, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -77,6 +79,8 @@ function HomeTabs() {
 
                         if (route.name === 'Start Match') {
                             iconName = focused ? 'play-circle' : 'play-circle-outline';
+                        } else if (route.name === 'Live') {
+                            iconName = focused ? 'radio' : 'radio-outline';
                         } else if (route.name === 'Matches') {
                             iconName = focused ? 'time' : 'time-outline';
                         } else if (route.name === 'Settings') {
@@ -88,6 +92,7 @@ function HomeTabs() {
                 })}
             >
                 <Tab.Screen name="Start Match" component={MatchSetupScreen} />
+                <Tab.Screen name="Live" component={JoinLiveMatchScreen} />
                 <Tab.Screen name="Matches" component={MatchesHistoryScreen} />
                 <Tab.Screen name="Settings" component={SettingsScreen} />
             </Tab.Navigator>
@@ -128,6 +133,7 @@ export default function AppNavigator() {
                 />
                 <Stack.Screen name="Scoreboard" component={ScoreboardScreen} options={{ title: 'Score board' }} />
                 <Stack.Screen name="MatchResult" component={MatchResultScreen} options={{ title: 'Result' }} />
+                <Stack.Screen name="LiveViewer" component={LiveViewerScreen} options={{ title: 'Live Match' }} />
                 <Stack.Screen name="Licenses" component={LicensesScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
             </Stack.Navigator>

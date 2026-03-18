@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Modal, Switch, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Modal, Switch, TextInput, Share, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
 import { useAuthStore } from '../store/useAuthStore';
@@ -77,7 +77,7 @@ const EditablePlayerName = ({
 
 export default function ScoreboardScreen({ navigation }: any) {
     const { t } = useTranslation();
-    const { state, config, recordBall, endInnings, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings, renamePlayer } = useMatchStore();
+    const { state, config, recordBall, endInnings, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings, renamePlayer, startLiveShare } = useMatchStore();
     const innings = state.currentInnings === 1 ? state.innings1 : state.innings2;
     const currentOverValidBalls = innings.currentOver.filter(b => b.isValidBall).length;
 
@@ -105,6 +105,39 @@ export default function ScoreboardScreen({ navigation }: any) {
 
     // Pending Wicket State
     const [pendingWicket, setPendingWicket] = useState<{ type: WicketType; fielderId?: string; runs?: number }>({ type: 'none' });
+    const [isSharingLive, setIsSharingLive] = useState(false);
+
+    useEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <TouchableOpacity 
+                    onPress={async () => {
+                        try {
+                            setIsSharingLive(true);
+                            const matchId = await startLiveShare();
+                            await Share.share({
+                                message: `Follow our live cricket match! Join with Match ID: ${matchId}`,
+                            });
+                        } catch(e) {
+                            Alert.alert('Error', 'Failed to start live share');
+                        } finally {
+                            setIsSharingLive(false);
+                        }
+                    }}
+                    className="flex-row items-center bg-blue-600/20 px-3 py-1.5 rounded-full border border-blue-500/50 mr-2"
+                >
+                    {isSharingLive ? (
+                        <ActivityIndicator color="#3b82f6" size="small" />
+                    ) : (
+                        <>
+                            <Ionicons name="radio-outline" size={16} color="#3b82f6" />
+                            <Text className="text-blue-500 font-bold ml-1 text-xs">{state.liveMatchId ? 'Share ID' : 'Go Live'}</Text>
+                        </>
+                    )}
+                </TouchableOpacity>
+            )
+        });
+    }, [navigation, startLiveShare, state.liveMatchId, isSharingLive]);
 
     useEffect(() => {
         const handleMatchEnd = async () => {

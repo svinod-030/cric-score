@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MatchConfig, MatchState, InningsState, ExtraType, WicketType, Player } from '../types/match';
 import { processBall } from '../utils/scoringUtils';
+import { matchSyncService } from '../services/matchSyncService';
 
 interface MatchStore {
     config: MatchConfig;
@@ -26,6 +27,8 @@ interface MatchStore {
     loadTeamRoster: (teamKey: 'teamA' | 'teamB', teamName: string) => void;
     saveTeamRoster: (teamName: string, playerNames: string[]) => void;
     toggleLastManStanding: () => void;
+    startLiveShare: () => Promise<string>;
+    stopLiveShare: () => void;
 }
 
 const INITIAL_CONFIG: MatchConfig = {
@@ -589,6 +592,32 @@ export const useMatchStore = create<MatchStore>()(
                     };
                 });
             },
+            startLiveShare: async () => {
+                const { state } = get();
+                if (state.liveMatchId) return state.liveMatchId;
+                
+                try {
+                    const matchId = await matchSyncService.createLiveMatch(state);
+                    set((store) => ({
+                        state: {
+                            ...store.state,
+                            liveMatchId: matchId
+                        }
+                    }));
+                    return matchId;
+                } catch (error) {
+                    console.error("Failed to start live share", error);
+                    throw error;
+                }
+            },
+            stopLiveShare: () => {
+                set((store) => ({
+                    state: {
+                        ...store.state,
+                        liveMatchId: undefined
+                    }
+                }));
+            },
         }),
         {
             name: 'match-storage',
@@ -605,3 +634,20 @@ export const useMatchStore = create<MatchStore>()(
         }
     )
 );
+
+// Subscribe to state changes and sync to Firestore if sharing is active
+let lastSyncedStateStr = '';
+useMatchStore.subscribe((state, prevState) => {
+    const liveMatchId = state.state.liveMatchId;
+    if (liveMatchId && state.state !== prevState.state) {
+        // Prevent infinite loops and unnecessary syncs by doing a simple equality check (excluding liveMatchId)
+        const currentStateStr = JSON.stringify({ ...state.state, liveMatchId: undefined });
+        if (currentStateStr !== lastSyncedStateStr) {
+            lastSyncedStateStr = currentStateStr;
+            // Background sync
+            matchSyncService.updateLiveMatch(liveMatchId, state.state).catch(err => {
+                console.error("Background sync failed:", err);
+            });
+        }
+    }
+});

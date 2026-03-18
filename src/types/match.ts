@@ -106,4 +106,5 @@ export interface MatchState extends MatchConfig {
     innings2: InningsState;
     isInningsBreak: boolean;
     completedAt?: string; // ISO string format
+    liveMatchId?: string; // ID of the Match document in Firestore
 }

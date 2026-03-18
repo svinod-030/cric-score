@@ -37,6 +37,7 @@ describe('ScoreboardScreen', () => {
     const mockRetirePlayer = jest.fn();
     const mockStartSecondInnings = jest.fn();
     const mockRenamePlayer = jest.fn();
+    const mockNavigation = { setOptions: jest.fn() };
 
     const mockState = {
         state: {
@@ -86,7 +87,7 @@ describe('ScoreboardScreen', () => {
     });
 
     test('renders correctly', () => {
-        const { getByText } = render(<ScoreboardScreen />);
+        const { getByText } = render(<ScoreboardScreen navigation={mockNavigation} />);
         expect(getByText('Team A Batting')).toBeTruthy();
         expect(getByText('100/2')).toBeTruthy();
         expect(getByText('Player 1*')).toBeTruthy(); // Striker
@@ -95,19 +96,19 @@ describe('ScoreboardScreen', () => {
     });
 
     test('handles standard runs scoring', () => {
-        const { getByText } = render(<ScoreboardScreen />);
+        const { getByText } = render(<ScoreboardScreen navigation={mockNavigation} />);
         fireEvent.press(getByText('1'));
         expect(mockRecordBall).toHaveBeenCalledWith(1, 'none', false);
     });
 
     test('handles boundaries', () => {
-        const { getByText } = render(<ScoreboardScreen />);
+        const { getByText } = render(<ScoreboardScreen navigation={mockNavigation} />);
         fireEvent.press(getByText('4'));
         expect(mockRecordBall).toHaveBeenCalledWith(4, 'none', false);
     });
 
     test('displays extras controls', () => {
-        const { getByText } = render(<ScoreboardScreen />);
+        const { getByText } = render(<ScoreboardScreen navigation={mockNavigation} />);
         expect(getByText('Wide')).toBeTruthy();
         expect(getByText('No Ball')).toBeTruthy();
         expect(getByText('Bye')).toBeTruthy();
@@ -115,7 +116,7 @@ describe('ScoreboardScreen', () => {
     });
 
     test('calls end innings confirmation', () => {
-        const { getByText } = render(<ScoreboardScreen />);
+        const { getByText } = render(<ScoreboardScreen navigation={mockNavigation} />);
         fireEvent.press(getByText('END'));
         // Alert is mocked in setup, but we're not checking the specific Alert call here in this unit test structure easily without spying on Alert.alert.
         // Assuming the button is pressable.
@@ -131,7 +132,7 @@ describe('ScoreboardScreen', () => {
         };
         (useMatchStore as unknown as jest.Mock).mockReturnValue(breakState);
 
-        const { getByText, queryByText } = render(<ScoreboardScreen />);
+        const { getByText, queryByText } = render(<ScoreboardScreen navigation={mockNavigation} />);
 
         // Should show break UI
         expect(getByText('Innings Over!')).toBeTruthy();
