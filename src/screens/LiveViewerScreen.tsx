@@ -74,10 +74,34 @@ export default function LiveViewerScreen({ route, navigation }: any) {
         <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
             <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 16 }}>
                 <View className="mb-6 items-center">
-                    <View className="flex-row items-center justify-center bg-red-600 px-3 py-1 rounded-full mb-4">
-                        <View className="w-2 h-2 rounded-full bg-white mr-2 animate-pulse" />
-                        <Text className="text-white text-xs font-bold tracking-widest uppercase">{t('common.liveBadge')}</Text>
-                    </View>
+                    {match.matchResult ? (
+                        <View className="items-center w-full mb-4">
+                            <View className="flex-row items-center justify-center bg-gray-700 px-3 py-1 rounded-full mb-4">
+                                <Text className="text-gray-300 text-xs font-bold tracking-widest uppercase">{t('common.completed')}</Text>
+                            </View>
+                            <View className="bg-yellow-600/20 border border-yellow-600/50 p-4 rounded-2xl w-full items-center">
+                                <Text className="text-yellow-500 font-black text-xl text-center">
+                                    {match.matchResult.winner === 'Draw' 
+                                        ? t('common.matchDrawn') 
+                                        : `${match.matchResult.winner} ${t('common.winsExclamation')}`}
+                                </Text>
+                                <Text className="text-gray-300 font-medium mt-1 text-center">
+                                    {match.matchResult.resultType === 'runs'
+                                        ? t('common.wonByRuns', { count: match.matchResult.margin })
+                                        : match.matchResult.resultType === 'wickets'
+                                            ? t('common.wonByWickets', { count: match.matchResult.margin })
+                                            : match.matchResult.resultType === 'tied'
+                                                ? t('common.scoresTied')
+                                                : match.matchResult.reason}
+                                </Text>
+                            </View>
+                        </View>
+                    ) : (
+                        <View className="flex-row items-center justify-center bg-red-600 px-3 py-1 rounded-full mb-4">
+                            <View className="w-2 h-2 rounded-full bg-white mr-2" />
+                            <Text className="text-white text-xs font-bold tracking-widest uppercase">{t('common.liveBadge')}</Text>
+                        </View>
+                    )}
                     <Text className="text-gray-400 font-medium mb-1">{innings.battingTeam} {t('common.batting')}</Text>
                     <Text className="text-6xl font-black text-white">
                         {innings.totalRuns}/{innings.totalWickets}
