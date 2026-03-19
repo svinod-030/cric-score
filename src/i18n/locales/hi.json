@@ -207,7 +207,7 @@
         "maybeLater": "बाद में",
         "goLive": "लाइव जाएं",
         "shareId": "आईडी साझा करें",
-        "followLiveMatch": "हमारे लाइव क्रिकेट मैच का आनंद लें! मैच आईडी के साथ जुड़ें: {{matchId}}",
+        "followLiveMatch": "हमारे लाइव क्रिकेट मैच का आनंद लें! \n\nप्ले स्टोर से क्रिक स्कोर डाउनलोड करें: \nhttps://play.google.com/store/apps/details?id=com.vinodsigadana.cricscore\n\nइंस्टॉल करने के बाद, मैच आईडी के साथ जुड़ें: {{matchId}}",
         "failedToStartLiveShare": "लाइव शेयर शुरू करने में विफल",
         "watchLive": "लाइव देखें",
         "enterMatchIdDescription": "वास्तविक समय में स्कोर देखने के लिए मैच आईडी दर्ज करें।",

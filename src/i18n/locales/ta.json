@@ -207,7 +207,7 @@
         "maybeLater": "பிறகு",
         "goLive": "நேரலையில் செல்க",
         "shareId": "ஐடியைப் பகிரவும்",
-        "followLiveMatch": "எங்கள் நேரடி கிரிக்கெட் போட்டியைப் பின்தொடரவும்! போட்டி ஐடியுடன் சேரவும்: {{matchId}}",
+        "followLiveMatch": "எங்கள் நேரடி கிரிக்கெட் போட்டியைப் பின்தொடரவும்! \n\nபிளே ஸ்டோரில் இருந்து கிரிக் ஸ்கோரைப் பதிவிறக்கவும்: \nhttps://play.google.com/store/apps/details?id=com.vinodsigadana.cricscore\n\nநிறுவிய பின், போட்டி ஐடியுடன் சேరவும்: {{matchId}}",
         "failedToStartLiveShare": "நேரலை பகிர்வைத் தொடங்குவதில் தோல்வி",
         "watchLive": "நேரலை காண்க",
         "enterMatchIdDescription": "நிகழ்நேரத்தில் ஸ்கோரைப் பின்தொடர போட்டி ஐடியை உள்ளிடவும்.",

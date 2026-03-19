@@ -207,7 +207,7 @@
         "maybeLater": "ನಂತರ",
         "goLive": "ಲೈವ್ ಹೋಗಿ",
         "shareId": "ID ಹಂಚಿಕೊಳ್ಳಿ",
-        "followLiveMatch": "ನಮ್ಮ ಲೈವ್ ಕ್ರಿಕೆಟ್ ಪಂದ್ಯವನ್ನು ಅನುಸರಿಸಿ! ಪಂದ್ಯದ ಐಡಿಯೊಂದಿಗೆ ಸೇರಿ: {{matchId}}",
+        "followLiveMatch": "ನಮ್ಮ ಲೈವ್ ಕ್ರಿಕೆಟ್ ಪಂದ್ಯವನ್ನು ಅನುಸರಿಸಿ! \n\nಪ್ಲೇ ಸ್ಟೋರ್‌ನಿಂದ ಕ್ರಿಕ್ ಸ್ಕೋರ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ: \nhttps://play.google.com/store/apps/details?id=com.vinodsigadana.cricscore\n\nಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದ ನಂತರ, ಪಂದ್ಯದ ಐಡಿಯೊಂದಿಗೆ ಸೇರಿ: {{matchId}}",
         "failedToStartLiveShare": "ಲೈವ್ ಶೇರ್ ಪ್ರಾರಂಭಿಸಲು ವಿಫಲವಾಗಿದೆ",
         "watchLive": "ನೇರಪ್ರಸಾರ ವೀಕ್ಷಿಸಿ",
         "enterMatchIdDescription": "ನೈಜ ಸಮಯದಲ್ಲಿ ಸ್ಕೋರ್ ಅನುಸರಿಸಲು ಪಂದ್ಯದ ಐಡಿ ನಮೂದಿಸಿ.",

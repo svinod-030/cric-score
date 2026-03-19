@@ -207,7 +207,7 @@
         "maybeLater": "తర్వాత",
         "goLive": "ప్రత్యక్ష ప్రసారం ప్రారంభించండి",
         "shareId": "IDని షేర్ చేయండి",
-        "followLiveMatch": "మా లైవ్ క్రికెట్ మ్యాచ్‌ను అనుసరించండి! మ్యాచ్ ఐడిలతో చేరండి: {{matchId}}",
+        "followLiveMatch": "మా లైవ్ క్రికెట్ మ్యాచ్‌ను అనుసరించండి! \n\nప్లే స్టోర్ నుండి క్రిక్ స్కోర్‌ను డౌన్‌లోడ్ చేయండి: \nhttps://play.google.com/store/apps/details?id=com.vinodsigadana.cricscore\n\nఇన్‌స్టాల్ చేసిన తర్వాత, మ్యాచ్ ఐడిలతో యాప్‌లో చేరండి: {{matchId}}",
         "failedToStartLiveShare": "లైవ్ షేర్ ప్రారంభించడంలో విఫలమైంది",
         "watchLive": "ప్రత్యక్ష ప్రసారం చూడండి",
         "enterMatchIdDescription": "నిజ సమయంలో స్కోర్‌ను అనుసరించడానికి మ్యాచ్ ఐడిని నమోదు చేయండి.",
