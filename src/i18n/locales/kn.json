@@ -204,6 +204,25 @@
         "updateAvailable": "ಅಪ್‌ಡೇಟ್ ಲಭ್ಯವಿದೆ!",
         "newVersionMsg": "ಕ್ರಿಕ್ ಸ್ಕೋರ್‌ನ ಹೊಸ ಆವೃತ್ತಿ ({{version}}) ಲಭ್ಯವಿದೆ.",
         "updateNow": "ಈಗ ಅಪ್‌ಡೇಟ್ ಮಾಡಿ",
-        "maybeLater": "ನಂತರ"
+        "maybeLater": "ನಂತರ",
+        "goLive": "ಲೈವ್ ಹೋಗಿ",
+        "shareId": "ID ಹಂಚಿಕೊಳ್ಳಿ",
+        "followLiveMatch": "ನಮ್ಮ ಲೈವ್ ಕ್ರಿಕೆಟ್ ಪಂದ್ಯವನ್ನು ಅನುಸರಿಸಿ! ಪಂದ್ಯದ ಐಡಿಯೊಂದಿಗೆ ಸೇರಿ: {{matchId}}",
+        "failedToStartLiveShare": "ಲೈವ್ ಶೇರ್ ಪ್ರಾರಂಭಿಸಲು ವಿಫಲವಾಗಿದೆ",
+        "watchLive": "ನೇರಪ್ರಸಾರ ವೀಕ್ಷಿಸಿ",
+        "enterMatchIdDescription": "ನೈಜ ಸಮಯದಲ್ಲಿ ಸ್ಕೋರ್ ಅನುಸರಿಸಲು ಪಂದ್ಯದ ಐಡಿ ನಮೂದಿಸಿ.",
+        "matchIdLabel": "ಪಂದ್ಯದ ಐಡಿ",
+        "enterIdPlaceholder": "ID ನಮೂದಿಸಿ",
+        "joinMatch": "ಪಂದ್ಯವನ್ನು ಸೇರಿಕೊಳ್ಳಿ",
+        "matchNotFound": "ಪಂದ್ಯ ಕಂಡುಬಂದಿಲ್ಲ. ದಯವಿಟ್ಟು ಪಂದ್ಯದ ಐಡಿ ಪರಿಶೀಲಿಸಿ.",
+        "failedToConnect": "ಸಂಪರ್ಕಿಸಲು ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+        "liveTitle": "ಲೈವ್: {{matchId}}",
+        "lostConnection": "ಸಂಪರ್ಕ ಕಡಿತಗೊಂಡಿದೆ ಅಥವಾ ಪಂದ್ಯ ಮುಗಿದಿದೆ.",
+        "connectingToLiveMatch": "ನೇರ ಪಂದ್ಯಕ್ಕೆ ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ...",
+        "liveBadge": "ಲೈವ್",
+        "liveTab": "ಲೈವ್",
+        "liveMatch": "ಲೈವ್ ಪಂದ್ಯ",
+        "scoreBoard": "ಸ್ಕೋರ್ ಬೋರ್ಡ್",
+        "profile": "ಪ್ರೊಫೈಲ್"
     }
 }

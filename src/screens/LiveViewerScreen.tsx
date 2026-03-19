@@ -16,7 +16,7 @@ export default function LiveViewerScreen({ route, navigation }: any) {
 
     useEffect(() => {
         navigation.setOptions({
-            title: `Live: ${matchId}`
+            title: t('common.liveTitle', { matchId })
         });
 
         const unsubscribe = matchSyncService.subscribeToMatch(
@@ -25,7 +25,7 @@ export default function LiveViewerScreen({ route, navigation }: any) {
                 setMatch(updatedMatch);
             },
             (err) => {
-                setError('Lost connection or match ended.');
+                setError(t('common.lostConnection'));
             }
         );
 
@@ -45,7 +45,7 @@ export default function LiveViewerScreen({ route, navigation }: any) {
         return (
             <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center">
                 <ActivityIndicator size="large" color="#3b82f6" />
-                <Text className="text-gray-400 mt-4">Connecting to live match...</Text>
+                <Text className="text-gray-400 mt-4">{t('common.connectingToLiveMatch')}</Text>
             </SafeAreaView>
         );
     }
@@ -76,7 +76,7 @@ export default function LiveViewerScreen({ route, navigation }: any) {
                 <View className="mb-6 items-center">
                     <View className="flex-row items-center justify-center bg-red-600 px-3 py-1 rounded-full mb-4">
                         <View className="w-2 h-2 rounded-full bg-white mr-2 animate-pulse" />
-                        <Text className="text-white text-xs font-bold tracking-widest uppercase">Live</Text>
+                        <Text className="text-white text-xs font-bold tracking-widest uppercase">{t('common.liveBadge')}</Text>
                     </View>
                     <Text className="text-gray-400 font-medium mb-1">{innings.battingTeam} {t('common.batting')}</Text>
                     <Text className="text-6xl font-black text-white">

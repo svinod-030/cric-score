@@ -204,6 +204,25 @@
         "updateAvailable": "अपडेट उपलब्ध है!",
         "newVersionMsg": "क्रिक स्कोर का एक नया संस्करण ({{version}}) उपलब्ध है।",
         "updateNow": "अभी अपडेट करें",
-        "maybeLater": "बाद में"
+        "maybeLater": "बाद में",
+        "goLive": "लाइव जाएं",
+        "shareId": "आईडी साझा करें",
+        "followLiveMatch": "हमारे लाइव क्रिकेट मैच का आनंद लें! मैच आईडी के साथ जुड़ें: {{matchId}}",
+        "failedToStartLiveShare": "लाइव शेयर शुरू करने में विफल",
+        "watchLive": "लाइव देखें",
+        "enterMatchIdDescription": "वास्तविक समय में स्कोर देखने के लिए मैच आईडी दर्ज करें।",
+        "matchIdLabel": "मैच आईडी",
+        "enterIdPlaceholder": "आईडी दर्ज करें",
+        "joinMatch": "मैच से जुड़ें",
+        "matchNotFound": "मैचानहीं मिला। कृपया मैच आईडी जांचें।",
+        "failedToConnect": "कनेक्ट करने में विफल। कृपया पुन: प्रयास करें।",
+        "liveTitle": "लाइव: {{matchId}}",
+        "lostConnection": "कनेक्शन खो गया या मैच समाप्त हो गया।",
+        "connectingToLiveMatch": "लाइव मैच से जुड़ रहा है...",
+        "liveBadge": "लाइव",
+        "liveTab": "लाइव",
+        "liveMatch": "लाइव मैच",
+        "scoreBoard": "स्कोर बोर्ड",
+        "profile": "प्रोफ़ाइल"
     }
 }

@@ -20,10 +20,10 @@ export default function JoinLiveMatchScreen({ navigation }: any) {
             if (match) {
                 navigation.navigate('LiveViewer', { matchId: matchId.trim().toUpperCase() });
             } else {
-                Alert.alert('Error', 'Match not found. Please check the Match ID.');
+                Alert.alert(t('common.error'), t('common.matchNotFound'));
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to connect. Please try again.');
+            Alert.alert(t('common.error'), t('common.failedToConnect'));
         } finally {
             setIsLoading(false);
         }
@@ -36,17 +36,17 @@ export default function JoinLiveMatchScreen({ navigation }: any) {
                     <View className="w-24 h-24 bg-blue-600/20 rounded-full items-center justify-center mb-6">
                         <Ionicons name="radio" size={48} color="#3b82f6" />
                     </View>
-                    <Text className="text-3xl font-black text-white text-center mb-2">Watch Live</Text>
+                    <Text className="text-3xl font-black text-white text-center mb-2">{t('common.watchLive')}</Text>
                     <Text className="text-gray-400 text-center px-4">
-                        Enter a Match ID to follow the score in real-time.
+                        {t('common.enterMatchIdDescription')}
                     </Text>
                 </View>
 
                 <View className="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-xl">
-                    <Text className="text-gray-300 font-bold mb-3 uppercase tracking-wider text-xs">Match ID</Text>
+                    <Text className="text-gray-300 font-bold mb-3 uppercase tracking-wider text-xs">{t('common.matchIdLabel')}</Text>
                     <TextInput
                         className="bg-gray-900 text-white p-4 rounded-xl border border-gray-700 text-center text-2xl font-black tracking-widest mb-6 uppercase"
-                        placeholder="ENTER ID"
+                        placeholder={t('common.enterIdPlaceholder')}
                         placeholderTextColor="#4b5563"
                         value={matchId}
                         onChangeText={setMatchId}
@@ -64,7 +64,7 @@ export default function JoinLiveMatchScreen({ navigation }: any) {
                         ) : (
                             <>
                                 <Ionicons name="enter-outline" size={24} color={!matchId.trim() ? '#9ca3af' : '#fff'} />
-                                <Text className={`text-lg font-bold ml-2 ${!matchId.trim() ? 'text-gray-400' : 'text-white'}`}>Join Match</Text>
+                                <Text className={`text-lg font-bold ml-2 ${!matchId.trim() ? 'text-gray-400' : 'text-white'}`}>{t('common.joinMatch')}</Text>
                             </>
                         )}
                     </TouchableOpacity>

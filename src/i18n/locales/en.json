@@ -204,6 +204,25 @@
         "updateAvailable": "Update Available!",
         "newVersionMsg": "A new version ({{version}}) of Cric Score is available with new features and improvements.",
         "updateNow": "Update Now",
-        "maybeLater": "Maybe Later"
+        "maybeLater": "Maybe Later",
+        "goLive": "Go Live",
+        "shareId": "Share ID",
+        "followLiveMatch": "Follow our live cricket match! Join with Match ID: {{matchId}}",
+        "failedToStartLiveShare": "Failed to start live share",
+        "watchLive": "Watch Live",
+        "enterMatchIdDescription": "Enter a Match ID to follow the score in real-time.",
+        "matchIdLabel": "Match ID",
+        "enterIdPlaceholder": "ENTER ID",
+        "joinMatch": "Join Match",
+        "matchNotFound": "Match not found. Please check the Match ID.",
+        "failedToConnect": "Failed to connect. Please try again.",
+        "liveTitle": "Live: {{matchId}}",
+        "lostConnection": "Lost connection or match ended.",
+        "connectingToLiveMatch": "Connecting to live match...",
+        "liveBadge": "Live",
+        "liveTab": "Live",
+        "liveMatch": "Live Match",
+        "scoreBoard": "Score board",
+        "profile": "Profile"
     }
 }

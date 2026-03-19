@@ -116,10 +116,10 @@ export default function ScoreboardScreen({ navigation }: any) {
                             setIsSharingLive(true);
                             const matchId = await startLiveShare();
                             await Share.share({
-                                message: `Follow our live cricket match! Join with Match ID: ${matchId}`,
+                                message: t('common.followLiveMatch', { matchId }),
                             });
                         } catch(e) {
-                            Alert.alert('Error', 'Failed to start live share');
+                            Alert.alert(t('common.error'), t('common.failedToStartLiveShare'));
                         } finally {
                             setIsSharingLive(false);
                         }
@@ -131,7 +131,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                     ) : (
                         <>
                             <Ionicons name="radio-outline" size={16} color="#3b82f6" />
-                            <Text className="text-blue-500 font-bold ml-1 text-xs">{state.liveMatchId ? 'Share ID' : 'Go Live'}</Text>
+                            <Text className="text-blue-500 font-bold ml-1 text-xs">{state.liveMatchId ? t('common.shareId') : t('common.goLive')}</Text>
                         </>
                     )}
                 </TouchableOpacity>

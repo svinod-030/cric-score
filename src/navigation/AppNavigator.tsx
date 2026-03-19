@@ -21,6 +21,8 @@ import ProfileScreen from '../screens/ProfileScreen';
 
 import LanguageSelectionModal from '../components/LanguageSelectionModal';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { useTranslation } from 'react-i18next';
+
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -61,6 +63,7 @@ function LogoTitle() {
 }
 
 function HomeTabs() {
+    const { t } = useTranslation();
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#1F2937' }} edges={['left', 'right']}>
             <Tab.Navigator
@@ -77,13 +80,13 @@ function HomeTabs() {
                     tabBarIcon: ({ focused, color, size }) => {
                         let iconName: any;
 
-                        if (route.name === 'Start Match') {
+                        if (route.name === t('common.startMatch')) {
                             iconName = focused ? 'play-circle' : 'play-circle-outline';
-                        } else if (route.name === 'Live') {
+                        } else if (route.name === t('common.liveTab')) {
                             iconName = focused ? 'radio' : 'radio-outline';
-                        } else if (route.name === 'Matches') {
+                        } else if (route.name === t('common.matches')) {
                             iconName = focused ? 'time' : 'time-outline';
-                        } else if (route.name === 'Settings') {
+                        } else if (route.name === t('common.settings')) {
                             iconName = focused ? 'settings' : 'settings-outline';
                         }
 
@@ -91,16 +94,17 @@ function HomeTabs() {
                     },
                 })}
             >
-                <Tab.Screen name="Start Match" component={MatchSetupScreen} />
-                <Tab.Screen name="Live" component={JoinLiveMatchScreen} />
-                <Tab.Screen name="Matches" component={MatchesHistoryScreen} />
-                <Tab.Screen name="Settings" component={SettingsScreen} />
+                <Tab.Screen name={t('common.startMatch')} component={MatchSetupScreen} />
+                <Tab.Screen name={t('common.liveTab')} component={JoinLiveMatchScreen} />
+                <Tab.Screen name={t('common.matches')} component={MatchesHistoryScreen} />
+                <Tab.Screen name={t('common.settings')} component={SettingsScreen} />
             </Tab.Navigator>
         </SafeAreaView>
     );
 }
 
 export default function AppNavigator() {
+    const { t } = useTranslation();
     const { language } = useSettingsStore();
 
     React.useEffect(() => {
@@ -131,11 +135,11 @@ export default function AppNavigator() {
                     component={HomeTabs}
                     options={{ title: '' }}
                 />
-                <Stack.Screen name="Scoreboard" component={ScoreboardScreen} options={{ title: 'Score board' }} />
-                <Stack.Screen name="MatchResult" component={MatchResultScreen} options={{ title: 'Result' }} />
-                <Stack.Screen name="LiveViewer" component={LiveViewerScreen} options={{ title: 'Live Match' }} />
+                <Stack.Screen name="Scoreboard" component={ScoreboardScreen} options={{ title: t('common.scoreBoard') }} />
+                <Stack.Screen name="MatchResult" component={MatchResultScreen} options={{ title: t('common.matchResult') }} />
+                <Stack.Screen name="LiveViewer" component={LiveViewerScreen} options={{ title: t('common.liveMatch') || 'Live Match' }} />
                 <Stack.Screen name="Licenses" component={LicensesScreen} options={{ headerShown: false }} />
-                <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
+                <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: t('common.profile') }} />
             </Stack.Navigator>
         </NavigationContainer>
     );
