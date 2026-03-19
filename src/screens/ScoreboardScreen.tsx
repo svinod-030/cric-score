@@ -107,37 +107,19 @@ export default function ScoreboardScreen({ navigation }: any) {
     const [pendingWicket, setPendingWicket] = useState<{ type: WicketType; fielderId?: string; runs?: number }>({ type: 'none' });
     const [isSharingLive, setIsSharingLive] = useState(false);
 
-    useEffect(() => {
-        navigation.setOptions({
-            headerRight: () => (
-                <TouchableOpacity 
-                    onPress={async () => {
-                        try {
-                            setIsSharingLive(true);
-                            const matchId = await startLiveShare();
-                            await Share.share({
-                                message: t('common.followLiveMatch', { matchId }),
-                            });
-                        } catch(e) {
-                            Alert.alert(t('common.error'), t('common.failedToStartLiveShare'));
-                        } finally {
-                            setIsSharingLive(false);
-                        }
-                    }}
-                    className="flex-row items-center bg-blue-600/20 px-3 py-1.5 rounded-full border border-blue-500/50 mr-2"
-                >
-                    {isSharingLive ? (
-                        <ActivityIndicator color="#3b82f6" size="small" />
-                    ) : (
-                        <>
-                            <Ionicons name="radio-outline" size={16} color="#3b82f6" />
-                            <Text className="text-blue-500 font-bold ml-1 text-xs">{state.liveMatchId ? t('common.shareId') : t('common.goLive')}</Text>
-                        </>
-                    )}
-                </TouchableOpacity>
-            )
-        });
-    }, [navigation, startLiveShare, state.liveMatchId, isSharingLive]);
+    const handleGoLive = async () => {
+        try {
+            setIsSharingLive(true);
+            const matchId = await startLiveShare();
+            await Share.share({
+                message: t('common.followLiveMatch', { matchId }),
+            });
+        } catch(e) {
+            Alert.alert(t('common.error'), t('common.failedToStartLiveShare'));
+        } finally {
+            setIsSharingLive(false);
+        }
+    };
 
     useEffect(() => {
         const handleMatchEnd = async () => {
@@ -356,7 +338,21 @@ export default function ScoreboardScreen({ navigation }: any) {
                 {!state.isInningsBreak && (
                     <View className="p-6 pb-2 border-b border-gray-800">
                         <View className="flex-row justify-between items-center mb-1">
-                            <View style={{ width: 40 }} />
+                            <TouchableOpacity 
+                                onPress={handleGoLive}
+                                className="flex-row items-center bg-blue-900/40 p-1 px-2 rounded border border-blue-800/50"
+                            >
+                                {isSharingLive ? (
+                                    <ActivityIndicator color="#3b82f6" size="small" />
+                                ) : (
+                                    <>
+                                        <Ionicons name="radio-outline" size={12} color="#3b82f6" />
+                                        <Text className="text-blue-500 text-[10px] font-bold ml-1">
+                                            {state.liveMatchId ? t('common.shareId') : t('common.goLive')}
+                                        </Text>
+                                    </>
+                                )}
+                            </TouchableOpacity>
                             <Text className="text-gray-400 text-center font-medium flex-1">
                                 {innings.battingTeam} {t('common.batting')}
                             </Text>

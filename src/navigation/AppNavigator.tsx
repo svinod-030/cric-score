@@ -28,35 +28,38 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function LogoTitle() {
+    return (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Image
+                style={{ width: 40, height: 40, borderRadius: 20 }}
+                source={require('../../assets/icon.png')}
+                resizeMode="contain"
+            />
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 20 }}>Cric Score</Text>
+        </View>
+    );
+}
+
+function HeaderActions() {
     const navigation = useNavigation<any>();
     const { user, isAuthenticated } = useAuthStore();
     const [showLangModal, setShowLangModal] = React.useState(false);
 
     return (
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%', paddingRight: 10 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <Image
-                    style={{ width: 40, height: 40, borderRadius: 20 }}
-                    source={require('../../assets/icon.png')}
-                    resizeMode="contain"
-                />
-                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 20 }}>Cric Score</Text>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
-                <TouchableOpacity onPress={() => setShowLangModal(true)} style={{ justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={{ color: '#A855F7', fontWeight: 'bold', fontSize: 16 }}>अ/A</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                    {isAuthenticated && user?.picture ? (
-                        <Image
-                            source={{ uri: user.picture }}
-                            style={{ width: 36, height: 36, borderRadius: 18, borderWidth: 2, borderColor: '#3B82F6' }}
-                        />
-                    ) : (
-                        <Ionicons name="person-circle-outline" size={36} color="#9CA3AF" />
-                    )}
-                </TouchableOpacity>
-            </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15, paddingRight: 10 }}>
+            <TouchableOpacity onPress={() => setShowLangModal(true)} style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ color: '#A855F7', fontWeight: 'bold', fontSize: 16 }}>ಅ/A</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                {isAuthenticated && user?.picture ? (
+                    <Image
+                        source={{ uri: user.picture }}
+                        style={{ width: 32, height: 32, borderRadius: 16, borderWidth: 1.5, borderColor: '#3B82F6' }}
+                    />
+                ) : (
+                    <Ionicons name="person-circle-outline" size={32} color="#9CA3AF" />
+                )}
+            </TouchableOpacity>
             <LanguageSelectionModal visible={showLangModal} onClose={() => setShowLangModal(false)} />
         </View>
     );
@@ -127,6 +130,7 @@ export default function AppNavigator() {
                         fontWeight: 'bold',
                     },
                     headerTitle: () => <LogoTitle />,
+                    headerRight: () => <HeaderActions />,
                     contentStyle: { backgroundColor: '#111827' }
                 }}
             >
