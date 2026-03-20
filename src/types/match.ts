@@ -107,4 +107,5 @@ export interface MatchState extends MatchConfig {
     isInningsBreak: boolean;
     completedAt?: string; // ISO string format
     liveMatchId?: string; // ID of the Match document in Firestore
+    creatorId?: string; // UID of the user who created/owns this live match
 }

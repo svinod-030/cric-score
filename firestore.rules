@@ -1,0 +1,19 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /matches/{matchId} {
+      // Anyone can read a match (to view scores)
+      allow read: if true;
+      
+      // Creating a match requires authentication
+      // and the creatorId must match the authenticated user's UID
+      allow create: if request.auth != null && 
+                     request.resource.data.creatorId == request.auth.uid;
+      
+      // Updating or deleting a match requires being the creator
+      allow update, delete: if request.auth != null && 
+                             resource.data.creatorId == request.auth.uid;
+    }
+  }
+}

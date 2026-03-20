@@ -44,6 +44,7 @@
         "pleaseSelectTossWinner": "Please select toss winner and decision before starting.",
         "signInRequired": "Sign In Required",
         "pleaseSignInGoogle": "Please sign in with Google in the Profile tab to backup your data.",
+        "pleaseSignInToShare": "Please sign in with Google to share live match scores.",
         "backupSuccess": "Backup Success",
         "backupSuccessMsg": "Your data has been successfully backed up to Google Drive.",
         "backupFailed": "Backup Failed",

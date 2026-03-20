@@ -108,6 +108,19 @@ export default function ScoreboardScreen({ navigation }: any) {
     const [isSharingLive, setIsSharingLive] = useState(false);
 
     const handleGoLive = async () => {
+        const { isAuthenticated } = useAuthStore.getState();
+        if (!isAuthenticated) {
+            Alert.alert(
+                t('common.signInRequired'),
+                t('common.pleaseSignInToShare'),
+                [
+                    { text: t('common.cancel'), style: 'cancel' },
+                    { text: t('common.signInWithGoogle'), onPress: () => navigation.navigate('Profile') }
+                ]
+            );
+            return;
+        }
+
         try {
             setIsSharingLive(true);
             const matchId = await startLiveShare();

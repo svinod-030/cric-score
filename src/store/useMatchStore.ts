@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MatchConfig, MatchState, InningsState, ExtraType, WicketType, Player } from '../types/match';
 import { processBall } from '../utils/scoringUtils';
 import { matchSyncService } from '../services/matchSyncService';
+import { useAuthStore } from './useAuthStore';
 
 interface MatchStore {
     config: MatchConfig;
@@ -597,10 +598,17 @@ export const useMatchStore = create<MatchStore>()(
                 if (state.liveMatchId) return state.liveMatchId;
                 
                 try {
-                    const matchId = await matchSyncService.createLiveMatch(state);
+                    const { user } = useAuthStore.getState();
+                    const stateWithCreator = {
+                        ...state,
+                        creatorId: user?.id
+                    };
+                    
+                    const matchId = await matchSyncService.createLiveMatch(stateWithCreator);
                     set((store) => ({
                         state: {
                             ...store.state,
+                            creatorId: user?.id,
                             liveMatchId: matchId
                         }
                     }));

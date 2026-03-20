@@ -1,5 +1,7 @@
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { GOOGLE_CONFIG } from './constants';
+import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import { auth } from './firebase';
 
 // Configure Google Sign-in
 GoogleSignin.configure({
@@ -44,16 +46,22 @@ export const signInWithGoogle = async () => {
         const userInfo = await GoogleSignin.signIn();
 
         // Extract what we need for our store
-        if (userInfo.data?.user) {
-            const { user } = userInfo.data;
+        if (userInfo.data?.user && userInfo.data.idToken) {
+            // 1. Create a Firebase credential
+            const credential = GoogleAuthProvider.credential(userInfo.data.idToken);
+            
+            // 2. Sign in to Firebase Auth
+            const firebaseUserCredential = await signInWithCredential(auth, credential);
+            const firebaseUser = firebaseUserCredential.user;
+
             const accessToken = await getFreshAccessToken();
 
             return {
                 user: {
-                    id: user.id,
-                    email: user.email,
-                    name: user.name || '',
-                    picture: user.photo || undefined,
+                    id: firebaseUser.uid, // Always use Firebase UID for security rules
+                    email: firebaseUser.email || userInfo.data.user.email,
+                    name: firebaseUser.displayName || userInfo.data.user.name || '',
+                    picture: firebaseUser.photoURL || userInfo.data.user.photo || undefined,
                 },
                 accessToken
             };
