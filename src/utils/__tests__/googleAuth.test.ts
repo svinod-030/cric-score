@@ -110,7 +110,7 @@ describe('googleAuth', () => {
         test('should successfully sign in and return user data', async () => {
             (GoogleSignin.hasPlayServices as jest.Mock).mockResolvedValue(true);
             (GoogleSignin.signIn as jest.Mock).mockResolvedValue({
-                data: { user: mockUser },
+                data: { user: mockUser, idToken: 'mock-id-token' },
             });
             (GoogleSignin.getTokens as jest.Mock).mockResolvedValue({
                 accessToken: mockAccessToken,
@@ -120,7 +120,7 @@ describe('googleAuth', () => {
 
             expect(result).toEqual({
                 user: {
-                    id: mockUser.id,
+                    id: 'mock-uid', // From the global firebase mock in jest.setup.js
                     email: mockUser.email,
                     name: mockUser.name,
                     picture: mockUser.photo,
@@ -136,7 +136,7 @@ describe('googleAuth', () => {
 
             (GoogleSignin.hasPlayServices as jest.Mock).mockResolvedValue(true);
             (GoogleSignin.signIn as jest.Mock).mockResolvedValue({
-                data: { user: userWithoutName },
+                data: { user: userWithoutName, idToken: 'mock-id-token' },
             });
             (GoogleSignin.getTokens as jest.Mock).mockResolvedValue({
                 accessToken: mockAccessToken,

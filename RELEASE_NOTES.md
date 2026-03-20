@@ -1,8 +1,8 @@
 <en-US>
-What's New in v1.2.0:
-• 🌐 Full Local Language Support: Added Hindi, Kannada, Malayalam, Tamil, and Telugu!
-• 📡 Live Match Sharing: Share your live match score with friends and fans in real-time.
-• 🏆 Real-time Results: Viewers can now see the final match outcome instantly.
-• 🎨 UI Improvements: Better "Go Live" button placement and cleaner scoreboard layout.
+What's New in v1.3.0:
+• 🔒 Enhanced Security: Implemented owner-based security for live matches. Only you can update your scores!
+• 🌐 Local Language Support: Full support for Hindi, Kannada, Malayalam, Tamil, and Telugu.
+• 📡 Live Match Sharing: Real-time score sharing with fans.
+• 🎨 UI Improvements: Redesigned "Go Live" access and cleaner scoreboard.
 • 🛠️ Bug fixes and performance improvements.
 </en-US>

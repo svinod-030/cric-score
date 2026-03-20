@@ -1,3 +1,30 @@
+// Mock Firebase
+jest.mock('firebase/app', () => ({
+    initializeApp: jest.fn(() => ({})),
+}));
+
+jest.mock('firebase/auth', () => ({
+    getAuth: jest.fn(),
+    initializeAuth: jest.fn(() => ({})),
+    getReactNativePersistence: jest.fn(() => ({})),
+    GoogleAuthProvider: {
+        credential: jest.fn(),
+    },
+    signInWithCredential: jest.fn(() => Promise.resolve({ user: { uid: 'mock-uid' } })),
+    onAuthStateChanged: jest.fn(),
+}));
+
+jest.mock('firebase/firestore', () => ({
+    getFirestore: jest.fn(),
+    initializeFirestore: jest.fn(() => ({})),
+    collection: jest.fn(),
+    doc: jest.fn(),
+    setDoc: jest.fn(),
+    updateDoc: jest.fn(),
+    onSnapshot: jest.fn(() => jest.fn()), // Returns unsubscribe mock
+    getDoc: jest.fn(),
+}));
+
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
     __esModule: true,
