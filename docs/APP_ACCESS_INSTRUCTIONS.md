@@ -36,4 +36,4 @@ Instructions for Reviewers:
    4. Select a file to restore it.
 
 Support Contact:
-If you encounter any issues accessing the app, please contact: scricscore3@gmail.com
+If you encounter any issues accessing the app, please contact: vinod.sigadana.labs@gmail.com
