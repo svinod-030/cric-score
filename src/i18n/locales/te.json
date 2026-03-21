@@ -224,6 +224,12 @@
         "liveTab": "లైవ్",
         "liveMatch": "లైవ్ మ్యాచ్",
         "scoreBoard": "స్కోర్ బోర్డ్",
-        "profile": "ప్రొఫైల్"
+        "profile": "ప్రొఫైల్",
+        "shareMatchScore": "మ్యాచ్ స్కోర్‌ను షేర్ చేయండి",
+        "scanToJoin": "చేరడానికి QR స్కాన్ చేయండి",
+        "allowCameraPermission": "QR కోడ్‌లను స్కాన్ చేయడానికి కెమెరా అనుమతి అవసరం",
+        "showQR": "QR చూపించు",
+        "joinLiveMatch": "లైవ్ మ్యాచ్‌లో చేరండి",
+        "join": "చేరండి"
     }
 }

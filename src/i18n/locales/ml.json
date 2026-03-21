@@ -224,6 +224,12 @@
         "liveTab": "ലൈവ്",
         "liveMatch": "തത്സമയ മത്സരം",
         "scoreBoard": "സ്കോർ ബോർഡ്",
-        "profile": "പ്രൊഫൈൽ"
+        "profile": "പ്രൊഫൈൽ",
+        "shareMatchScore": "മാച്ച് സ്കോർ പങ്കിടുക",
+        "scanToJoin": "ചേരാൻ QR സ്കാൻ ചെയ്യുക",
+        "allowCameraPermission": "QR കോഡുകൾ സ്കാൻ ചെയ്യാൻ ക്യാമറ അനുമതി ആവശ്യമാണ്",
+        "showQR": "QR കാണിക്കുക",
+        "joinLiveMatch": "ലൈവ് മാച്ചിൽ ചേരുക",
+        "join": "ചേരുക"
     }
 }

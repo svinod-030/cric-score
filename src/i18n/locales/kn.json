@@ -224,6 +224,12 @@
         "liveTab": "ಲೈವ್",
         "liveMatch": "ಲೈವ್ ಪಂದ್ಯ",
         "scoreBoard": "ಸ್ಕೋರ್ ಬೋರ್ಡ್",
-        "profile": "ಪ್ರೊಫೈಲ್"
+        "profile": "ಪ್ರೊಫೈಲ್",
+        "shareMatchScore": "ಪಂದ್ಯದ ಸ್ಕೋರ್ ಹಂಚಿಕೊಳ್ಳಿ",
+        "scanToJoin": "ಸೇರಲು QR ಸ್ಕ್ಯಾನ್ ಮಾಡಿ",
+        "allowCameraPermission": "QR ಕೋಡ್‌ಗಳನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಲು ಕ್ಯಾಮೆರಾ ಅನುಮತಿ ಅಗತ್ಯವಿದೆ",
+        "showQR": "QR ತೋರಿಸಿ",
+        "joinLiveMatch": "ಲೈವ್ ಪಂದ್ಯಕ್ಕೆ ಸೇರಿ",
+        "join": "ಸೇರಿ"
     }
 }

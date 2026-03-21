@@ -224,6 +224,12 @@
         "liveTab": "நேரலை",
         "liveMatch": "நேரடி போட்டி",
         "scoreBoard": "ஸ்கோர் போர்டு",
-        "profile": "ப்ரொபைல்"
+        "profile": "சுயவிவரம்",
+        "shareMatchScore": "போட்டி மதிப்பெண்ணைப் பகிரவும்",
+        "scanToJoin": "சேர QR ஐ ஸ்கேன் செய்யவும்",
+        "allowCameraPermission": "QR குறியீடுகளை ஸ்கேன் செய்ய கேமரா அனுமதி தேவை",
+        "showQR": "QR ஐக் காட்டு",
+        "joinLiveMatch": "நேரடிப் போட்டியில் இணையுங்கள்",
+        "join": "சேருங்கள்"
     }
 }

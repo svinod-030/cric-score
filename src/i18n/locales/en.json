@@ -224,6 +224,12 @@
         "liveTab": "Live",
         "liveMatch": "Live Match",
         "scoreBoard": "Score board",
-        "profile": "Profile"
+        "profile": "Profile",
+        "shareMatchScore": "Share Match Score",
+        "scanToJoin": "Scan QR to Join",
+        "allowCameraPermission": "Camera permission is needed to scan QR codes",
+        "showQR": "Show QR",
+        "joinLiveMatch": "Join Live Match",
+        "join": "Join"
     }
 }

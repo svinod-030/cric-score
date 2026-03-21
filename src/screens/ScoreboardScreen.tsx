@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Modal, Switch, TextInput, Share, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Modal, TextInput, ActivityIndicator, Image, Alert, TouchableWithoutFeedback } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ViewShot from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
 import { useMatchStore } from '../store/useMatchStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { backupToDrive } from '../utils/backupService';
-import { ExtraType } from '../types/match';
+import { ExtraType, MatchState, WicketType } from '../types/match';
 import { BowlerSelectionModal } from '../components/BowlerSelectionModal';
 import { BatterSelectionModal } from '../components/BatterSelectionModal';
 import { ScorecardSection } from '../components/ScorecardSection';
@@ -13,12 +15,12 @@ import { RunSelectionModal } from '../components/RunSelectionModal';
 import { WicketTypeSelectionModal } from '../components/WicketTypeSelectionModal';
 import { FielderSelectionModal } from '../components/FielderSelectionModal';
 import { WhoIsOutModal } from '../components/WhoIsOutModal';
-import { OverHistory } from '../components/OverHistory';
 import { MatchStartModal } from '../components/MatchStartModal';
+import { MatchCard } from '../components/MatchCard';
 import { Ionicons } from '@expo/vector-icons';
-import { WicketType } from '../types/match';
-import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
+
+
 
 const EditablePlayerName = ({
     name,
@@ -78,6 +80,7 @@ const EditablePlayerName = ({
 export default function ScoreboardScreen({ navigation }: any) {
     const { t } = useTranslation();
     const { state, config, recordBall, endInnings, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings, renamePlayer, startLiveShare } = useMatchStore();
+    const viewShotRef = useRef<any>(null);
     const innings = state.currentInnings === 1 ? state.innings1 : state.innings2;
     const currentOverValidBalls = innings.currentOver.filter(b => b.isValidBall).length;
 
@@ -106,8 +109,10 @@ export default function ScoreboardScreen({ navigation }: any) {
     // Pending Wicket State
     const [pendingWicket, setPendingWicket] = useState<{ type: WicketType; fielderId?: string; runs?: number }>({ type: 'none' });
     const [isSharingLive, setIsSharingLive] = useState(false);
+    const [isQRModalVisible, setQRModalVisible] = useState(false);
+    const [isBatterSelectionVisible, setBatterSelectionVisible] = useState(false);
 
-    const handleGoLive = async () => {
+    const handleShareMatch = async () => {
         const { isAuthenticated } = useAuthStore.getState();
         if (!isAuthenticated) {
             Alert.alert(
@@ -124,13 +129,53 @@ export default function ScoreboardScreen({ navigation }: any) {
         try {
             setIsSharingLive(true);
             const matchId = await startLiveShare();
-            await Share.share({
-                message: t('common.followLiveMatch', { matchId }),
-            });
-        } catch(e) {
+
+            // Wait for QR code to potentially load and for ViewShot to be ready
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            if (viewShotRef.current) {
+                const uri = await viewShotRef.current.capture();
+                if (await Sharing.isAvailableAsync()) {
+                    await Sharing.shareAsync(uri, {
+                        mimeType: 'image/png',
+                        dialogTitle: t('common.shareMatchScore'),
+                        UTI: 'public.png',
+                    });
+                }
+            }
+        } catch (e) {
+            console.error("Failed to share match card:", e);
             Alert.alert(t('common.error'), t('common.failedToStartLiveShare'));
         } finally {
             setIsSharingLive(false);
+        }
+    };
+
+    const handleShowQR = async () => {
+        const { isAuthenticated } = useAuthStore.getState();
+        if (!isAuthenticated) {
+            Alert.alert(
+                t('common.signInRequired'),
+                t('common.pleaseSignInToShare'),
+                [
+                    { text: t('common.cancel'), style: 'cancel' },
+                    { text: t('common.signInWithGoogle'), onPress: () => navigation.navigate('Profile') }
+                ]
+            );
+            return;
+        }
+
+        try {
+            if (!state.liveMatchId) {
+                setIsSharingLive(true);
+                await startLiveShare();
+                setIsSharingLive(false);
+            }
+            setQRModalVisible(true);
+        } catch (e) {
+            console.error("Failed to show QR:", e);
+            setIsSharingLive(false);
+            Alert.alert(t('common.error'), t('common.failedToStartLiveShare'));
         }
     };
 
@@ -206,8 +251,6 @@ export default function ScoreboardScreen({ navigation }: any) {
             setBatterSelectionVisible(false);
         }
     }, [state.isPlaying, state.isInningsBreak, isStartOfInnings, innings.currentBowlerId, innings.strikerId, innings.nonStrikerId]);
-
-    const [isBatterSelectionVisible, setBatterSelectionVisible] = useState(false);
 
     const handleMatchStart = (strikerId: string, nonStrikerId: string, bowlerId: string) => {
         setStriker(strikerId);
@@ -346,33 +389,29 @@ export default function ScoreboardScreen({ navigation }: any) {
 
     return (
         <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
+            {/* Hidden ViewShot for Match Card sharing */}
+            <View style={{ position: 'absolute', left: -9999, top: -9999 }}>
+                <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 0.9 }}>
+                    {state.liveMatchId && (
+                        <MatchCard state={state} matchId={state.liveMatchId} t={t} />
+                    )}
+                </ViewShot>
+            </View>
+
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 {/* Header / Score */}
                 {!state.isInningsBreak && (
                     <View className="p-6 pb-2 border-b border-gray-800">
-                        <View className="flex-row justify-between items-center mb-1">
-                            <TouchableOpacity 
-                                onPress={handleGoLive}
-                                className="flex-row items-center bg-blue-900/40 p-1 px-2 rounded border border-blue-800/50"
-                            >
-                                {isSharingLive ? (
-                                    <ActivityIndicator color="#3b82f6" size="small" />
-                                ) : (
-                                    <>
-                                        <Ionicons name="radio-outline" size={12} color="#3b82f6" />
-                                        <Text className="text-blue-500 text-[10px] font-bold ml-1">
-                                            {state.liveMatchId ? t('common.shareId') : t('common.goLive')}
-                                        </Text>
-                                    </>
-                                )}
-                            </TouchableOpacity>
-                            <Text className="text-gray-400 text-center font-medium flex-1">
-                                {innings.battingTeam} {t('common.batting')}
-                            </Text>
-                            <TouchableOpacity onPress={handleEndInnings} className="p-1 px-3 bg-red-900/30 rounded border border-red-800/50">
-                                <Text className="text-red-500 text-[10px] font-bold">{t('common.end')}</Text>
-                            </TouchableOpacity>
+                        {/* Team Status Row */}
+                        <View className="items-center mb-4">
+                            <View className="flex-row items-center bg-gray-800/50 px-4 py-1.5 rounded-full border border-gray-700">
+                                <View className="w-2 h-2 rounded-full bg-red-600 mr-2 animate-pulse" />
+                                <Text className="text-gray-300 font-black uppercase tracking-[2px] text-[10px]">
+                                    {innings.battingTeam} {t('common.batting')}
+                                </Text>
+                            </View>
                         </View>
+
                         <View className="items-center mb-6">
                             <Text className="text-6xl font-black text-white">
                                 {innings.totalRuns}/{innings.totalWickets}
@@ -394,6 +433,40 @@ export default function ScoreboardScreen({ navigation }: any) {
                                     </Text>
                                 </View>
                             )}
+                        </View>
+                        {/* Action Buttons Row */}
+                        <View className="flex-row justify-between items-center mb-4">
+                            <View className="flex-row items-center gap-2">
+                                <TouchableOpacity
+                                    onPress={handleShareMatch}
+                                    className="flex-row items-center bg-blue-600 px-3 py-2 rounded-xl shadow-lg shadow-blue-500/20"
+                                >
+                                    {isSharingLive ? (
+                                        <ActivityIndicator color="white" size="small" />
+                                    ) : (
+                                        <>
+                                            <Ionicons name={state.liveMatchId ? "share-social" : "radio"} size={14} color="white" />
+                                            <Text className="text-white text-[10px] font-black ml-1.5 uppercase tracking-wider">
+                                                {state.liveMatchId ? t('common.shareMatchScore') : t('common.goLive')}
+                                            </Text>
+                                        </>
+                                    )}
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    onPress={handleShowQR}
+                                    className="bg-gray-800 p-2 rounded-xl border border-gray-700 w-10 h-10 items-center justify-center"
+                                >
+                                    <Ionicons name="qr-code-outline" size={18} color="#3b82f6" />
+                                </TouchableOpacity>
+                            </View>
+
+                            <TouchableOpacity
+                                onPress={handleEndInnings}
+                                className="bg-red-900/20 px-4 py-2 rounded-xl border border-red-900/40"
+                            >
+                                <Text className="text-red-500 text-[10px] font-black uppercase tracking-widest">{t('common.end')}</Text>
+                            </TouchableOpacity>
                         </View>
 
                         {/* Player Stats Bar */}
@@ -682,6 +755,32 @@ export default function ScoreboardScreen({ navigation }: any) {
                 onStart={handleMatchStart}
                 title={state.currentInnings === 1 ? t('common.start1stInnings') : t('common.start2ndInningsTitle')}
             />
+
+            {/* QR View Modal */}
+            <Modal
+                visible={isQRModalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setQRModalVisible(false)}
+            >
+                <TouchableWithoutFeedback onPress={() => setQRModalVisible(false)}>
+                    <View className="flex-1 bg-black/80 justify-center items-center p-4">
+                        <TouchableWithoutFeedback>
+                            <View className="bg-gray-900 rounded-[40px] overflow-hidden border border-gray-800 shadow-2xl">
+                                {state.liveMatchId && (
+                                    <MatchCard state={state} matchId={state.liveMatchId} t={t} />
+                                )}
+                                <TouchableOpacity
+                                    onPress={() => setQRModalVisible(false)}
+                                    className="absolute top-4 right-4 bg-black/40 p-2 rounded-full"
+                                >
+                                    <Ionicons name="close" size={24} color="#fff" />
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </View>
+                </TouchableWithoutFeedback>
+            </Modal>
         </SafeAreaView>
     );
 }

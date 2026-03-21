@@ -29,7 +29,13 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Cric Score to access your camera to scan match QR codes."
+        }
+      ]
     ],
     "extra": {
       "eas": {
