@@ -679,6 +679,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                                         <OverSummarySection
                                             title={t('common.overSummaryTitle', { innings: t('common.stInnings') })}
                                             innings={state.innings1}
+                                            bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
                                             defaultExpanded={false}
                                         />
                                     </View>
@@ -696,6 +697,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                                 <OverSummarySection
                                     title={t('common.overSummaryTitle', { innings: state.currentInnings === 2 ? t('common.ndInnings') : t('common.stInnings') })}
                                     innings={innings}
+                                    bowlingTeamPlayers={bowlingTeamPlayers}
                                     defaultExpanded={false}
                                 />
                             </View>

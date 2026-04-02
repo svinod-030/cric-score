@@ -1,22 +1,33 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { InningsState, Over, Ball } from '../types/match';
+import { InningsState, Over, Ball, Player } from '../types/match';
 import { useTranslation } from 'react-i18next';
 
 interface OverSummarySectionProps {
     title: string;
     innings: InningsState;
+    bowlingTeamPlayers: Player[];
     defaultExpanded?: boolean;
     expanded?: boolean;
 }
 
-const OverRow = ({ overNum, balls, runs, wickets }: { overNum: string, balls: Ball[], runs: number, wickets: number }) => {
+const OverRow = ({ overNum, bowlerName, balls, runs, wickets }: { overNum: string, bowlerName?: string, balls: Ball[], runs: number, wickets: number }) => {
     const { t } = useTranslation();
     return (
-        <View className="flex-row justify-between items-center p-3 border-b border-gray-700/50">
-            <View className="flex-row items-center flex-1">
-                <Text className="text-gray-400 font-bold w-16">{overNum}</Text>
-                <View className="flex-row flex-wrap gap-1 flex-1">
+        <View className="p-3 border-b border-gray-700/50">
+            <View className="flex-row justify-between items-center mb-1">
+                <View className="flex-row items-center">
+                    <Text className="text-gray-400 font-bold w-16">{overNum}</Text>
+                    {bowlerName && (
+                        <Text className="text-blue-400 text-xs font-medium ml-2">{bowlerName}</Text>
+                    )}
+                </View>
+                <View className="flex-row gap-4 w-24 justify-end">
+                    <Text className="text-gray-300 font-bold">{runs} {t('common.runsLabel')}</Text>
+                    <Text className="text-red-400 font-bold">{wickets > 0 ? `${wickets} ${t('common.wktLabel')}` : '-'}</Text>
+                </View>
+            </View>
+            <View className="flex-row flex-wrap gap-1">
                     {balls.map((ball, idx) => (
                         <View
                             key={idx}
@@ -30,16 +41,11 @@ const OverRow = ({ overNum, balls, runs, wickets }: { overNum: string, balls: Ba
                         </View>
                     ))}
                 </View>
-            </View>
-            <View className="flex-row gap-4 w-24 justify-end">
-                <Text className="text-gray-300 font-bold">{runs} {t('common.runsLabel')}</Text>
-                <Text className="text-red-400 font-bold">{wickets > 0 ? `${wickets} ${t('common.wktLabel')}` : '-'}</Text>
-            </View>
         </View>
     );
 };
 
-export const OverSummarySection = ({ title, innings, defaultExpanded = false, expanded }: OverSummarySectionProps) => {
+export const OverSummarySection = ({ title, innings, bowlingTeamPlayers, defaultExpanded = false, expanded }: OverSummarySectionProps) => {
     const { t } = useTranslation();
     const [internalExpanded, setInternalExpanded] = useState(defaultExpanded);
     const isExpanded = expanded !== undefined ? expanded : internalExpanded;
@@ -81,10 +87,12 @@ export const OverSummarySection = ({ title, innings, defaultExpanded = false, ex
 
                     {innings.overs.map((over, idx) => {
                         const { totalRuns, wickets } = calcIntervalStats(over.balls);
+                        const bowler = bowlingTeamPlayers.find(p => p.id === over.bowlerId);
                         return (
                             <OverRow
                                 key={idx}
                                 overNum={`${t('common.over')} ${idx + 1}`}
+                                bowlerName={bowler?.name}
                                 balls={over.balls}
                                 runs={totalRuns}
                                 wickets={wickets}
@@ -96,6 +104,7 @@ export const OverSummarySection = ({ title, innings, defaultExpanded = false, ex
                     {innings.currentOver.length > 0 && (
                         <OverRow
                             overNum={`${t('common.over')} ${innings.overs.length + 1}`}
+                            bowlerName={bowlingTeamPlayers.find(p => p.id === innings.currentBowlerId)?.name}
                             balls={innings.currentOver}
                             runs={calcIntervalStats(innings.currentOver).totalRuns}
                             wickets={calcIntervalStats(innings.currentOver).wickets}

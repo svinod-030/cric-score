@@ -205,6 +205,23 @@ export const processBall = (
     let finalBowlerId = bowlerId;
 
     if (validBallsCount >= 6) {
+        // --- Maiden Over Check ---
+        const runsConcededInOver = newCurrentOver.reduce((acc, ball) => {
+            let runs = 0;
+            if (ball.extraType === 'wide' || ball.extraType === 'no-ball') {
+                runs = ball.runs;
+            } else if (ball.extraType === 'bye' || ball.extraType === 'leg-bye') {
+                runs = 0;
+            } else {
+                runs = ball.runs;
+            }
+            return acc + runs;
+        }, 0);
+
+        if (runsConcededInOver === 0) {
+            bowlerStats.maidens += 1;
+        }
+
         finalOvers = [...finalOvers, { balls: newCurrentOver, bowlerId }];
         finalCurrentOver = [];
 

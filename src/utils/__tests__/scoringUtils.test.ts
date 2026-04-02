@@ -264,5 +264,53 @@ describe('scoringUtils', () => {
             expect(newState.innings1.battingStats['p1'].ballsFaced).toBe(1);
             expect(newState.innings1.bowlingStats['p4'].runsConceded).toBe(0);
         });
+
+        test('should detect maiden over correctly', () => {
+            let state = createInitialState();
+
+            // Bowl 6 dot balls
+            for (let i = 0; i < 6; i++) {
+                state = processBall(state, mockConfig, 0, 'none', false);
+            }
+
+            expect(state.innings1.bowlingStats['p4'].maidens).toBe(1);
+        });
+
+        test('should detect maiden over with byes', () => {
+            let state = createInitialState();
+
+            // Bowl 5 dots and 1 bye
+            for (let i = 0; i < 5; i++) {
+                state = processBall(state, mockConfig, 0, 'none', false);
+            }
+            state = processBall(state, mockConfig, 4, 'bye', false);
+
+            expect(state.innings1.bowlingStats['p4'].runsConceded).toBe(0);
+            expect(state.innings1.bowlingStats['p4'].maidens).toBe(1);
+        });
+
+        test('should NOT detect maiden over if runs are conceded', () => {
+            let state = createInitialState();
+
+            // Bowl 5 dots and 1 run
+            for (let i = 0; i < 5; i++) {
+                state = processBall(state, mockConfig, 0, 'none', false);
+            }
+            state = processBall(state, mockConfig, 1, 'none', false);
+
+            expect(state.innings1.bowlingStats['p4'].maidens).toBe(0);
+        });
+
+        test('should NOT detect maiden over if wide is bowled', () => {
+            let state = createInitialState();
+
+            // Bowl 1 wide and then 6 dots
+            state = processBall(state, mockConfig, 0, 'wide', false);
+            for (let i = 0; i < 6; i++) {
+                state = processBall(state, mockConfig, 0, 'none', false);
+            }
+
+            expect(state.innings1.bowlingStats['p4'].maidens).toBe(0);
+        });
     });
 });

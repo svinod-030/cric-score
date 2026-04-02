@@ -200,6 +200,7 @@ export default function LiveViewerScreen({ route, navigation }: any) {
                         <OverSummarySection
                             title={t('common.overSummaryTitle', { innings: t('common.stInnings') })}
                             innings={match.innings1}
+                            bowlingTeamPlayers={match.innings1.battingTeamKey === 'teamA' ? match.teamBPlayers : match.teamAPlayers}
                             defaultExpanded={false}
                         />
                     </View>
@@ -217,6 +218,7 @@ export default function LiveViewerScreen({ route, navigation }: any) {
                 <OverSummarySection
                     title={t('common.overSummaryTitle', { innings: match.currentInnings === 2 ? t('common.ndInnings') : t('common.stInnings') })}
                     innings={innings}
+                    bowlingTeamPlayers={innings.battingTeamKey === 'teamA' ? match.teamBPlayers : match.teamAPlayers}
                     defaultExpanded={false}
                 />
             </ScrollView>

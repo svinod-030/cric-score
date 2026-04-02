@@ -140,6 +140,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                             <OverSummarySection
                                 title={t('common.overSummaryTitle', { innings: t('common.stInnings') })}
                                 innings={innings1}
+                                bowlingTeamPlayers={innings1.battingTeam === state.teamA ? teamBPlayers : teamAPlayers}
                                 defaultExpanded={false}
                                 expanded={isSharing ? true : undefined}
                             />
@@ -158,6 +159,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                                     <OverSummarySection
                                         title={t('common.overSummaryTitle', { innings: t('common.ndInnings') })}
                                         innings={innings2}
+                                        bowlingTeamPlayers={innings2.battingTeam === state.teamA ? teamBPlayers : teamAPlayers}
                                         defaultExpanded={false}
                                         expanded={isSharing ? true : undefined}
                                     />
