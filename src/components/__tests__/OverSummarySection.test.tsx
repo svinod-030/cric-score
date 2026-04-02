@@ -39,11 +39,17 @@ describe('OverSummarySection', () => {
         isLastManStanding: false,
     };
 
+    const mockBowlingTeamPlayers = [
+        { id: 'b1', name: 'Bowler 1' },
+        { id: 'b2', name: 'Bowler 2' }
+    ];
+
     test('renders correctly with title', () => {
         const { getByText } = render(
             <OverSummarySection
                 title="Match Log"
                 innings={mockInnings}
+                bowlingTeamPlayers={mockBowlingTeamPlayers}
                 defaultExpanded={true}
             />
         );
@@ -56,6 +62,7 @@ describe('OverSummarySection', () => {
             <OverSummarySection
                 title="Match Log"
                 innings={mockInnings}
+                bowlingTeamPlayers={mockBowlingTeamPlayers}
                 defaultExpanded={true}
             />
         );
@@ -75,6 +82,7 @@ describe('OverSummarySection', () => {
             <OverSummarySection
                 title="Match Log"
                 innings={mockInnings}
+                bowlingTeamPlayers={mockBowlingTeamPlayers}
                 defaultExpanded={false}
             />
         );
