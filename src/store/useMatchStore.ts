@@ -611,6 +611,12 @@ export const useMatchStore = create<MatchStore>()(
                 }));
             },
             deleteMatch: (completedAt: string) => {
+                const matchToDelete = get().history.find(m => m.completedAt === completedAt);
+                if (matchToDelete?.liveMatchId) {
+                    matchSyncService.deleteMatch(matchToDelete.liveMatchId).catch(err => {
+                        console.error("Failed to delete from Firestore:", err);
+                    });
+                }
                 set((store) => ({
                     history: store.history.filter(m => m.completedAt !== completedAt)
                 }));

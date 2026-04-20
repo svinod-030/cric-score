@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, onSnapshot, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, onSnapshot, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../utils/firebase';
 import { MatchState } from '../types/match';
 
@@ -94,6 +94,21 @@ export const matchSyncService = {
             return null;
         } catch (error) {
             console.error("Error fetching match:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Deletes a match document from Firestore
+     * @param matchId The unique match ID
+     */
+    deleteMatch: async (matchId: string): Promise<void> => {
+        if (!matchId) return;
+        try {
+            const matchRef = doc(db, MATCHES_COLLECTION, matchId);
+            await deleteDoc(matchRef);
+        } catch (error) {
+            console.error("Error deleting live match:", error);
             throw error;
         }
     }
