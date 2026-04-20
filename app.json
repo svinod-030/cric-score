@@ -2,7 +2,7 @@
   "expo": {
     "name": "Cric Score",
     "slug": "cric-score",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -17,7 +17,7 @@
     },
     "android": {
       "package": "com.vinodsigadana.cricscore",
-      "versionCode": 40,
+      "versionCode": 41,
       "googleServicesFile": "./google-services.json",
       "permissions": [],
       "adaptiveIcon": {
