@@ -30,6 +30,7 @@ interface MatchStore {
     toggleLastManStanding: () => void;
     startLiveShare: () => Promise<string>;
     stopLiveShare: () => void;
+    deleteMatch: (completedAt: string) => void;
 }
 
 const INITIAL_CONFIG: MatchConfig = {
@@ -607,6 +608,11 @@ export const useMatchStore = create<MatchStore>()(
                         ...store.state,
                         liveMatchId: undefined
                     }
+                }));
+            },
+            deleteMatch: (completedAt: string) => {
+                set((store) => ({
+                    history: store.history.filter(m => m.completedAt !== completedAt)
                 }));
             },
         }),

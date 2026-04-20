@@ -14,7 +14,7 @@ import { calculateAwards } from '../utils/awardsUtils';
 
 export default function MatchResultScreen({ navigation, route }: any) {
     const { t } = useTranslation();
-    const { state, resetMatch } = useMatchStore();
+    const { state, resetMatch, deleteMatch } = useMatchStore();
     const viewShotRef = useRef<any>(null);
     const [isSharing, setIsSharing] = React.useState(false);
 
@@ -49,6 +49,30 @@ export default function MatchResultScreen({ navigation, route }: any) {
         } else {
             Linking.openURL(APP_CONFIG.STORE_URL_IOS);
         }
+    };
+
+    const handleDeleteMatch = () => {
+        Alert.alert(
+            t('common.deleteMatch'),
+            t('common.deleteMatchMsg'),
+            [
+                { text: t('common.cancel'), style: "cancel" },
+                {
+                    text: t('common.delete'),
+                    style: "destructive",
+                    onPress: () => {
+                        if (matchData.completedAt) {
+                            deleteMatch(matchData.completedAt);
+                        }
+                        if (isHistoryView) {
+                            navigation.goBack();
+                        } else {
+                            handleNewMatch();
+                        }
+                    }
+                }
+            ]
+        );
     };
 
     const handleShare = async () => {
@@ -196,6 +220,15 @@ export default function MatchResultScreen({ navigation, route }: any) {
                             <Text className="text-white text-lg font-bold">{t('common.startNewMatch')}</Text>
                         </TouchableOpacity>
                     )}
+                    <TouchableOpacity
+                        className="bg-red-500/10 w-full p-4 rounded-xl items-center border border-red-500/30 mb-8"
+                        onPress={handleDeleteMatch}
+                    >
+                        <View className="flex-row items-center gap-2">
+                            <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                            <Text className="text-red-500 text-lg font-bold">{t('common.deleteMatch')}</Text>
+                        </View>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
             {!isSharing && matchResult.winner !== 'Draw' && <Confetti />}

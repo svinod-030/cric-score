@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 export default function MatchesHistoryScreen() {
     const { t } = useTranslation();
-    const { state, history, restoreMatches } = useMatchStore();
+    const { state, history, restoreMatches, deleteMatch } = useMatchStore();
     const { isAuthenticated } = useAuthStore();
     const [isRestoring, setIsRestoring] = useState(false);
     const navigation = useNavigation<any>();
@@ -99,12 +99,42 @@ export default function MatchesHistoryScreen() {
                         const teamBScore = teamBInnings?.totalRuns || 0;
                         const teamBWickets = teamBInnings?.totalWickets || 0;
 
+                        const handleDelete = () => {
+                            if (!match.completedAt) return;
+                            Alert.alert(
+                                t('common.deleteMatch'),
+                                t('common.deleteMatchMsg'),
+                                [
+                                    { text: t('common.cancel'), style: "cancel" },
+                                    {
+                                        text: t('common.delete'),
+                                        style: "destructive",
+                                        onPress: () => deleteMatch(match.completedAt!)
+                                    }
+                                ]
+                            );
+                        };
+
                         return (
                             <TouchableOpacity
                                 key={index}
                                 className="bg-gray-800/40 p-3 rounded-xl mb-3 border border-gray-700/50"
                                 onPress={() => navigation.navigate('MatchResult', { matchData: match })}
                             >
+                                <View className="flex-row justify-between items-start mb-2">
+                                    <View className="bg-gray-700/50 px-2 py-0.5 rounded">
+                                        <Text className="text-[10px] text-gray-400 font-bold uppercase">
+                                            {match.completedAt ? new Date(match.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : t('common.completed')}
+                                        </Text>
+                                    </View>
+                                    <TouchableOpacity
+                                        onPress={handleDelete}
+                                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                    >
+                                        <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                                    </TouchableOpacity>
+                                </View>
+
                                 <View className="flex-row items-center justify-between">
                                     {/* Team A */}
                                     <View className={`flex-1 items-center py-2 px-1 rounded-xl ${isTeamAWinner ? 'bg-blue-500/10' : ''}`}>
@@ -118,12 +148,7 @@ export default function MatchesHistoryScreen() {
 
                                     {/* Info Middle */}
                                     <View className="px-2 items-center">
-                                        <Text className="text-gray-600 font-black italic text-base mb-1">VS</Text>
-                                        <View className="bg-gray-700/50 px-2 py-0.5 rounded">
-                                            <Text className="text-[10px] text-gray-400 font-bold uppercase">
-                                                {match.completedAt ? new Date(match.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : t('common.completed')}
-                                            </Text>
-                                        </View>
+                                        <Text className="text-gray-600 font-black italic text-base">VS</Text>
                                     </View>
 
                                     {/* Team B */}
