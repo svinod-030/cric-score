@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MatchConfig, MatchState, InningsState, ExtraType, WicketType, Player } from '../types/match';
-import { processBall } from '../utils/scoringUtils';
+import { calculateMatchResult, processBall } from '../utils/scoringUtils';
 import { matchSyncService } from '../services/matchSyncService';
 import { useAuthStore } from './useAuthStore';
 
@@ -229,15 +229,15 @@ export const useMatchStore = create<MatchStore>()(
                                 battingStats: {
                                     ...store.state[currentInningsKey].battingStats,
                                     [playerId]: {
-                                        ...(store.state[currentInningsKey].battingStats[playerId] || { 
-                                            playerId, 
-                                            runs: 0, 
-                                            ballsFaced: 0, 
-                                            fours: 0, 
-                                            sixes: 0, 
-                                            isOut: false, 
+                                        ...(store.state[currentInningsKey].battingStats[playerId] || {
+                                            playerId,
+                                            runs: 0,
+                                            ballsFaced: 0,
+                                            fours: 0,
+                                            sixes: 0,
+                                            isOut: false,
                                             isRetired: false,
-                                            battingOrder: Object.keys(store.state[currentInningsKey].battingStats).length + 1 
+                                            battingOrder: Object.keys(store.state[currentInningsKey].battingStats).length + 1
                                         }),
                                         isRetired: false,
                                         dismissal: undefined
@@ -261,15 +261,15 @@ export const useMatchStore = create<MatchStore>()(
                                 battingStats: {
                                     ...store.state[currentInningsKey].battingStats,
                                     [playerId]: {
-                                        ...(store.state[currentInningsKey].battingStats[playerId] || { 
-                                            playerId, 
-                                            runs: 0, 
-                                            ballsFaced: 0, 
-                                            fours: 0, 
-                                            sixes: 0, 
-                                            isOut: false, 
+                                        ...(store.state[currentInningsKey].battingStats[playerId] || {
+                                            playerId,
+                                            runs: 0,
+                                            ballsFaced: 0,
+                                            fours: 0,
+                                            sixes: 0,
+                                            isOut: false,
                                             isRetired: false,
-                                            battingOrder: Object.keys(store.state[currentInningsKey].battingStats).length + 1 
+                                            battingOrder: Object.keys(store.state[currentInningsKey].battingStats).length + 1
                                         }),
                                         isRetired: false,
                                         dismissal: undefined
@@ -294,27 +294,7 @@ export const useMatchStore = create<MatchStore>()(
                             }
                         };
                     } else {
-                        let resultText = '';
-                        let winner: string | 'Draw' = 'Draw';
-                        const runs1 = state.innings1.totalRuns;
-                        const runs2 = state.innings2.totalRuns;
-
-                        if (runs2 > runs1) {
-                            winner = state.innings2.battingTeam;
-                            const wicketsLeft = config.playersPerTeam - 1 - state.innings2.totalWickets;
-                            resultText = `${winner} won by ${wicketsLeft} wickets`;
-                        } else if (runs2 === runs1) {
-                            resultText = `Match Tied`;
-                        } else {
-                            winner = state.innings1.battingTeam;
-                            resultText = `${winner} won by ${runs1 - runs2} runs`;
-                        }
-
-                        const matchResult = {
-                            winner: winner,
-                            reason: resultText
-                        };
-
+                        const matchResult = calculateMatchResult(state, config);
                         const completedMatch = { ...state, matchResult, isPlaying: false, completedAt: new Date().toISOString() };
 
                         return {
@@ -385,16 +365,18 @@ export const useMatchStore = create<MatchStore>()(
                     const innings = store.state[currentInningsKey];
 
                     // Mark player as retired hurt
-                    const currentStats = { ...(innings.battingStats[playerId] || { 
-                        playerId, 
-                        runs: 0, 
-                        ballsFaced: 0, 
-                        fours: 0, 
-                        sixes: 0, 
-                        isOut: false, 
-                        isRetired: false,
-                        battingOrder: Object.keys(innings.battingStats).length + 1
-                    }) };
+                    const currentStats = {
+                        ...(innings.battingStats[playerId] || {
+                            playerId,
+                            runs: 0,
+                            ballsFaced: 0,
+                            fours: 0,
+                            sixes: 0,
+                            isOut: false,
+                            isRetired: false,
+                            battingOrder: Object.keys(innings.battingStats).length + 1
+                        })
+                    };
                     currentStats.isRetired = true;
                     currentStats.isOut = false;
                     currentStats.dismissal = 'retired-hurt';
@@ -491,6 +473,7 @@ export const useMatchStore = create<MatchStore>()(
                             config: parsedData.state.config || get().config,
                             state: parsedData.state.state || get().state,
                             history: parsedData.state.history || get().history,
+                            ballHistory: parsedData.state.ballHistory || get().ballHistory,
                         });
                     }
                 } catch (error) {
@@ -596,14 +579,14 @@ export const useMatchStore = create<MatchStore>()(
             startLiveShare: async () => {
                 const { state } = get();
                 if (state.liveMatchId) return state.liveMatchId;
-                
+
                 try {
                     const { user } = useAuthStore.getState();
                     const stateWithCreator = {
                         ...state,
                         creatorId: user?.id
                     };
-                    
+
                     const matchId = await matchSyncService.createLiveMatch(stateWithCreator);
                     set((store) => ({
                         state: {

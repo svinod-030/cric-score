@@ -130,8 +130,8 @@ export default function MatchResultScreen({ navigation, route }: any) {
                             <ScorecardSection
                                 title={`${t('common.stInnings')}: ${innings1.battingTeam}`}
                                 innings={innings1}
-                                battingTeamPlayers={innings1.battingTeam === state.teamA ? teamAPlayers : teamBPlayers}
-                                bowlingTeamPlayers={innings1.battingTeam === state.teamA ? teamBPlayers : teamAPlayers}
+                                battingTeamPlayers={innings1.battingTeam === matchData.teamA ? teamAPlayers : teamBPlayers}
+                                bowlingTeamPlayers={innings1.battingTeam === matchData.teamA ? teamBPlayers : teamAPlayers}
                                 isCollapsible={true}
                                 defaultExpanded={true}
                                 expanded={isSharing ? true : undefined}
@@ -140,7 +140,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                             <OverSummarySection
                                 title={t('common.overSummaryTitle', { innings: t('common.stInnings') })}
                                 innings={innings1}
-                                bowlingTeamPlayers={innings1.battingTeam === state.teamA ? teamBPlayers : teamAPlayers}
+                                bowlingTeamPlayers={innings1.battingTeam === matchData.teamA ? teamBPlayers : teamAPlayers}
                                 defaultExpanded={false}
                                 expanded={isSharing ? true : undefined}
                             />
@@ -150,8 +150,8 @@ export default function MatchResultScreen({ navigation, route }: any) {
                                     <ScorecardSection
                                         title={`${t('common.ndInnings')}: ${innings2.battingTeam}`}
                                         innings={innings2}
-                                        battingTeamPlayers={innings2.battingTeam === state.teamA ? teamAPlayers : teamBPlayers}
-                                        bowlingTeamPlayers={innings2.battingTeam === state.teamA ? teamBPlayers : teamAPlayers}
+                                        battingTeamPlayers={innings2.battingTeam === matchData.teamA ? teamAPlayers : teamBPlayers}
+                                        bowlingTeamPlayers={innings2.battingTeam === matchData.teamA ? teamBPlayers : teamAPlayers}
                                         isCollapsible={true}
                                         defaultExpanded={false}
                                         expanded={isSharing ? true : undefined}
@@ -159,7 +159,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                                     <OverSummarySection
                                         title={t('common.overSummaryTitle', { innings: t('common.ndInnings') })}
                                         innings={innings2}
-                                        bowlingTeamPlayers={innings2.battingTeam === state.teamA ? teamBPlayers : teamAPlayers}
+                                        bowlingTeamPlayers={innings2.battingTeam === matchData.teamA ? teamBPlayers : teamAPlayers}
                                         defaultExpanded={false}
                                         expanded={isSharing ? true : undefined}
                                     />
