@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
 import { Ball } from '../types/match';
 import { useTranslation } from 'react-i18next';
 
@@ -16,11 +16,16 @@ export const OverHistory = ({ overs, runsForNoBall, runsForWide }: OverHistoryPr
     return (
         <View className="mb-4">
             <Text className="text-gray-400 mb-2 text-sm font-bold">{t('common.previousOvers')}</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
-                {overs.slice().reverse().map((over, index) => {
+            <FlatList
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingRight: 20 }}
+                data={overs.slice().reverse()}
+                keyExtractor={(_, index) => `over-${index}`}
+                renderItem={({ item: over, index }) => {
                     const overNumber = overs.length - index;
                     return (
-                        <View key={index} className="mr-3 bg-gray-800 p-2 rounded-xl min-w-[160px] border border-gray-700">
+                        <View className="mr-3 bg-gray-800 p-2 rounded-xl min-w-[160px] border border-gray-700">
                             <Text className="text-gray-500 text-xs mb-2 font-bold uppercase tracking-wider">{t('common.over')} {overNumber}</Text>
                             <View className="flex-row flex-wrap gap-1.5">
                                 {over.balls.map((ball, idx) => (
@@ -41,8 +46,8 @@ export const OverHistory = ({ overs, runsForNoBall, runsForWide }: OverHistoryPr
                             </View>
                         </View>
                     );
-                })}
-            </ScrollView>
+                }}
+            />
         </View>
     );
 };

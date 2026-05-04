@@ -624,14 +624,30 @@ export const useMatchStore = create<MatchStore>()(
         }),
         {
             name: 'match-storage',
-            storage: createJSONStorage(() => AsyncStorage),
+            storage: createJSONStorage(() => {
+                let timeout: NodeJS.Timeout | null = null;
+                return {
+                    getItem: (name) => AsyncStorage.getItem(name),
+                    setItem: (name, value) => {
+                        if (timeout) clearTimeout(timeout);
+                        timeout = setTimeout(async () => {
+                            try {
+                                await AsyncStorage.setItem(name, value);
+                            } catch (e) {
+                                console.error('AsyncStorage Error:', e);
+                            }
+                        }, 500);
+                    },
+                    removeItem: (name) => AsyncStorage.removeItem(name),
+                };
+            }),
             partialize: (state) => {
                 const { tossWinner, tossDecision, ...restConfig } = state.config;
                 return {
                     config: restConfig as MatchConfig,
                     state: state.state,
-                    history: state.history,
-                    ballHistory: state.ballHistory
+                    history: state.history
+                    // EXCLUDED: ballHistory is extremely large (O(N^2)) and causes Binder IPC ANRs
                 };
             },
         }
