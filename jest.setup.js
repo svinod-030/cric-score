@@ -146,6 +146,14 @@ jest.mock('react-i18next', () => ({
     },
 }));
 
+// Mock react-native-share
+jest.mock('react-native-share', () => ({
+    default: {
+        open: jest.fn(() => Promise.resolve({ success: true, message: 'Mocked share' })),
+        shareSingle: jest.fn(() => Promise.resolve({ success: true, message: 'Mocked share single' })),
+    },
+}));
+
 // Suppress console errors and warnings during tests
 global.console = {
     ...console,

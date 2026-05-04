@@ -73,7 +73,7 @@ describe('SettingsScreen', () => {
             fireEvent.press(getByText('Rate App'));
 
             expect(Linking.openURL).toHaveBeenCalledWith(
-                expect.stringContaining('market://details?id=')
+                expect.stringContaining('https://play.google.com/store/apps/details?id=com.vinodsigadana.cricscore')
             );
         });
 
