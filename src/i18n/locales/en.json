@@ -233,6 +233,9 @@
         "join": "Join",
         "deleteMatch": "Delete Match",
         "deleteMatchMsg": "Are you sure you want to delete this match from history? This action cannot be undone.",
-        "delete": "Delete"
+        "delete": "Delete",
+        "shareResultPromo": "Want to score your own cricket matches and follow live scoring?",
+        "shareLivePromo": "Follow this match live and score your own games!",
+        "downloadAppPrompt": "Download the Cric-Score App now: {{link}}"
     }
 }

@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Linking, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ViewShot from 'react-native-view-shot';
-import * as Sharing from 'expo-sharing';
+import Share from 'react-native-share';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMatchStore } from '../store/useMatchStore';
 import { ScorecardSection } from '../components/ScorecardSection';
@@ -85,19 +85,21 @@ export default function MatchResultScreen({ navigation, route }: any) {
 
             setIsSharing(false);
 
-            if (await Sharing.isAvailableAsync()) {
-                await Sharing.shareAsync(uri, {
-                    mimeType: 'image/png',
-                    dialogTitle: t('common.shareScoreboard'),
-                    UTI: 'public.png',
-                });
-            } else {
-                Alert.alert(t('common.error'), t('common.sharingNotAvailable'));
-            }
-        } catch (error) {
-            console.error("Failed to share scoreboard:", error);
+            const message = `🏆 ${t('common.shareScoreboard')}\n\n${t('common.shareResultPromo')}\n📲 ${t('common.downloadAppPrompt', { link: APP_CONFIG.STORE_URL_ANDROID })}`;
+
+            const shareOptions = {
+                title: t('common.shareScoreboard'),
+                message: message,
+                url: uri,
+                type: 'image/png',
+            };
+
+            await Share.open(shareOptions);
+        } catch (error: any) {
             setIsSharing(false);
-            Alert.alert(t('common.error'), t('common.failedCaptureScoreboard'));
+            if (error.message !== 'User did not share') {
+                Alert.alert(t('common.error'), t('common.failedCaptureScoreboard'));
+            }
         }
     };
 
@@ -135,10 +137,10 @@ export default function MatchResultScreen({ navigation, route }: any) {
                                     {calculateAwards(matchData).map((award, idx) => (
                                         <View key={idx} className="bg-gray-900/80 p-3 rounded-xl border border-gray-800 items-center justify-center mb-3" style={{ width: '47%' }}>
                                             <View className="mb-2">
-                                                <Ionicons 
-                                                    name={award.type === 'potm' ? "star" : award.type === 'bestBatsman' ? "medal" : award.type === 'bestBowler' ? "flash" : "hand-right"} 
-                                                    size={24} 
-                                                    color={award.type === 'potm' ? "#EAB308" : award.type === 'bestBatsman' ? "#FCA5A5" : award.type === 'bestBowler' ? "#93C5FD" : "#86EFAC"} 
+                                                <Ionicons
+                                                    name={award.type === 'potm' ? "star" : award.type === 'bestBatsman' ? "medal" : award.type === 'bestBowler' ? "flash" : "hand-right"}
+                                                    size={24}
+                                                    color={award.type === 'potm' ? "#EAB308" : award.type === 'bestBatsman' ? "#FCA5A5" : award.type === 'bestBowler' ? "#93C5FD" : "#86EFAC"}
                                                 />
                                             </View>
                                             <Text className="text-gray-400 text-[10px] uppercase font-bold tracking-tighter mb-1 text-center">{t(`common.${award.type}`)}</Text>

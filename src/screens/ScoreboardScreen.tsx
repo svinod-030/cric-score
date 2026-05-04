@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Modal, TextInput, ActivityIndicator, Image, Alert, TouchableWithoutFeedback } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ViewShot from 'react-native-view-shot';
-import * as Sharing from 'expo-sharing';
+import Share from 'react-native-share';
 import { useMatchStore } from '../store/useMatchStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { backupToDrive } from '../utils/backupService';
-import { ExtraType, MatchState, WicketType } from '../types/match';
+import { APP_CONFIG } from '../utils/constants';
+import { ExtraType, WicketType } from '../types/match';
 import { BowlerSelectionModal } from '../components/BowlerSelectionModal';
 import { BatterSelectionModal } from '../components/BatterSelectionModal';
 import { ScorecardSection } from '../components/ScorecardSection';
@@ -135,17 +136,21 @@ export default function ScoreboardScreen({ navigation }: any) {
 
             if (viewShotRef.current) {
                 const uri = await viewShotRef.current.capture();
-                if (await Sharing.isAvailableAsync()) {
-                    await Sharing.shareAsync(uri, {
-                        mimeType: 'image/png',
-                        dialogTitle: t('common.shareMatchScore'),
-                        UTI: 'public.png',
-                    });
-                }
+                const message = `🔴 ${t('common.shareMatchScore')}\n\n${t('common.shareLivePromo')}\n📲 ${t('common.downloadAppPrompt', { link: APP_CONFIG.STORE_URL_ANDROID })}`;
+
+                const shareOptions = {
+                    title: t('common.shareMatchScore'),
+                    message: message,
+                    url: uri,
+                    type: 'image/png',
+                };
+
+                await Share.open(shareOptions);
             }
-        } catch (e) {
-            console.error("Failed to share match card:", e);
-            Alert.alert(t('common.error'), t('common.failedToStartLiveShare'));
+        } catch (e: any) {
+            if (e.message !== 'User did not share') {
+                Alert.alert(t('common.error'), t('common.failedToStartLiveShare'));
+            }
         } finally {
             setIsSharingLive(false);
         }
