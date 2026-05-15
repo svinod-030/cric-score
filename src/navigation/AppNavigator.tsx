@@ -64,6 +64,19 @@ const HeaderActions = React.memo(() => {
     );
 });
 
+const DEFAULT_STACK_OPTIONS = {
+    headerStyle: {
+        backgroundColor: '#111827',
+    },
+    headerTintColor: '#fff',
+    headerTitleStyle: {
+        fontWeight: 'bold' as const,
+    },
+    headerTitle: (props: any) => <LogoTitle {...props} />,
+    headerRight: (props: any) => <HeaderActions {...props} />,
+    contentStyle: { backgroundColor: '#111827' }
+};
+
 function HomeTabs() {
     const { t } = useTranslation();
     return (
@@ -123,18 +136,7 @@ export default function AppNavigator() {
         <>
             <NavigationContainer>
                 <Stack.Navigator
-                    screenOptions={{
-                        headerStyle: {
-                            backgroundColor: '#111827',
-                        },
-                        headerTintColor: '#fff',
-                        headerTitleStyle: {
-                            fontWeight: 'bold',
-                        },
-                        headerTitle: () => <LogoTitle />,
-                        headerRight: () => <HeaderActions />,
-                        contentStyle: { backgroundColor: '#111827' }
-                    }}
+                    screenOptions={DEFAULT_STACK_OPTIONS}
                 >
                     <Stack.Screen
                         name="HomeTabs"
