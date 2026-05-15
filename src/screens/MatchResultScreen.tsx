@@ -201,8 +201,9 @@ export default function MatchResultScreen({ navigation, route }: any) {
 
                 <View className="p-6 pt-0">
                     <TouchableOpacity
-                        className="bg-green-600 w-full p-4 rounded-xl flex-row items-center justify-center gap-2 shadow-lg shadow-green-900/50 mb-4"
+                        className={`bg-green-600 w-full p-4 rounded-xl flex-row items-center justify-center gap-2 shadow-lg shadow-green-900/50 mb-4 ${isSharing ? 'opacity-50' : ''}`}
                         onPress={handleShare}
+                        disabled={isSharing}
                     >
                         <Ionicons name="share-social" size={20} color="white" />
                         <Text className="text-white text-lg font-bold">{t('common.shareScoreboard')}</Text>

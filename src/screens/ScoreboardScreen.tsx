@@ -442,6 +442,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                             <View className="flex-row items-center gap-2">
                                 <TouchableOpacity
                                     onPress={handleShareMatch}
+                                    disabled={isSharingLive}
                                     className="flex-row items-center bg-blue-600 px-3 py-2 rounded-xl shadow-lg shadow-blue-500/20"
                                 >
                                     {isSharingLive ? (
