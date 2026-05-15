@@ -24,14 +24,12 @@ export default function App() {
   return (
     <>
       <AppNavigator />
-      {updateInfo && (
-        <UpdateModal
-          visible={showUpdateModal}
-          onClose={() => setShowUpdateModal(false)}
-          latestVersion={updateInfo.latestVersion}
-          storeUrl={updateInfo.storeUrl}
-        />
-      )}
+      <UpdateModal
+        visible={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+        latestVersion={updateInfo?.latestVersion || ''}
+        storeUrl={updateInfo?.storeUrl || ''}
+      />
     </>
   );
 }

@@ -103,10 +103,10 @@ const ConfettiPiece: React.FC<ConfettiPieceProps> = ({ index }) => {
     );
 };
 
-export const Confetti: React.FC = () => {
+export const Confetti: React.FC<{ active: boolean }> = ({ active }) => {
     return (
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
-            {Array.from({ length: NUM_CONFETTI }).map((_, i) => (
+            {active && Array.from({ length: NUM_CONFETTI }).map((_, i) => (
                 <ConfettiPiece key={i} index={i} />
             ))}
         </View>

@@ -233,7 +233,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-            {!isSharing && matchResult.winner !== 'Draw' && <Confetti />}
+            <Confetti active={!isSharing && matchResult.winner !== 'Draw'} />
         </SafeAreaView>
     );
 }

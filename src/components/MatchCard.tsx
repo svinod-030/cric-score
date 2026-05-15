@@ -9,6 +9,8 @@ interface MatchCardProps {
 }
 
 export const MatchCard: React.FC<MatchCardProps> = ({ state, matchId, t }) => {
+    if (!matchId) return <View style={{ width: 350, height: 400, backgroundColor: '#111827' }} />;
+    
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${matchId}`;
 
     return (

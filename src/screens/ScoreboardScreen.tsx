@@ -397,9 +397,7 @@ export default function ScoreboardScreen({ navigation }: any) {
             {/* Hidden ViewShot for Match Card sharing */}
             <View style={{ position: 'absolute', left: -9999, top: -9999 }}>
                 <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 0.9 }}>
-                    {state.liveMatchId && (
-                        <MatchCard state={state} matchId={state.liveMatchId} t={t} />
-                    )}
+                    <MatchCard state={state} matchId={state.liveMatchId || ''} t={t} />
                 </ViewShot>
             </View>
 
@@ -774,9 +772,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                     <View className="flex-1 bg-black/80 justify-center items-center p-4">
                         <TouchableWithoutFeedback>
                             <View className="bg-gray-900 rounded-[40px] overflow-hidden border border-gray-800 shadow-2xl">
-                                {state.liveMatchId && (
-                                    <MatchCard state={state} matchId={state.liveMatchId} t={t} />
-                                )}
+                                <MatchCard state={state} matchId={state.liveMatchId || ''} t={t} />
                                 <TouchableOpacity
                                     onPress={() => setQRModalVisible(false)}
                                     className="absolute top-4 right-4 bg-black/40 p-2 rounded-full"

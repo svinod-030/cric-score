@@ -67,40 +67,42 @@ const HeaderActions = React.memo(() => {
 function HomeTabs() {
     const { t } = useTranslation();
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#1F2937' }} edges={['left', 'right']}>
-            <Tab.Navigator
-                screenOptions={({ route }) => ({
-                    headerShown: false,
-                    tabBarStyle: {
-                        backgroundColor: '#1F2937', // gray-800
-                        borderTopColor: '#374151', // gray-700
-                        elevation: 0, // Android shadow remove
-                        paddingTop: 5,
-                    },
-                    tabBarActiveTintColor: '#3B82F6', // blue-500
-                    tabBarInactiveTintColor: '#9CA3AF', // gray-400
-                    tabBarIcon: ({ focused, color, size }) => {
-                        let iconName: any;
+        <SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
+            <View style={{ flex: 1, backgroundColor: '#1F2937' }}>
+                <Tab.Navigator
+                    screenOptions={({ route }) => ({
+                        headerShown: false,
+                        tabBarStyle: {
+                            backgroundColor: '#1F2937', // gray-800
+                            borderTopColor: '#374151', // gray-700
+                            elevation: 0, // Android shadow remove
+                            paddingTop: 5,
+                        },
+                        tabBarActiveTintColor: '#3B82F6', // blue-500
+                        tabBarInactiveTintColor: '#9CA3AF', // gray-400
+                        tabBarIcon: ({ focused, color, size }) => {
+                            let iconName: any;
 
-                        if (route.name === t('common.startMatch')) {
-                            iconName = focused ? 'play-circle' : 'play-circle-outline';
-                        } else if (route.name === t('common.liveTab')) {
-                            iconName = focused ? 'radio' : 'radio-outline';
-                        } else if (route.name === t('common.matches')) {
-                            iconName = focused ? 'time' : 'time-outline';
-                        } else if (route.name === t('common.settings')) {
-                            iconName = focused ? 'settings' : 'settings-outline';
-                        }
+                            if (route.name === t('common.startMatch')) {
+                                iconName = focused ? 'play-circle' : 'play-circle-outline';
+                            } else if (route.name === t('common.liveTab')) {
+                                iconName = focused ? 'radio' : 'radio-outline';
+                            } else if (route.name === t('common.matches')) {
+                                iconName = focused ? 'time' : 'time-outline';
+                            } else if (route.name === t('common.settings')) {
+                                iconName = focused ? 'settings' : 'settings-outline';
+                            }
 
-                        return <Ionicons name={iconName} size={size} color={color} />;
-                    },
-                })}
-            >
-                <Tab.Screen name={t('common.startMatch')} component={MatchSetupScreen} />
-                <Tab.Screen name={t('common.liveTab')} component={JoinLiveMatchScreen} />
-                <Tab.Screen name={t('common.matches')} component={MatchesHistoryScreen} />
-                <Tab.Screen name={t('common.settings')} component={SettingsScreen} />
-            </Tab.Navigator>
+                            return <Ionicons name={iconName} size={size} color={color} />;
+                        },
+                    })}
+                >
+                    <Tab.Screen name={t('common.startMatch')} component={MatchSetupScreen} />
+                    <Tab.Screen name={t('common.liveTab')} component={JoinLiveMatchScreen} />
+                    <Tab.Screen name={t('common.matches')} component={MatchesHistoryScreen} />
+                    <Tab.Screen name={t('common.settings')} component={SettingsScreen} />
+                </Tab.Navigator>
+            </View>
         </SafeAreaView>
     );
 }
