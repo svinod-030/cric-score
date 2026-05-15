@@ -27,7 +27,7 @@ import { useTranslation } from 'react-i18next';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function LogoTitle() {
+const LogoTitle = React.memo(() => {
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <Image
@@ -38,16 +38,16 @@ function LogoTitle() {
             <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 20 }}>Cric Score</Text>
         </View>
     );
-}
+});
 
-function HeaderActions() {
+const HeaderActions = React.memo(() => {
     const navigation = useNavigation<any>();
     const { user, isAuthenticated } = useAuthStore();
-    const [showLangModal, setShowLangModal] = React.useState(false);
+    const { setShowLanguageModal } = useSettingsStore();
 
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15, paddingRight: 10 }}>
-            <TouchableOpacity onPress={() => setShowLangModal(true)} style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <TouchableOpacity onPress={() => setShowLanguageModal(true)} style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={{ color: '#A855F7', fontWeight: 'bold', fontSize: 16 }}>ಅ/A</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
@@ -60,10 +60,9 @@ function HeaderActions() {
                     <Ionicons name="person-circle-outline" size={32} color="#9CA3AF" />
                 )}
             </TouchableOpacity>
-            <LanguageSelectionModal visible={showLangModal} onClose={() => setShowLangModal(false)} />
         </View>
     );
-}
+});
 
 function HomeTabs() {
     const { t } = useTranslation();
@@ -119,32 +118,35 @@ export default function AppNavigator() {
     }, [language]);
 
     return (
-        <NavigationContainer>
-            <Stack.Navigator
-                screenOptions={{
-                    headerStyle: {
-                        backgroundColor: '#111827',
-                    },
-                    headerTintColor: '#fff',
-                    headerTitleStyle: {
-                        fontWeight: 'bold',
-                    },
-                    headerTitle: () => <LogoTitle />,
-                    headerRight: () => <HeaderActions />,
-                    contentStyle: { backgroundColor: '#111827' }
-                }}
-            >
-                <Stack.Screen
-                    name="HomeTabs"
-                    component={HomeTabs}
-                    options={{ title: '' }}
-                />
-                <Stack.Screen name="Scoreboard" component={ScoreboardScreen} options={{ title: t('common.scoreBoard') }} />
-                <Stack.Screen name="MatchResult" component={MatchResultScreen} options={{ title: t('common.matchResult') }} />
-                <Stack.Screen name="LiveViewer" component={LiveViewerScreen} options={{ title: t('common.liveMatch') || 'Live Match' }} />
-                <Stack.Screen name="Licenses" component={LicensesScreen} options={{ headerShown: false }} />
-                <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: t('common.profile') }} />
-            </Stack.Navigator>
-        </NavigationContainer>
+        <>
+            <NavigationContainer>
+                <Stack.Navigator
+                    screenOptions={{
+                        headerStyle: {
+                            backgroundColor: '#111827',
+                        },
+                        headerTintColor: '#fff',
+                        headerTitleStyle: {
+                            fontWeight: 'bold',
+                        },
+                        headerTitle: () => <LogoTitle />,
+                        headerRight: () => <HeaderActions />,
+                        contentStyle: { backgroundColor: '#111827' }
+                    }}
+                >
+                    <Stack.Screen
+                        name="HomeTabs"
+                        component={HomeTabs}
+                        options={{ title: '' }}
+                    />
+                    <Stack.Screen name="Scoreboard" component={ScoreboardScreen} options={{ title: t('common.scoreBoard') }} />
+                    <Stack.Screen name="MatchResult" component={MatchResultScreen} options={{ title: t('common.matchResult') }} />
+                    <Stack.Screen name="LiveViewer" component={LiveViewerScreen} options={{ title: t('common.liveMatch') || 'Live Match' }} />
+                    <Stack.Screen name="Licenses" component={LicensesScreen} options={{ headerShown: false }} />
+                    <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: t('common.profile') }} />
+                </Stack.Navigator>
+            </NavigationContainer>
+            <LanguageSelectionModal />
+        </>
     );
 }

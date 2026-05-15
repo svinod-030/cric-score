@@ -13,28 +13,17 @@ export const SUPPORTED_LANGUAGES = [
     { code: 'ml', label: 'മലയാളம்' }
 ];
 
-export default function LanguageSelectionModal({ visible, onClose }: { visible?: boolean, onClose?: () => void }) {
+export default function LanguageSelectionModal() {
     const { t, i18n } = useTranslation();
-    const { isLanguageSelected, setLanguage, language } = useSettingsStore();
-    const [isVisible, setIsVisible] = useState(false);
-
-    useEffect(() => {
-        // Show modal automatically if language is not selected
-        if (!isLanguageSelected) {
-            setIsVisible(true);
-        } else if (visible !== undefined) {
-            setIsVisible(visible);
-        } else {
-            setIsVisible(false);
-        }
-    }, [isLanguageSelected, visible]);
+    const { isLanguageSelected, setLanguage, showLanguageModal, setShowLanguageModal } = useSettingsStore();
 
     const handleSelect = (langCode: string) => {
         setLanguage(langCode);
         i18n.changeLanguage(langCode);
-        setIsVisible(false);
-        if (onClose) onClose();
+        setShowLanguageModal(false);
     };
+
+    const isVisible = !isLanguageSelected || showLanguageModal;
 
     return (
         <Modal
@@ -42,8 +31,8 @@ export default function LanguageSelectionModal({ visible, onClose }: { visible?:
             transparent={true}
             animationType="fade"
             onRequestClose={() => {
-                if (isLanguageSelected && onClose) {
-                    onClose();
+                if (isLanguageSelected) {
+                    setShowLanguageModal(false);
                 }
             }}
         >
@@ -54,7 +43,7 @@ export default function LanguageSelectionModal({ visible, onClose }: { visible?:
                             <Text className="text-white text-2xl font-bold">{t('common.selectLanguage')}</Text>
                         </View>
                         {isLanguageSelected && (
-                            <TouchableOpacity onPress={() => { setIsVisible(false); if (onClose) onClose(); }}>
+                            <TouchableOpacity onPress={() => setShowLanguageModal(false)}>
                                 <Ionicons name="close" size={28} color="#9CA3AF" />
                             </TouchableOpacity>
                         )}
