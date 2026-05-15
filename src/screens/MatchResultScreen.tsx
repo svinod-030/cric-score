@@ -17,11 +17,23 @@ export default function MatchResultScreen({ navigation, route }: any) {
     const { state, resetMatch, deleteMatch } = useMatchStore();
     const viewShotRef = useRef<any>(null);
     const [isSharing, setIsSharing] = React.useState(false);
+    const [shouldShowConfetti, setShouldShowConfetti] = React.useState(false);
 
     // Use passed match data (history) OR current active state
     const matchData = route.params?.matchData || state;
     const { matchResult, innings1, innings2, teamAPlayers, teamBPlayers } = matchData;
     const isHistoryView = !!route.params?.matchData;
+
+    React.useEffect(() => {
+        if (matchResult && matchResult.winner !== 'Draw' && matchData.completedAt) {
+            const completedTime = new Date(matchData.completedAt).getTime();
+            const currentTime = new Date().getTime();
+            // Show confetti only if match was completed within the last 1 minute
+            if (currentTime - completedTime < 60000) {
+                setShouldShowConfetti(true);
+            }
+        }
+    }, [matchData.completedAt, matchResult]);
 
     const handleNewMatch = () => {
         resetMatch();
@@ -234,7 +246,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-            <Confetti active={!isSharing && matchResult.winner !== 'Draw'} />
+            <Confetti active={!isSharing && shouldShowConfetti} />
         </SafeAreaView>
     );
 }
