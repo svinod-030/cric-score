@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MatchSetupScreen from '../screens/MatchSetupScreen';
 import ScoreboardScreen from '../screens/ScoreboardScreen';
@@ -22,12 +22,15 @@ import ProfileScreen from '../screens/ProfileScreen';
 import LanguageSelectionModal from '../components/LanguageSelectionModal';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useTranslation } from 'react-i18next';
+import { useColorScheme } from 'nativewind';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const LogoTitle = React.memo(() => {
+    const { isDark } = useAppTheme();
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <Image
@@ -35,7 +38,7 @@ const LogoTitle = React.memo(() => {
                 source={require('../../assets/icon.png')}
                 resizeMode="contain"
             />
-            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 20 }}>Cric Score</Text>
+            <Text style={{ color: isDark ? '#fff' : '#111827', fontWeight: 'bold', fontSize: 20 }}>Cric Score</Text>
         </View>
     );
 });
@@ -64,35 +67,30 @@ const HeaderActions = React.memo(() => {
     );
 });
 
-const DEFAULT_STACK_OPTIONS = {
-    headerStyle: {
-        backgroundColor: '#111827',
-    },
-    headerTintColor: '#fff',
-    headerTitleStyle: {
-        fontWeight: 'bold' as const,
-    },
-    headerTitle: (props: any) => <LogoTitle {...props} />,
-    headerRight: (props: any) => <HeaderActions {...props} />,
-    contentStyle: { backgroundColor: '#111827' }
-};
-
 function HomeTabs() {
     const { t } = useTranslation();
+    const { isDark } = useAppTheme();
+
+    const tabBarBg = isDark ? '#1F2937' : '#F9FAFB';
+    const tabBarBorder = isDark ? '#374151' : '#E5E7EB';
+    const tabBarActive = '#3B82F6';
+    const tabBarInactive = isDark ? '#9CA3AF' : '#6B7280';
+    const headerBg = isDark ? '#111827' : '#FFFFFF';
+
     return (
         <SafeAreaView style={{ flex: 1 }} edges={['left', 'right']}>
-            <View style={{ flex: 1, backgroundColor: '#1F2937' }}>
+            <View style={{ flex: 1, backgroundColor: tabBarBg }}>
                 <Tab.Navigator
                     screenOptions={({ route }) => ({
                         headerShown: false,
                         tabBarStyle: {
-                            backgroundColor: '#1F2937', // gray-800
-                            borderTopColor: '#374151', // gray-700
-                            elevation: 0, // Android shadow remove
+                            backgroundColor: tabBarBg,
+                            borderTopColor: tabBarBorder,
+                            elevation: 0,
                             paddingTop: 5,
                         },
-                        tabBarActiveTintColor: '#3B82F6', // blue-500
-                        tabBarInactiveTintColor: '#9CA3AF', // gray-400
+                        tabBarActiveTintColor: tabBarActive,
+                        tabBarInactiveTintColor: tabBarInactive,
                         tabBarIcon: ({ focused, color, size }) => {
                             let iconName: any;
 
@@ -122,7 +120,12 @@ function HomeTabs() {
 
 export default function AppNavigator() {
     const { t } = useTranslation();
-    const { language } = useSettingsStore();
+    const { language, theme } = useSettingsStore();
+    const { setColorScheme } = useColorScheme();
+    const { isDark } = useAppTheme();
+
+    const headerBg = isDark ? '#111827' : '#FFFFFF';
+    const headerTint = isDark ? '#FFFFFF' : '#111827';
 
     React.useEffect(() => {
         if (language) {
@@ -132,9 +135,41 @@ export default function AppNavigator() {
         }
     }, [language]);
 
+    React.useEffect(() => {
+        if (theme === 'system') {
+            setColorScheme('system');
+        } else {
+            setColorScheme(theme);
+        }
+    }, [theme]);
+
+    const DEFAULT_STACK_OPTIONS = {
+        headerStyle: {
+            backgroundColor: headerBg,
+        },
+        headerTintColor: headerTint,
+        headerTitleStyle: {
+            fontWeight: 'bold' as const,
+        },
+        headerTitle: (props: any) => <LogoTitle {...props} />,
+        headerRight: (props: any) => <HeaderActions {...props} />,
+        contentStyle: { backgroundColor: headerBg }
+    };
+
+    const navTheme = isDark ? DarkTheme : {
+        ...DefaultTheme,
+        colors: {
+            ...DefaultTheme.colors,
+            background: '#F9FAFB',
+            card: '#FFFFFF',
+            text: '#111827',
+            border: '#E5E7EB',
+        },
+    };
+
     return (
         <>
-            <NavigationContainer>
+            <NavigationContainer theme={navTheme}>
                 <Stack.Navigator
                     screenOptions={DEFAULT_STACK_OPTIONS}
                 >

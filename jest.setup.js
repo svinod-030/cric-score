@@ -99,6 +99,20 @@ jest.mock('@react-native-google-signin/google-signin', () => ({
 jest.mock('react-native-css-interop', () => ({
     cssInterop: jest.fn(),
     remapProps: jest.fn(),
+    useColorScheme: jest.fn(() => ({
+        colorScheme: 'light',
+        setColorScheme: jest.fn(),
+        toggleColorScheme: jest.fn(),
+    })),
+}));
+
+// Mock nativewind
+jest.mock('nativewind', () => ({
+    useColorScheme: jest.fn(() => ({
+        colorScheme: 'light',
+        setColorScheme: jest.fn(),
+        toggleColorScheme: jest.fn(),
+    })),
 }));
 
 // Mock react-native-reanimated

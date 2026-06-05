@@ -7,6 +7,26 @@ import { Text } from 'react-native';
 jest.mock('@react-navigation/native', () => ({
     NavigationContainer: ({ children }: any) => children,
     createNavigationContainerRef: () => ({ current: null }),
+    DefaultTheme: {
+        colors: {
+            background: 'white',
+            card: 'white',
+            text: 'black',
+            border: 'gray',
+            notification: 'red',
+            primary: 'blue',
+        },
+    },
+    DarkTheme: {
+        colors: {
+            background: 'black',
+            card: 'black',
+            text: 'white',
+            border: 'gray',
+            notification: 'red',
+            primary: 'blue',
+        },
+    },
 }));
 
 jest.mock('@react-navigation/native-stack', () => ({

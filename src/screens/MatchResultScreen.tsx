@@ -11,9 +11,11 @@ import { APP_CONFIG } from '../utils/constants';
 import { useTranslation } from 'react-i18next';
 import { Confetti } from '../components/Confetti';
 import { calculateAwards } from '../utils/awardsUtils';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 export default function MatchResultScreen({ navigation, route }: any) {
     const { t } = useTranslation();
+    const { isDark } = useAppTheme();
     const { state, resetMatch, deleteMatch } = useMatchStore();
     const viewShotRef = useRef<any>(null);
     const [isSharing, setIsSharing] = React.useState(false);
@@ -46,8 +48,8 @@ export default function MatchResultScreen({ navigation, route }: any) {
 
     if (!matchResult) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-900 items-center justify-center" edges={['bottom', 'left', 'right']}>
-                <Text className="text-white mb-4">{t('common.noResultYet')}</Text>
+            <SafeAreaView className={`flex-1 items-center justify-center ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`} edges={['bottom', 'left', 'right']}>
+                <Text className={`mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('common.noResultYet')}</Text>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Text className="text-blue-500">{t('common.goBack')}</Text>
                 </TouchableOpacity>
@@ -116,20 +118,20 @@ export default function MatchResultScreen({ navigation, route }: any) {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
+        <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`} edges={['bottom', 'left', 'right']}>
             <ScrollView className="flex-1">
                 <ViewShot
                     ref={viewShotRef}
                     options={{ format: 'png', quality: 0.9 }}
-                    style={{ backgroundColor: '#111827' }} // Matches gray-900
+                    style={{ backgroundColor: isDark ? '#111827' : '#f3f4f6' }}
                 >
-                    <View className="bg-gray-900">
-                        <View className="p-6 items-center border-b border-gray-800 mb-4">
-                            <Text className="text-gray-400 text-lg mb-1">{t('common.matchResult')}</Text>
-                            <Text className="text-3xl font-black text-white text-center mb-1">
+                    <View className={isDark ? 'bg-gray-900' : 'bg-gray-100'}>
+                        <View className={`p-6 items-center border-b mb-4 ${isDark ? 'border-gray-800' : 'border-gray-250 bg-white'}`}>
+                            <Text className={`text-lg mb-1 ${isDark ? 'text-gray-400' : 'text-gray-650'}`}>{t('common.matchResult')}</Text>
+                            <Text className={`text-3xl font-black text-center mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                 {matchResult.winner === 'Draw' ? t('common.matchDrawn') : `${matchResult.winner} ${t('common.winsExclamation')}`}
                             </Text>
-                            <Text className="text-lg text-yellow-500 font-medium lowercase">
+                            <Text className="text-lg text-yellow-600 font-medium lowercase">
                                 {matchResult.resultType === 'runs'
                                     ? t('common.wonByRuns', { count: matchResult.margin })
                                     : matchResult.resultType === 'wickets'
@@ -141,13 +143,13 @@ export default function MatchResultScreen({ navigation, route }: any) {
                         </View>
 
                         <View className="px-4 mb-6">
-                            <View className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700">
-                                <Text className="text-white text-lg font-bold mb-4 flex-row items-center">
+                            <View className={`rounded-2xl p-4 border ${isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'}`}>
+                                <Text className={`text-lg font-bold mb-4 flex-row items-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                     <Ionicons name="trophy-outline" size={20} color="#EAB308" /> {t('common.matchAwards')}
                                 </Text>
                                 <View className="flex-row flex-wrap justify-between" style={{ gap: 12 }}>
                                     {calculateAwards(matchData).map((award, idx) => (
-                                        <View key={idx} className="bg-gray-900/80 p-3 rounded-xl border border-gray-800 items-center justify-center mb-3" style={{ width: '47%' }}>
+                                        <View key={idx} className={`p-3 rounded-xl border items-center justify-center mb-3 ${isDark ? 'bg-gray-900/80 border-gray-800' : 'bg-gray-50 border-gray-200'}`} style={{ width: '47%' }}>
                                             <View className="mb-2">
                                                 <Ionicons
                                                     name={award.type === 'potm' ? "star" : award.type === 'bestBatsman' ? "medal" : award.type === 'bestBowler' ? "flash" : "hand-right"}
@@ -155,9 +157,9 @@ export default function MatchResultScreen({ navigation, route }: any) {
                                                     color={award.type === 'potm' ? "#EAB308" : award.type === 'bestBatsman' ? "#FCA5A5" : award.type === 'bestBowler' ? "#93C5FD" : "#86EFAC"}
                                                 />
                                             </View>
-                                            <Text className="text-gray-400 text-[10px] uppercase font-bold tracking-tighter mb-1 text-center">{t(`common.${award.type}`)}</Text>
-                                            <Text className="text-white font-bold text-center text-xs" numberOfLines={1}>{award.playerName}</Text>
-                                            <Text className="text-gray-500 text-[10px] mt-1 text-center">{award.stats}</Text>
+                                            <Text className={`text-[10px] uppercase font-bold tracking-tighter mb-1 text-center ${isDark ? 'text-gray-400' : 'text-gray-650'}`}>{t(`common.${award.type}`)}</Text>
+                                            <Text className={`font-bold text-center text-xs ${isDark ? 'text-white' : 'text-gray-900'}`} numberOfLines={1}>{award.playerName}</Text>
+                                            <Text className={`text-[10px] mt-1 text-center ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{award.stats}</Text>
                                         </View>
                                     ))}
                                 </View>
@@ -206,7 +208,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                         </View>
                         {/* Add branding or footer for the screenshot */}
                         <View className="p-4 items-center">
-                            <Text className="text-gray-600 text-xs italic">{t('common.brandingFooter')}</Text>
+                            <Text className={`text-xs italic ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>{t('common.brandingFooter')}</Text>
                         </View>
                     </View>
                 </ViewShot>
@@ -236,7 +238,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                         </TouchableOpacity>
                     )}
                     <TouchableOpacity
-                        className="bg-red-500/10 w-full p-4 rounded-xl items-center border border-red-500/30 mb-8"
+                        className={`w-full p-4 rounded-xl items-center border mb-8 ${isDark ? 'bg-red-500/10 border-red-500/30' : 'bg-red-50 border-red-200'}`}
                         onPress={handleDeleteMatch}
                     >
                         <View className="flex-row items-center gap-2">

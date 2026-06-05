@@ -3,6 +3,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { APP_CONFIG } from '../utils/constants';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
+import { useAuthStore } from '../store/useAuthStore';
+import { backupToDrive } from '../utils/backupService';
+import React, { useState } from 'react';
+import { useSettingsStore } from '../store/useSettingsStore';
+import { useAppTheme } from '../hooks/useAppTheme';
+import ThemeSelectionModal from '../components/ThemeSelectionModal';
 
 type SettingItemProps = {
     icon: keyof typeof Ionicons.glyphMap;
@@ -10,34 +17,55 @@ type SettingItemProps = {
     subtitle?: string;
     onPress: () => void;
     color?: string;
+    isDark?: boolean;
+    rightElement?: React.ReactNode;
 };
 
-const SettingItem = ({ icon, title, subtitle, onPress, color = '#3B82F6' }: SettingItemProps) => (
+const SettingItem = ({ icon, title, subtitle, onPress, color = '#3B82F6', isDark = true, rightElement }: SettingItemProps) => (
     <TouchableOpacity
         onPress={onPress}
-        className="flex-row items-center bg-gray-800 p-4 rounded-xl mb-3 border border-gray-700 active:bg-gray-700"
+        className={`flex-row items-center p-4 rounded-xl mb-3 border ${isDark
+            ? 'bg-gray-800 border-gray-700 active:bg-gray-700'
+            : 'bg-white border-gray-200 active:bg-gray-50'
+            }`}
     >
         <View className={`w-10 h-10 rounded-full items-center justify-center mr-4`} style={{ backgroundColor: `${color}20` }}>
             <Ionicons name={icon} size={20} color={color} />
         </View>
         <View className="flex-1">
-            <Text className="text-white font-semibold text-lg">{title}</Text>
-            {subtitle && <Text className="text-gray-400 text-xs">{subtitle}</Text>}
+            <Text className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{title}</Text>
+            {subtitle && <Text className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{subtitle}</Text>}
         </View>
-        <Ionicons name="chevron-forward" size={20} color="#6B7280" />
+        {rightElement ?? <Ionicons name="chevron-forward" size={20} color={isDark ? '#6B7280' : '#9CA3AF'} />}
     </TouchableOpacity>
 );
 
-import { useNavigation } from '@react-navigation/native';
-import { useAuthStore } from '../store/useAuthStore';
-import { backupToDrive } from '../utils/backupService';
-import React, { useState } from 'react';
+const THEME_LABELS: Record<string, string> = {
+    light: 'common.themeLight',
+    dark: 'common.themeDark',
+    system: 'common.themeSystem',
+};
+
+const THEME_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+    light: 'sunny',
+    dark: 'moon',
+    system: 'phone-portrait-outline',
+};
 
 export default function SettingsScreen() {
     const { t, i18n } = useTranslation();
     const navigation = useNavigation<any>();
     const { isAuthenticated } = useAuthStore();
+    const { theme } = useSettingsStore();
+    const { isDark } = useAppTheme();
     const [isBackingUp, setIsBackingUp] = useState(false);
+    const [showThemeModal, setShowThemeModal] = useState(false);
+
+    const bg = isDark ? 'bg-gray-900' : 'bg-gray-100';
+    const sectionLabelColor = isDark ? 'text-gray-500' : 'text-gray-400';
+    const titleColor = isDark ? 'text-white' : 'text-gray-900';
+    const versionColor = isDark ? 'text-gray-600' : 'text-gray-400';
+    const appNameColor = isDark ? 'text-gray-500' : 'text-gray-500';
 
     const handleBackup = async () => {
         if (!isAuthenticated) {
@@ -54,10 +82,6 @@ export default function SettingsScreen() {
         } else {
             Alert.alert(t('common.backupFailed'), t('common.backupFailedMsg'));
         }
-    };
-
-    const toggleLanguage = (lang: string) => {
-        i18n.changeLanguage(lang);
     };
 
     const handlePress = (action: string) => {
@@ -85,13 +109,46 @@ export default function SettingsScreen() {
         Alert.alert(t('common.comingSoon'), t('common.featureUnderDevelopment', { feature: action }));
     };
 
-    return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['left', 'right']}>
-            <ScrollView className="p-4">
-                <Text className="text-white text-3xl font-bold mb-6">{t('common.settings')}</Text>
+    const ThemeBadge = () => (
+        <View className={`flex-row items-center gap-2 px-3 py-1.5 rounded-lg border ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'}`}>
+            <Ionicons
+                name={THEME_ICONS[theme]}
+                size={14}
+                color={isDark ? '#9CA3AF' : '#6B7280'}
+            />
+            <Text className={`text-xs font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                {t(THEME_LABELS[theme])}
+            </Text>
+        </View>
+    );
 
+    return (
+        <SafeAreaView className={`flex-1 ${bg}`} edges={['left', 'right']}>
+            <ScrollView className="p-4">
+                <Text className={`text-3xl font-bold mb-6 ${titleColor}`}>{t('common.settings')}</Text>
+
+                {/* Appearance Section */}
                 <View className="mb-6">
-                    <Text className="text-gray-500 font-bold mb-3 uppercase text-xs tracking-wider">{t('common.general')}</Text>
+                    <Text className={`font-bold mb-3 uppercase text-xs tracking-wider ${sectionLabelColor}`}>
+                        {t('common.appearance')}
+                    </Text>
+
+                    <SettingItem
+                        icon={THEME_ICONS[theme]}
+                        title={t('common.theme')}
+                        subtitle={t(THEME_LABELS[theme])}
+                        onPress={() => setShowThemeModal(true)}
+                        color="#6366F1"
+                        isDark={isDark}
+                        rightElement={<ThemeBadge />}
+                    />
+                </View>
+
+                {/* General Section */}
+                <View className="mb-6">
+                    <Text className={`font-bold mb-3 uppercase text-xs tracking-wider ${sectionLabelColor}`}>
+                        {t('common.general')}
+                    </Text>
 
                     <SettingItem
                         icon="star"
@@ -99,6 +156,7 @@ export default function SettingsScreen() {
                         subtitle={t('common.rateUsOnStore')}
                         onPress={() => handlePress("Rate App")}
                         color="#F59E0B"
+                        isDark={isDark}
                     />
 
                     <SettingItem
@@ -107,16 +165,21 @@ export default function SettingsScreen() {
                         subtitle={isBackingUp ? "Backing up..." : t('common.saveDataSafely')}
                         onPress={() => handlePress("Backup")}
                         color="#10B981"
+                        isDark={isDark}
                     />
                 </View>
 
+                {/* About Section */}
                 <View className="mb-6">
-                    <Text className="text-gray-500 font-bold mb-3 uppercase text-xs tracking-wider">{t('common.about')}</Text>
+                    <Text className={`font-bold mb-3 uppercase text-xs tracking-wider ${sectionLabelColor}`}>
+                        {t('common.about')}
+                    </Text>
                     <SettingItem
                         icon="document-text"
                         title={t('common.openSourceLicenses')}
                         onPress={() => handlePress("Licenses")}
                         color="#6366F1"
+                        isDark={isDark}
                     />
                     <SettingItem
                         icon="chatbubble-ellipses"
@@ -124,14 +187,20 @@ export default function SettingsScreen() {
                         subtitle={t('common.supportFeedback')}
                         onPress={() => handlePress("Contact Us")}
                         color="#3B82F6"
+                        isDark={isDark}
                     />
                 </View>
 
                 <View className="items-center mt-4 mb-10">
-                    <Text className="text-gray-500 font-bold text-lg">Cric Score</Text>
-                    <Text className="text-gray-600 text-sm">{t('common.version')} {APP_CONFIG.APP_VERSION}</Text>
+                    <Text className={`font-bold text-lg ${appNameColor}`}>Cric Score</Text>
+                    <Text className={`text-sm ${versionColor}`}>{t('common.version')} {APP_CONFIG.APP_VERSION}</Text>
                 </View>
             </ScrollView>
+
+            <ThemeSelectionModal
+                visible={showThemeModal}
+                onClose={() => setShowThemeModal(false)}
+            />
         </SafeAreaView>
     );
 }

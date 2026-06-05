@@ -20,13 +20,14 @@ import { MatchStartModal } from '../components/MatchStartModal';
 import { MatchCard } from '../components/MatchCard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 
 
 const EditablePlayerName = ({
     name,
     onSave,
-    textClassName = "text-white font-bold text-lg",
+    textClassName,
     containerClassName = ""
 }: {
     name: string;
@@ -36,6 +37,7 @@ const EditablePlayerName = ({
 }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [tempName, setTempName] = useState(name);
+    const { isDark } = useAppTheme();
 
     useEffect(() => {
         setTempName(name);
@@ -50,6 +52,8 @@ const EditablePlayerName = ({
         setIsEditing(false);
     };
 
+    const resolvedTextClassName = textClassName || `${isDark ? 'text-white' : 'text-gray-900'} font-bold text-lg`;
+
     if (isEditing) {
         return (
             <TextInput
@@ -58,7 +62,7 @@ const EditablePlayerName = ({
                 onBlur={handleSave}
                 onSubmitEditing={handleSave}
                 autoFocus
-                className={`${textClassName} border-b border-blue-500 min-w-[100px] p-0`}
+                className={`${resolvedTextClassName} border-b border-blue-500 min-w-[100px] p-0`}
                 selectionColor="#3b82f6"
             />
         );
@@ -72,7 +76,7 @@ const EditablePlayerName = ({
             }}
             className={`flex-row items-center gap-2 ${containerClassName}`}
         >
-            <Text className={`max-w-[150px] ${textClassName}`}>{name}</Text>
+            <Text className={`max-w-[150px] ${resolvedTextClassName}`}>{name}</Text>
             <Ionicons name="pencil" size={14} color="#6b7280" />
         </TouchableOpacity >
     );
@@ -80,6 +84,7 @@ const EditablePlayerName = ({
 
 export default function ScoreboardScreen({ navigation }: any) {
     const { t } = useTranslation();
+    const { isDark } = useAppTheme();
     const { state, config, recordBall, endInnings, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings, renamePlayer, startLiveShare } = useMatchStore();
     const viewShotRef = useRef<any>(null);
     const innings = state.currentInnings === 1 ? state.innings1 : state.innings2;
@@ -393,7 +398,7 @@ export default function ScoreboardScreen({ navigation }: any) {
 
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
+        <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`} edges={['bottom', 'left', 'right']}>
             {/* Hidden ViewShot for Match Card sharing */}
             <View style={{ position: 'absolute', left: -9999, top: -9999 }}>
                 <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 0.9 }}>
@@ -404,31 +409,31 @@ export default function ScoreboardScreen({ navigation }: any) {
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 {/* Header / Score */}
                 {!state.isInningsBreak && (
-                    <View className="p-6 pb-2 border-b border-gray-800">
+                    <View className={`p-6 pb-2 border-b ${isDark ? 'border-gray-800' : 'border-gray-200 bg-white'}`}>
                         {/* Team Status Row */}
                         <View className="items-center mb-4">
-                            <View className="flex-row items-center bg-gray-800/50 px-4 py-1.5 rounded-full border border-gray-700">
+                            <View className={`flex-row items-center px-4 py-1.5 rounded-full border ${isDark ? 'bg-gray-800/50 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
                                 <View className="w-2 h-2 rounded-full bg-red-600 mr-2 animate-pulse" />
-                                <Text className="text-gray-300 font-black uppercase tracking-[2px] text-[10px]">
+                                <Text className={`font-black uppercase tracking-[2px] text-[10px] ${isDark ? 'text-gray-300' : 'text-gray-750'}`}>
                                     {innings.battingTeam} {t('common.batting')}
                                 </Text>
                             </View>
                         </View>
 
                         <View className="items-center mb-6">
-                            <Text className="text-6xl font-black text-white">
+                            <Text className={`text-6xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                 {innings.totalRuns}/{innings.totalWickets}
                             </Text>
-                            <Text className="text-xl text-gray-400 mt-2">
+                            <Text className={`text-xl mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                                 {t('common.overs')}: {innings.overs.length}.{currentOverValidBalls} ({state.overs})
                             </Text>
 
                             {state.currentInnings === 2 && (
-                                <View className="mt-4 bg-gray-800 px-4 py-2 rounded-lg">
-                                    <Text className="text-yellow-500 font-bold text-lg text-center">
+                                <View className={`mt-4 px-4 py-2 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50 border border-gray-200'}`}>
+                                    <Text className="text-yellow-600 font-bold text-lg text-center">
                                         {t('common.target')}: {state.innings1.totalRuns + 1}
                                     </Text>
-                                    <Text className="text-gray-300 text-sm text-center mt-1">
+                                    <Text className={`text-sm text-center mt-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                                         {t('common.needRunsInBalls', {
                                             runs: state.innings1.totalRuns + 1 - innings.totalRuns,
                                             balls: (state.overs * 6) - (innings.overs.length * 6 + currentOverValidBalls)
@@ -459,7 +464,7 @@ export default function ScoreboardScreen({ navigation }: any) {
 
                                 <TouchableOpacity
                                     onPress={handleShowQR}
-                                    className="bg-gray-800 p-2 rounded-xl border border-gray-700 w-10 h-10 items-center justify-center"
+                                    className={`p-2 rounded-xl border w-10 h-10 items-center justify-center ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-255'}`}
                                 >
                                     <Ionicons name="qr-code-outline" size={18} color="#3b82f6" />
                                 </TouchableOpacity>
@@ -467,20 +472,20 @@ export default function ScoreboardScreen({ navigation }: any) {
 
                             <TouchableOpacity
                                 onPress={handleEndInnings}
-                                className="bg-red-900/20 px-4 py-2 rounded-xl border border-red-900/40"
+                                className={`px-4 py-2 rounded-xl border ${isDark ? 'bg-red-900/20 border-red-900/40' : 'bg-red-50 border-red-200'}`}
                             >
                                 <Text className="text-red-500 text-[10px] font-black uppercase tracking-widest">{t('common.end')}</Text>
                             </TouchableOpacity>
                         </View>
 
                         {/* Player Stats Bar */}
-                        <View className={`flex-row ${innings.isLastManStanding ? 'justify-center' : 'justify-between'} bg-gray-800 p-3 rounded-xl mb-4`}>
+                        <View className={`flex-row ${innings.isLastManStanding ? 'justify-center' : 'justify-between'} p-3 rounded-xl mb-4 ${isDark ? 'bg-gray-800' : 'bg-gray-50 border border-gray-200'}`}>
                             <View className={innings.isLastManStanding ? 'items-center' : ''}>
                                 <EditablePlayerName
                                     name={getPlayerName(innings.strikerId) + "*"}
                                     onSave={(newName) => renamePlayer(innings.strikerId, newName.replace('*', ''))}
                                 />
-                                <Text className="text-gray-400">
+                                <Text className={isDark ? 'text-gray-400' : 'text-gray-600'}>
                                     {strikerStats.runs} ({strikerStats.ballsFaced})
                                 </Text>
                             </View>
@@ -490,7 +495,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                                         name={getPlayerName(innings.nonStrikerId)}
                                         onSave={(newName) => renamePlayer(innings.nonStrikerId, newName)}
                                     />
-                                    <Text className="text-gray-400">
+                                    <Text className={isDark ? 'text-gray-400' : 'text-gray-600'}>
                                         {nonStrikerStats.runs} ({nonStrikerStats.ballsFaced})
                                     </Text>
                                 </View>
@@ -498,23 +503,23 @@ export default function ScoreboardScreen({ navigation }: any) {
                         </View>
 
                         {/* Current Bowler Bar */}
-                        <View className="flex-row justify-between items-center bg-gray-800 p-3 rounded-xl mb-4">
+                        <View className={`flex-row justify-between items-center p-3 rounded-xl mb-4 ${isDark ? 'bg-gray-800' : 'bg-gray-50 border border-gray-200'}`}>
                             <View>
-                                <Text className="text-gray-400 text-xs uppercase font-bold">{t('common.bowler')}</Text>
+                                <Text className={`text-xs uppercase font-bold ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('common.bowler')}</Text>
                                 {innings.currentBowlerId ? (
                                     <EditablePlayerName
                                         name={getPlayerName(innings.currentBowlerId)}
                                         onSave={(newName) => renamePlayer(innings.currentBowlerId!, newName)}
                                     />
                                 ) : (
-                                    <Text className="text-white font-bold text-lg">{t('common.selectBowler')}</Text>
+                                    <Text className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('common.selectBowler')}</Text>
                                 )}
                             </View>
                             <View className="items-end">
-                                <Text className="text-white font-bold">
+                                <Text className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                                     {currentBowlerStats ? `${currentBowlerStats.wickets}-${currentBowlerStats.runsConceded}` : "0-0"}
                                 </Text>
-                                <Text className="text-gray-400 text-xs">
+                                <Text className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                                     {bowlerOversDisplay} {t('common.overs')}
                                 </Text>
                             </View>
@@ -522,13 +527,13 @@ export default function ScoreboardScreen({ navigation }: any) {
 
 
                         <View className="mb-4">
-                            <Text className="text-gray-400 mb-2 text-sm">{t('common.thisOver')}</Text>
+                            <Text className={`mb-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('common.thisOver')}</Text>
                             <View className="flex-row gap-2 min-h-[32px] flex-wrap">
                                 {innings.currentOver.length > 0 ? (
                                     innings.currentOver.map((ball, idx) => (
                                         <View
                                             key={idx}
-                                            className={`px-2 h-8 rounded-full items-center justify-center border border-white/10 ${ball.isWicket ? 'bg-red-600' : ball.extraType !== 'none' ? 'bg-yellow-600' : ball.runs >= 4 ? 'bg-green-600' : 'bg-gray-700'}`}
+                                            className={`px-2 h-8 rounded-full items-center justify-center border ${isDark ? 'border-white/10' : 'border-gray-250'} ${ball.isWicket ? 'bg-red-600' : ball.extraType !== 'none' ? 'bg-yellow-600' : ball.runs >= 4 ? 'bg-green-600' : isDark ? 'bg-gray-700' : 'bg-gray-300'}`}
                                         >
                                             <View className="flex-row items-center">
                                                 <Text className="text-white font-bold text-xs">
@@ -541,7 +546,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                                         </View>
                                     ))
                                 ) : (
-                                    <Text className="text-gray-600 text-sm italic">-</Text>
+                                    <Text className={`text-sm italic ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>-</Text>
                                 )}
                             </View>
                         </View>
@@ -578,12 +583,12 @@ export default function ScoreboardScreen({ navigation }: any) {
 
                 {state.isInningsBreak ? (
                     <View className="flex-1 p-6">
-                        <View className="items-center mb-8 bg-gray-800 p-8 rounded-3xl border border-blue-900/30">
+                        <View className={`items-center mb-8 p-8 rounded-3xl border ${isDark ? 'bg-gray-800 border-blue-900/30' : 'bg-white border-blue-100 shadow-sm'}`}>
                             <Ionicons name="trophy" size={64} color="#fbbf24" className="mb-4" />
-                            <Text className="text-white text-3xl font-black text-center">{t('common.inningsOver')}</Text>
-                            <Text className="text-gray-400 text-lg mt-2">{t('common.finishedTheirInnings', { team: state.innings1.battingTeam })}</Text>
+                            <Text className={`text-3xl font-black text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('common.inningsOver')}</Text>
+                            <Text className={`text-lg mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('common.finishedTheirInnings', { team: state.innings1.battingTeam })}</Text>
                             <View className="mt-6 flex-row items-baseline">
-                                <Text className="text-5xl font-bold text-white">{state.innings1.totalRuns}</Text>
+                                <Text className={`text-5xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{state.innings1.totalRuns}</Text>
                                 <Text className="text-2xl text-gray-500 font-medium ml-2">/ {state.innings1.totalWickets}</Text>
                             </View>
                         </View>
@@ -612,9 +617,9 @@ export default function ScoreboardScreen({ navigation }: any) {
                                     <TouchableOpacity
                                         key={run}
                                         onPress={() => handleScore(run)}
-                                        className="flex-1 aspect-square bg-gray-800 rounded-2xl items-center justify-center border border-gray-700 active:bg-gray-700"
+                                        className={`flex-1 aspect-square rounded-2xl items-center justify-center border active:bg-gray-700 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
                                     >
-                                        <Text className="text-white text-3xl font-bold">{run}</Text>
+                                        <Text className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{run}</Text>
                                     </TouchableOpacity>
                                 ))}
                             </View>
@@ -624,51 +629,44 @@ export default function ScoreboardScreen({ navigation }: any) {
                                     <TouchableOpacity
                                         key={run}
                                         onPress={() => handleScore(run)}
-                                        className="flex-1 aspect-video bg-gray-800 rounded-2xl items-center justify-center border border-gray-700 active:bg-gray-700"
+                                        className={`flex-1 aspect-video rounded-2xl items-center justify-center border active:bg-gray-700 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
                                     >
-                                        <Text className="text-white text-3xl font-bold">{run}</Text>
+                                        <Text className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{run}</Text>
                                     </TouchableOpacity>
                                 ))}
                                 <TouchableOpacity
                                     onPress={handleWicket}
-                                    className="flex-1 aspect-video bg-red-900/50 rounded-2xl items-center justify-center border border-red-700 active:bg-red-800/50"
+                                    className={`flex-1 aspect-video rounded-2xl items-center justify-center border ${isDark ? 'bg-red-900/50 border-red-700 active:bg-red-800/50' : 'bg-red-50 border-red-200 active:bg-red-100'}`}
                                 >
                                     <Text className="text-red-500 text-2xl font-bold">{t('common.wicket')}</Text>
                                 </TouchableOpacity>
                             </View>
 
                             {/* Extras */}
-                            <Text className="text-gray-400 mt-4 mb-2">{t('common.extras')}</Text>
+                            <Text className={`mt-4 mb-2 ${isDark ? 'text-gray-400' : 'text-gray-650'}`}>{t('common.extras')}</Text>
                             <View className="flex-row gap-4">
-                                <TouchableOpacity
-                                    onPress={() => handleExtra('wide')}
-                                    className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
-                                >
-                                    <Text className="text-yellow-500 font-bold text-lg">{t('common.wide')}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={() => handleExtra('no-ball')}
-                                    className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
-                                >
-                                    <Text className="text-yellow-500 font-bold text-lg">{t('common.noBall')}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={() => handleExtra('bye')}
-                                    className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
-                                >
-                                    <Text className="text-yellow-500 font-bold text-lg">{t('common.byes')}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={() => handleExtra('leg-bye')}
-                                    className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
-                                >
-                                    <Text className="text-yellow-500 font-bold text-lg">{t('common.lBye')}</Text>
-                                </TouchableOpacity>
+                                {(['wide', 'no-ball', 'bye', 'leg-bye'] as ExtraType[]).map((type) => {
+                                    const labels: Record<string, string> = {
+                                        'wide': t('common.wide'),
+                                        'no-ball': t('common.noBall'),
+                                        'bye': t('common.byes'),
+                                        'leg-bye': t('common.lBye')
+                                    };
+                                    return (
+                                        <TouchableOpacity
+                                            key={type}
+                                            onPress={() => handleExtra(type)}
+                                            className={`flex-1 h-14 rounded-xl items-center justify-center border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+                                        >
+                                            <Text className="text-yellow-600 font-bold text-lg">{labels[type]}</Text>
+                                        </TouchableOpacity>
+                                    );
+                                })}
                             </View>
 
                             {/* Full Scorecard Section */}
                             <View className="mt-10 mb-20">
-                                <Text className="text-white text-2xl font-bold mb-4 px-2">{t('common.scorecard')}</Text>
+                                <Text className={`text-2xl font-bold mb-4 px-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('common.scorecard')}</Text>
 
                                 {state.currentInnings === 2 && (
                                     <View className="mb-4">

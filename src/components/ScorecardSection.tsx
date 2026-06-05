@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { InningsState, Player } from '../types/match';
 import { useTranslation } from 'react-i18next';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 // Helper to calc extras
 const calculateExtras = (innings: InningsState) => {
@@ -38,6 +39,7 @@ export const ScorecardSection = ({
     expanded?: boolean
 }) => {
     const { t } = useTranslation();
+    const { isDark } = useAppTheme();
     const [internalExpanded, setInternalExpanded] = React.useState(defaultExpanded);
     const isExpanded = expanded !== undefined ? expanded : internalExpanded;
     const validBalls = innings.currentOver.filter(b => b.isValidBall).length;
@@ -50,33 +52,33 @@ export const ScorecardSection = ({
     };
 
     return (
-        <View className="mb-6 bg-gray-800 rounded-xl overflow-hidden">
+        <View className={`mb-6 rounded-xl overflow-hidden border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'}`}>
             <TouchableOpacity
                 activeOpacity={isCollapsible ? 0.7 : 1}
                 onPress={toggleExpanded}
-                className="bg-gray-700 p-3 flex-row justify-between items-center"
+                className={`p-3 flex-row justify-between items-center ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}
             >
                 <View className="flex-row items-center">
                     {isCollapsible && (
-                        <Text className="text-gray-400 mr-2 text-xs">
+                        <Text className={`mr-2 text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                             {isExpanded ? '▼' : '▶'}
                         </Text>
                     )}
-                    <Text className="text-white font-bold text-lg">{title}</Text>
+                    <Text className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{title}</Text>
                 </View>
-                <Text className="text-gray-300 font-bold">{innings.totalRuns}/{innings.totalWickets} ({totalOvers} {t('common.overs')})</Text>
+                <Text className={`font-bold ${isDark ? 'text-gray-300' : 'text-gray-750'}`}>{innings.totalRuns}/{innings.totalWickets} ({totalOvers} {t('common.overs')})</Text>
             </TouchableOpacity>
 
             {(!isCollapsible || isExpanded) && (
                 <View>
                     {/* Batting Header */}
-                    <View className="flex-row bg-gray-800 p-2 border-b border-gray-700">
-                        <Text className="flex-[3] text-gray-400 text-xs uppercase font-bold">{t('common.batter')}</Text>
-                        <Text className="flex-1 text-gray-400 text-xs uppercase font-bold text-center">{t('common.r')}</Text>
-                        <Text className="flex-1 text-gray-400 text-xs uppercase font-bold text-center">{t('common.b')}</Text>
-                        <Text className="flex-1 text-gray-400 text-xs uppercase font-bold text-center">{t('common.fours')}</Text>
-                        <Text className="flex-1 text-gray-400 text-xs uppercase font-bold text-center">{t('common.sixes')}</Text>
-                        <Text className="flex-1 text-gray-400 text-xs uppercase font-bold text-center">{t('common.sr')}</Text>
+                    <View className={`flex-row p-2 border-b ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+                        <Text className={`flex-[3] text-xs uppercase font-bold ${isDark ? 'text-gray-400' : 'text-gray-550'}`}>{t('common.batter')}</Text>
+                        <Text className={`flex-1 text-xs uppercase font-bold text-center ${isDark ? 'text-gray-400' : 'text-gray-550'}`}>{t('common.r')}</Text>
+                        <Text className={`flex-1 text-xs uppercase font-bold text-center ${isDark ? 'text-gray-400' : 'text-gray-550'}`}>{t('common.b')}</Text>
+                        <Text className={`flex-1 text-xs uppercase font-bold text-center ${isDark ? 'text-gray-400' : 'text-gray-550'}`}>{t('common.fours')}</Text>
+                        <Text className={`flex-1 text-xs uppercase font-bold text-center ${isDark ? 'text-gray-400' : 'text-gray-550'}`}>{t('common.sixes')}</Text>
+                        <Text className={`flex-1 text-xs uppercase font-bold text-center ${isDark ? 'text-gray-400' : 'text-gray-550'}`}>{t('common.sr')}</Text>
                     </View>
 
                     {battingTeamPlayers
@@ -88,11 +90,11 @@ export const ScorecardSection = ({
 
                         const sr = stats.ballsFaced > 0 ? ((stats.runs / stats.ballsFaced) * 100).toFixed(0) : "0";
                         return (
-                            <View key={player.id} className="flex-row p-3 border-b border-gray-700/50">
+                            <View key={player.id} className={`flex-row p-3 border-b ${isDark ? 'border-gray-700/50' : 'border-gray-150'}`}>
                                 <View className="flex-[3] pr-2">
-                                    <Text className="text-white font-medium">{player.name}</Text>
+                                    <Text className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{player.name}</Text>
                                     {(stats.isOut || stats.isRetired) ? (
-                                        <Text className="text-gray-500 text-[10px] leading-tight mt-0.5">
+                                        <Text className={`text-[10px] leading-tight mt-0.5 ${isDark ? 'text-gray-550' : 'text-gray-500'}`}>
                                             {stats.dismissal === 'bowled' && `${t('common.bowledAbbr')} ${bowlingTeamPlayers.find(p => p.id === stats.bowlerId)?.name || t('common.bowler')}`}
                                             {stats.dismissal === 'caught' && `${t('common.caughtAbbr')} ${bowlingTeamPlayers.find(p => p.id === stats.fielderId)?.name || t('common.fielder')} ${t('common.bowledAbbr')} ${bowlingTeamPlayers.find(p => p.id === stats.bowlerId)?.name || t('common.bowler')}`}
                                             {stats.dismissal === 'lbw' && `${t('common.lbw')} ${t('common.bowledAbbr')} ${bowlingTeamPlayers.find(p => p.id === stats.bowlerId)?.name || t('common.bowler')}`}
@@ -103,14 +105,14 @@ export const ScorecardSection = ({
                                             {(!stats.dismissal || stats.dismissal === 'none') && t('common.wicket')}
                                         </Text>
                                     ) : (
-                                        <Text className="text-blue-400 text-[10px] font-bold mt-0.5">{t('common.notOut')}</Text>
+                                        <Text className="text-blue-500 text-[10px] font-bold mt-0.5">{t('common.notOut')}</Text>
                                     )}
                                 </View>
-                                <Text className="flex-1 text-white font-bold text-center">{stats.runs}</Text>
-                                <Text className="flex-1 text-gray-400 text-center">{stats.ballsFaced}</Text>
-                                <Text className="flex-1 text-gray-400 text-center">{stats.fours}</Text>
-                                <Text className="flex-1 text-gray-400 text-center">{stats.sixes}</Text>
-                                <Text className="flex-1 text-gray-400 text-center">{sr}</Text>
+                                <Text className={`flex-1 font-bold text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>{stats.runs}</Text>
+                                <Text className={`flex-1 text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{stats.ballsFaced}</Text>
+                                <Text className={`flex-1 text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{stats.fours}</Text>
+                                <Text className={`flex-1 text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{stats.sixes}</Text>
+                                <Text className={`flex-1 text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{sr}</Text>
                             </View>
                         );
                     })}
@@ -119,9 +121,9 @@ export const ScorecardSection = ({
                     {(() => {
                         const extras = calculateExtras(innings);
                         return (
-                            <View className="flex-row justify-between p-3 border-b border-gray-700 bg-gray-600/20">
-                                <Text className="text-gray-300 font-bold">{t('common.extras')}</Text>
-                                <Text className="text-white">
+                            <View className={`flex-row justify-between p-3 border-b ${isDark ? 'border-gray-700 bg-gray-600/20' : 'border-gray-200 bg-gray-50'}`}>
+                                <Text className={`font-bold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('common.extras')}</Text>
+                                <Text className={isDark ? 'text-white' : 'text-gray-900'}>
                                     {extras.total} ({t('common.wideAbbr')} {extras.wide}, {t('common.noBallAbbr')} {extras.noBall}, {t('common.byeAbbr')} {extras.bye}, {t('common.legByeAbbr')} {extras.legBye})
                                 </Text>
                             </View>
@@ -129,21 +131,21 @@ export const ScorecardSection = ({
                     })()}
 
                     {/* Total Row */}
-                    <View className="flex-row justify-between p-3 border-b border-gray-700 bg-gray-900/40">
-                        <Text className="text-white font-black text-lg">{t('common.total')}</Text>
-                        <Text className="text-white font-black text-lg">
-                            {innings.totalRuns}/{innings.totalWickets} <Text className="text-base text-gray-400 font-normal">({totalOvers} {t('common.overs')})</Text>
+                    <View className={`flex-row justify-between p-3 border-b ${isDark ? 'border-gray-700 bg-gray-900/40' : 'border-gray-200 bg-gray-100'}`}>
+                        <Text className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('common.total')}</Text>
+                        <Text className={`font-black text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                            {innings.totalRuns}/{innings.totalWickets} <Text className={`text-base font-normal ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>({totalOvers} {t('common.overs')})</Text>
                         </Text>
                     </View>
 
                     {/* Bowling Header */}
-                    <View className="flex-row bg-gray-700 p-2 mt-4">
-                        <Text className="flex-[3] text-gray-300 text-xs uppercase font-bold">{t('common.bowler')}</Text>
-                        <Text className="flex-1 text-gray-300 text-xs uppercase font-bold text-center">{t('common.o')}</Text>
-                        <Text className="flex-1 text-gray-300 text-xs uppercase font-bold text-center">{t('common.m')}</Text>
-                        <Text className="flex-1 text-gray-300 text-xs uppercase font-bold text-center">{t('common.r')}</Text>
-                        <Text className="flex-1 text-gray-300 text-xs uppercase font-bold text-center">{t('common.wicketsAbbr')}</Text>
-                        <Text className="flex-1 text-gray-300 text-xs uppercase font-bold text-center">{t('common.eco')}</Text>
+                    <View className={`flex-row p-2 mt-4 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                        <Text className={`flex-[3] text-xs uppercase font-bold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('common.bowler')}</Text>
+                        <Text className={`flex-1 text-xs uppercase font-bold text-center ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('common.o')}</Text>
+                        <Text className={`flex-1 text-xs uppercase font-bold text-center ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('common.m')}</Text>
+                        <Text className={`flex-1 text-xs uppercase font-bold text-center ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('common.r')}</Text>
+                        <Text className={`flex-1 text-xs uppercase font-bold text-center ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('common.wicketsAbbr')}</Text>
+                        <Text className={`flex-1 text-xs uppercase font-bold text-center ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('common.eco')}</Text>
                     </View>
 
                     {bowlingTeamPlayers.map(player => {
@@ -157,13 +159,13 @@ export const ScorecardSection = ({
                         const oversDisplay = `${stats.overs}.${stats.balls % 6}`;
 
                         return (
-                            <View key={player.id} className="flex-row p-3 border-b border-gray-700/50">
-                                <Text className="flex-[3] text-white font-medium">{player.name}</Text>
-                                <Text className="flex-1 text-gray-400 text-center">{oversDisplay}</Text>
-                                <Text className="flex-1 text-gray-400 text-center">{stats.maidens}</Text>
-                                <Text className="flex-1 text-gray-400 text-center">{stats.runsConceded}</Text>
-                                <Text className="flex-1 text-white font-bold text-center">{stats.wickets}</Text>
-                                <Text className="flex-1 text-gray-400 text-center">{economy}</Text>
+                            <View key={player.id} className={`flex-row p-3 border-b ${isDark ? 'border-gray-700/50' : 'border-gray-150'}`}>
+                                <Text className={`flex-[3] font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{player.name}</Text>
+                                <Text className={`flex-1 text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{oversDisplay}</Text>
+                                <Text className={`flex-1 text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{stats.maidens}</Text>
+                                <Text className={`flex-1 text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{stats.runsConceded}</Text>
+                                <Text className={`flex-1 font-bold text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>{stats.wickets}</Text>
+                                <Text className={`flex-1 text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{economy}</Text>
                             </View>
                         );
                     })}

@@ -19,9 +19,11 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useMatchSync } from '../hooks/useMatchSync';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 export default function JoinLiveMatchScreen({ navigation }: any) {
     const { t } = useTranslation();
+    const { isDark } = useAppTheme();
     const [matchIdInput, setMatchIdInput] = useState('');
     const { joinMatch, isLoading, error } = useMatchSync();
 
@@ -69,7 +71,7 @@ export default function JoinLiveMatchScreen({ navigation }: any) {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
+        <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`} edges={['bottom', 'left', 'right']}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 className="flex-1"
@@ -80,20 +82,20 @@ export default function JoinLiveMatchScreen({ navigation }: any) {
                             <View className="bg-blue-600/20 p-6 rounded-full mb-6 shadow-2xl">
                                 <Ionicons name="radio" size={60} color="#3b82f6" />
                             </View>
-                            <Text className="text-white text-3xl font-black text-center uppercase tracking-widest">{t('common.joinLiveMatch')}</Text>
-                            <Text className="text-gray-400 text-center mt-4 text-lg leading-6 px-4 font-medium italic">
+                            <Text className={`text-3xl font-black text-center uppercase tracking-widest ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('common.joinLiveMatch')}</Text>
+                            <Text className={`text-center mt-4 text-lg leading-6 px-4 font-medium italic ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                                 {t('common.enterMatchIdDescription')}
                             </Text>
                         </View>
 
-                        <View className="bg-gray-800 p-8 rounded-[40px] border border-gray-700 shadow-2xl mb-6">
+                        <View className={`p-8 rounded-[40px] border shadow-2xl mb-6 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                             <Text className="text-gray-500 text-[10px] font-black uppercase mb-4 tracking-[4px] ml-1">{t('common.matchIdLabel')}</Text>
                             <TextInput
                                 value={matchIdInput}
                                 onChangeText={setMatchIdInput}
                                 placeholder="e.g. MATCH-123456"
-                                placeholderTextColor="#4b5563"
-                                className="bg-gray-900 text-white p-6 rounded-3xl border border-gray-700 font-black text-2xl mb-8 tracking-widest"
+                                placeholderTextColor={isDark ? '#4b5563' : '#9ca3af'}
+                                className={`p-6 rounded-3xl border font-black text-2xl mb-8 tracking-widest ${isDark ? 'bg-gray-900 text-white border-gray-700' : 'bg-gray-50 text-gray-900 border-gray-200'}`}
                                 autoCapitalize="characters"
                                 autoCorrect={false}
                                 selectionColor="#3b82f6"
@@ -117,7 +119,7 @@ export default function JoinLiveMatchScreen({ navigation }: any) {
 
                                 <TouchableOpacity
                                     onPress={handleRequestPermission}
-                                    className="p-6 rounded-3xl items-center flex-row justify-center border-2 border-dashed border-gray-600 bg-gray-900/50 active:bg-gray-700"
+                                    className={`p-6 rounded-3xl items-center flex-row justify-center border-2 border-dashed ${isDark ? 'border-gray-600 bg-gray-900/50 active:bg-gray-700' : 'border-gray-300 bg-gray-50 active:bg-gray-200'}`}
                                 >
                                     <Ionicons name="qr-code-outline" size={24} color="#3b82f6" />
                                     <Text className="text-blue-500 font-black ml-3 uppercase tracking-widest text-lg">{t('common.scanToJoin')}</Text>
@@ -133,7 +135,7 @@ export default function JoinLiveMatchScreen({ navigation }: any) {
                         </View>
 
                         <View className="flex-1 justify-end items-center mb-10">
-                            <Text className="text-gray-700 text-[10px] font-bold uppercase tracking-[5px]">Cric-Score Live</Text>
+                            <Text className={`text-[10px] font-bold uppercase tracking-[5px] ${isDark ? 'text-gray-700' : 'text-gray-400'}`}>Cric-Score Live</Text>
                         </View>
 
                         {/* QR Scanner Overlay */}

@@ -7,10 +7,12 @@ import { ScorecardSection } from '../components/ScorecardSection';
 import { OverSummarySection } from '../components/OverSummarySection';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 export default function LiveViewerScreen({ route, navigation }: any) {
     const { matchId } = route.params;
     const { t } = useTranslation();
+    const { isDark } = useAppTheme();
     const [match, setMatch] = useState<MatchState | null>(null);
     const [error, setError] = useState('');
 
@@ -34,18 +36,18 @@ export default function LiveViewerScreen({ route, navigation }: any) {
 
     if (error) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center">
+            <SafeAreaView className={`flex-1 justify-center items-center ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`}>
                 <Ionicons name="alert-circle" size={64} color="#ef4444" />
-                <Text className="text-white text-xl mt-4">{error}</Text>
+                <Text className={`text-xl mt-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>{error}</Text>
             </SafeAreaView>
         );
     }
 
     if (!match) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center">
+            <SafeAreaView className={`flex-1 justify-center items-center ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`}>
                 <ActivityIndicator size="large" color="#3b82f6" />
-                <Text className="text-gray-400 mt-4">{t('common.connectingToLiveMatch')}</Text>
+                <Text className={`mt-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('common.connectingToLiveMatch')}</Text>
             </SafeAreaView>
         );
     }
@@ -71,21 +73,21 @@ export default function LiveViewerScreen({ route, navigation }: any) {
         : "0.0";
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
+        <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`} edges={['bottom', 'left', 'right']}>
             <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 16 }}>
                 <View className="mb-6 items-center">
                     {match.matchResult ? (
                         <View className="items-center w-full mb-4">
-                            <View className="flex-row items-center justify-center bg-gray-700 px-3 py-1 rounded-full mb-4">
-                                <Text className="text-gray-300 text-xs font-bold tracking-widest uppercase">{t('common.completed')}</Text>
+                            <View className={`flex-row items-center justify-center px-3 py-1 rounded-full mb-4 ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}>
+                                <Text className={`text-xs font-bold tracking-widest uppercase ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('common.completed')}</Text>
                             </View>
-                            <View className="bg-yellow-600/20 border border-yellow-600/50 p-4 rounded-2xl w-full items-center">
-                                <Text className="text-yellow-500 font-black text-xl text-center">
+                            <View className={`border p-4 rounded-2xl w-full items-center ${isDark ? 'bg-yellow-600/20 border-yellow-600/50' : 'bg-yellow-50 border-yellow-200'}`}>
+                                <Text className="text-yellow-600 font-black text-xl text-center">
                                     {match.matchResult.winner === 'Draw' 
                                         ? t('common.matchDrawn') 
                                         : `${match.matchResult.winner} ${t('common.winsExclamation')}`}
                                 </Text>
-                                <Text className="text-gray-300 font-medium mt-1 text-center">
+                                <Text className={`font-medium mt-1 text-center ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                                     {match.matchResult.resultType === 'runs'
                                         ? t('common.wonByRuns', { count: match.matchResult.margin })
                                         : match.matchResult.resultType === 'wickets'
@@ -102,20 +104,20 @@ export default function LiveViewerScreen({ route, navigation }: any) {
                             <Text className="text-white text-xs font-bold tracking-widest uppercase">{t('common.liveBadge')}</Text>
                         </View>
                     )}
-                    <Text className="text-gray-400 font-medium mb-1">{innings.battingTeam} {t('common.batting')}</Text>
-                    <Text className="text-6xl font-black text-white">
+                    <Text className={`font-medium mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{innings.battingTeam} {t('common.batting')}</Text>
+                    <Text className={`text-6xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         {innings.totalRuns}/{innings.totalWickets}
                     </Text>
-                    <Text className="text-xl text-gray-400 mt-2">
+                    <Text className={`text-xl mt-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                         {t('common.overs')}: {innings.overs.length}.{currentOverValidBalls} ({match.overs})
                     </Text>
 
                     {match.currentInnings === 2 && (
-                        <View className="mt-4 bg-gray-800 px-4 py-2 rounded-lg">
-                            <Text className="text-yellow-500 font-bold text-lg text-center">
+                        <View className={`mt-4 px-4 py-2 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+                            <Text className="text-yellow-600 font-bold text-lg text-center">
                                 {t('common.target')}: {match.innings1.totalRuns + 1}
                             </Text>
-                            <Text className="text-gray-300 text-sm text-center mt-1">
+                            <Text className={`text-sm text-center mt-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                                 {t('common.needRunsInBalls', {
                                     runs: match.innings1.totalRuns + 1 - innings.totalRuns,
                                     balls: (match.overs * 6) - (innings.overs.length * 6 + currentOverValidBalls)
@@ -126,47 +128,47 @@ export default function LiveViewerScreen({ route, navigation }: any) {
                 </View>
 
                 {/* Player Stats Bar */}
-                <View className={`flex-row ${innings.isLastManStanding ? 'justify-center' : 'justify-between'} bg-gray-800 p-4 rounded-xl mb-4 shadow-lg border border-gray-700`}>
+                <View className={`flex-row ${innings.isLastManStanding ? 'justify-center' : 'justify-between'} p-4 rounded-xl mb-4 shadow-lg border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                     <View className={innings.isLastManStanding ? 'items-center' : ''}>
-                        <Text className="text-white font-bold text-lg max-w-[150px]">{getPlayerName(innings.strikerId)}*</Text>
-                        <Text className="text-blue-400 font-bold mt-1">
-                            {strikerStats.runs} <Text className="text-gray-400 text-sm font-normal">({strikerStats.ballsFaced})</Text>
+                        <Text className={`font-bold text-lg max-w-[150px] ${isDark ? 'text-white' : 'text-gray-900'}`}>{getPlayerName(innings.strikerId)}*</Text>
+                        <Text className="text-blue-500 font-bold mt-1">
+                            {strikerStats.runs} <Text className={`text-sm font-normal ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>({strikerStats.ballsFaced})</Text>
                         </Text>
                     </View>
                     {!innings.isLastManStanding && (
                         <View className="items-end">
-                            <Text className="text-white font-bold text-lg max-w-[150px] text-right">{getPlayerName(innings.nonStrikerId)}</Text>
-                            <Text className="text-blue-400 font-bold mt-1">
-                                {nonStrikerStats.runs} <Text className="text-gray-400 text-sm font-normal">({nonStrikerStats.ballsFaced})</Text>
+                            <Text className={`font-bold text-lg max-w-[150px] text-right ${isDark ? 'text-white' : 'text-gray-900'}`}>{getPlayerName(innings.nonStrikerId)}</Text>
+                            <Text className="text-blue-500 font-bold mt-1">
+                                {nonStrikerStats.runs} <Text className={`text-sm font-normal ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>({nonStrikerStats.ballsFaced})</Text>
                             </Text>
                         </View>
                     )}
                 </View>
 
                 {/* Current Bowler Bar */}
-                <View className="flex-row justify-between items-center bg-gray-800 p-4 rounded-xl mb-6 shadow-lg border border-gray-700">
+                <View className={`flex-row justify-between items-center p-4 rounded-xl mb-6 shadow-lg border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                     <View>
-                        <Text className="text-gray-500 text-xs uppercase font-black tracking-wider mb-1">{t('common.bowler')}</Text>
-                        <Text className="text-white font-bold text-lg">{getPlayerName(innings.currentBowlerId)}</Text>
+                        <Text className={`text-xs uppercase font-black tracking-wider mb-1 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{t('common.bowler')}</Text>
+                        <Text className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{getPlayerName(innings.currentBowlerId)}</Text>
                     </View>
                     <View className="items-end">
-                        <Text className="text-white font-black text-xl">
+                        <Text className={`font-black text-xl ${isDark ? 'text-white' : 'text-gray-900'}`}>
                             {currentBowlerStats ? `${currentBowlerStats.wickets}-${currentBowlerStats.runsConceded}` : "0-0"}
                         </Text>
-                        <Text className="text-gray-400 text-sm font-medium">
+                        <Text className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                             {bowlerOversDisplay} {t('common.overs')}
                         </Text>
                     </View>
                 </View>
 
                 <View className="mb-8">
-                    <Text className="text-gray-400 mb-2 text-sm uppercase font-bold tracking-wider">{t('common.thisOver')}</Text>
+                    <Text className={`mb-2 text-sm uppercase font-bold tracking-wider ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('common.thisOver')}</Text>
                     <View className="flex-row gap-2 min-h-[32px] flex-wrap">
                         {innings.currentOver.length > 0 ? (
                             innings.currentOver.map((ball, idx) => (
                                 <View
                                     key={idx}
-                                    className={`px-3 py-1.5 rounded-full items-center justify-center shadow-lg ${ball.isWicket ? 'bg-red-600' : ball.extraType !== 'none' ? 'bg-yellow-600' : ball.runs >= 4 ? 'bg-green-600' : 'bg-gray-700'}`}
+                                    className={`px-3 py-1.5 rounded-full items-center justify-center shadow-lg ${ball.isWicket ? 'bg-red-600' : ball.extraType !== 'none' ? 'bg-yellow-600' : ball.runs >= 4 ? 'bg-green-600' : isDark ? 'bg-gray-700' : 'bg-gray-300'}`}
                                 >
                                     <View className="flex-row items-center">
                                         <Text className="text-white font-black text-xs">
@@ -179,13 +181,13 @@ export default function LiveViewerScreen({ route, navigation }: any) {
                                 </View>
                             ))
                         ) : (
-                            <Text className="text-gray-600 text-sm italic">-</Text>
+                            <Text className={`text-sm italic ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>-</Text>
                         )}
                     </View>
                 </View>
 
                 {/* Scorecards */}
-                <Text className="text-white text-2xl font-black mb-4 px-2 tracking-wide uppercase">{t('common.scorecard')}</Text>
+                <Text className={`text-2xl font-black mb-4 px-2 tracking-wide uppercase ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('common.scorecard')}</Text>
 
                 {match.currentInnings === 2 && (
                     <View className="mb-4">

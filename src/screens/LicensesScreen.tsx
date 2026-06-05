@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Linking } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 const licenses = [
     {
@@ -72,31 +73,32 @@ const licenses = [
 
 export default function LicensesScreen({ navigation }: any) {
     const { t } = useTranslation();
+    const { isDark } = useAppTheme();
     return (
-        <SafeAreaView className="flex-1 bg-gray-900">
-            <View className="flex-row items-center p-4 border-b border-gray-800">
+        <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-100'}`}>
+            <View className={`flex-row items-center p-4 border-b ${isDark ? 'border-gray-850 bg-gray-900' : 'border-gray-200 bg-white'}`}>
                 <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
-                    <Ionicons name="arrow-back" size={24} color="white" />
+                    <Ionicons name="arrow-back" size={24} color={isDark ? 'white' : 'black'} />
                 </TouchableOpacity>
-                <Text className="text-white text-xl font-bold">{t('common.openSourceLicenses')}</Text>
+                <Text className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('common.openSourceLicenses')}</Text>
             </View>
 
             <ScrollView className="flex-1 p-4">
-                <Text className="text-gray-400 mb-6">
+                <Text className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-650'}`}>
                     {t('common.attributionNotice')}
                 </Text>
 
                 {licenses.map((lib, index) => (
                     <TouchableOpacity
                         key={index}
-                        className="bg-gray-800 p-4 rounded-xl mb-3 border border-gray-700"
+                        className={`p-4 rounded-xl mb-3 border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'}`}
                         onPress={() => Linking.openURL(lib.url)}
                     >
                         <View className="flex-row justify-between items-center mb-1">
-                            <Text className="text-white font-bold text-lg">{lib.name}</Text>
-                            <Text className="text-gray-500 text-xs">{lib.license}</Text>
+                            <Text className={`font-bold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{lib.name}</Text>
+                            <Text className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{lib.license}</Text>
                         </View>
-                        <Text className="text-gray-400 text-sm mb-2">{lib.copyright}</Text>
+                        <Text className={`text-sm mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{lib.copyright}</Text>
                         <Text className="text-blue-500 text-xs">{t('common.viewLicense')}</Text>
                     </TouchableOpacity>
                 ))}

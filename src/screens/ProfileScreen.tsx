@@ -5,10 +5,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/useAuthStore';
 import { signInWithGoogle, signOutGoogle } from '../utils/googleAuth';
 import { useTranslation } from 'react-i18next';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 export default function ProfileScreen({ navigation }: any) {
     const { t } = useTranslation();
     const { user, isAuthenticated, setUser, signOut } = useAuthStore();
+    const { isDark } = useAppTheme();
+
+    const bg = isDark ? 'bg-gray-900' : 'bg-gray-100';
+    const cardBg = isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200';
+    const titleColor = isDark ? 'text-white' : 'text-gray-900';
+    const subtitleColor = isDark ? 'text-gray-400' : 'text-gray-500';
+    const labelColor = isDark ? 'text-gray-500' : 'text-gray-400';
 
     const handleGoogleSignIn = async () => {
         try {
@@ -43,11 +51,11 @@ export default function ProfileScreen({ navigation }: any) {
 
     if (!isAuthenticated || !user) {
         return (
-            <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
+            <SafeAreaView className={`flex-1 ${bg}`} edges={['bottom', 'left', 'right']}>
                 <View className="flex-1 items-center justify-center p-6">
-                    <Ionicons name="person-circle-outline" size={120} color="#6B7280" />
-                    <Text className="text-white text-2xl font-bold mt-6 mb-2">{t('common.welcomeToCricScore')}</Text>
-                    <Text className="text-gray-400 text-center mb-8">
+                    <Ionicons name="person-circle-outline" size={120} color={isDark ? '#6B7280' : '#9CA3AF'} />
+                    <Text className={`text-2xl font-bold mt-6 mb-2 ${titleColor}`}>{t('common.welcomeToCricScore')}</Text>
+                    <Text className={`text-center mb-8 ${subtitleColor}`}>
                         {t('common.signInGoogleSync')}
                     </Text>
 
@@ -67,7 +75,7 @@ export default function ProfileScreen({ navigation }: any) {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
+        <SafeAreaView className={`flex-1 ${bg}`} edges={['bottom', 'left', 'right']}>
             <ScrollView className="flex-1 p-6">
                 <View className="items-center mb-8">
                     {user.picture ? (
@@ -76,17 +84,17 @@ export default function ProfileScreen({ navigation }: any) {
                             style={{ width: 100, height: 100, borderRadius: 50 }}
                         />
                     ) : (
-                        <Ionicons name="person-circle" size={100} color="#6B7280" />
+                        <Ionicons name="person-circle" size={100} color={isDark ? '#6B7280' : '#9CA3AF'} />
                     )}
-                    <Text className="text-white text-2xl font-bold mt-4">{user.name}</Text>
-                    <Text className="text-gray-400 text-sm">{user.email}</Text>
+                    <Text className={`text-2xl font-bold mt-4 ${titleColor}`}>{user.name}</Text>
+                    <Text className={`text-sm ${subtitleColor}`}>{user.email}</Text>
                 </View>
 
-                <View className="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700">
-                    <Text className="text-gray-500 text-xs uppercase tracking-wider mb-3">{t('common.account')}</Text>
+                <View className={`rounded-xl p-4 mb-4 border ${cardBg}`}>
+                    <Text className={`text-xs uppercase tracking-wider mb-3 ${labelColor}`}>{t('common.account')}</Text>
                     <View className="flex-row items-center mb-2">
                         <Ionicons name="checkmark-circle" size={20} color="#10B981" />
-                        <Text className="text-white ml-2">{t('common.signedInWithGoogle')}</Text>
+                        <Text className={`ml-2 ${titleColor}`}>{t('common.signedInWithGoogle')}</Text>
                     </View>
                 </View>
 

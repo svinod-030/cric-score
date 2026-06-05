@@ -236,6 +236,13 @@
         "delete": "हटाएं",
         "shareResultPromo": "क्या आप अपने क्रिकेट मैचों को स्कोर करना और लाइव स्कोरिंग का पालन करना चाहते हैं?",
         "shareLivePromo": "इस मैच को लाइव देखें और अपने खुद के खेल स्कोर करें!",
-        "downloadAppPrompt": "अभी क्रिक-स्कोर ऐप डाउनलोड करें: {{link}}"
+        "downloadAppPrompt": "अभी क्रिक-स्कोर ऐप डाउनलोड करें: {{link}}",
+        "theme": "थीम",
+        "appearance": "रूप",
+        "selectTheme": "थीम चुनें",
+        "chooseAppearance": "ऐप कैसा दिखे यह चुनें",
+        "themeLight": "लाइट",
+        "themeDark": "डार्क",
+        "themeSystem": "सिस्टम"
     }
 }

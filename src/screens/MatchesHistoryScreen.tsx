@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { LiveMatchCard } from '../components/LiveMatchCard';
 import { useTranslation } from 'react-i18next';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 export default function MatchesHistoryScreen() {
     const { t } = useTranslation();
@@ -15,6 +16,20 @@ export default function MatchesHistoryScreen() {
     const { isAuthenticated } = useAuthStore();
     const [isRestoring, setIsRestoring] = useState(false);
     const navigation = useNavigation<any>();
+    const { isDark } = useAppTheme();
+
+    const bg = isDark ? 'bg-gray-900' : 'bg-gray-100';
+    const titleColor = isDark ? 'text-white' : 'text-gray-900';
+    const cardBg = isDark ? 'bg-gray-800/40 border-gray-700/50' : 'bg-white border-gray-200';
+    const dateBg = isDark ? 'bg-gray-700/50' : 'bg-gray-100';
+    const dateTextColor = isDark ? 'text-gray-400' : 'text-gray-500';
+    const scoreTextColor = isDark ? 'text-white' : 'text-gray-900';
+    const wicketsColor = isDark ? 'text-gray-500' : 'text-gray-400';
+    const vsColor = isDark ? 'text-gray-600' : 'text-gray-400';
+    const resultColor = isDark ? 'text-gray-400' : 'text-gray-600';
+    const resultBorder = isDark ? 'border-gray-700/30' : 'border-gray-200';
+    const emptyColor = isDark ? 'text-gray-500' : 'text-gray-400';
+    const restoreBtnBg = isDark ? 'bg-blue-600/10' : 'bg-blue-50';
 
     const handleRestore = async () => {
         if (!isAuthenticated) return;
@@ -47,16 +62,15 @@ export default function MatchesHistoryScreen() {
         );
     };
 
-
     const renderHeader = () => (
         <>
             <View className="flex-row justify-between items-center mb-6">
-                <Text className="text-white text-3xl font-bold">{t('common.matches')}</Text>
+                <Text className={`text-3xl font-bold ${titleColor}`}>{t('common.matches')}</Text>
                 {isAuthenticated && (
                     <TouchableOpacity
                         onPress={handleRestore}
                         disabled={isRestoring}
-                        className={`flex-row items-center px-4 py-2 rounded-xl border border-blue-500/30 ${isRestoring ? 'bg-gray-800' : 'bg-blue-600/10'}`}
+                        className={`flex-row items-center px-4 py-2 rounded-xl border border-blue-500/30 ${isRestoring ? (isDark ? 'bg-gray-800' : 'bg-gray-100') : restoreBtnBg}`}
                     >
                         {isRestoring ? (
                             <ActivityIndicator size="small" color="#3B82F6" className="mr-2" />
@@ -74,12 +88,12 @@ export default function MatchesHistoryScreen() {
                 containerStyle="mb-6"
             />
 
-            <Text className="text-white text-xl font-bold mb-4">{t('common.history')}</Text>
+            <Text className={`text-xl font-bold mb-4 ${titleColor}`}>{t('common.history')}</Text>
         </>
     );
 
     const renderEmpty = () => (
-        <Text className="text-gray-500 text-center py-10">{t('common.noCompletedMatches')}</Text>
+        <Text className={`text-center py-10 ${emptyColor}`}>{t('common.noCompletedMatches')}</Text>
     );
 
     const renderItem = ({ item: match }: { item: any, index: number }) => {
@@ -120,12 +134,12 @@ export default function MatchesHistoryScreen() {
 
         return (
             <TouchableOpacity
-                className="bg-gray-800/40 p-3 rounded-xl mb-3 border border-gray-700/50"
+                className={`p-3 rounded-xl mb-3 border ${cardBg}`}
                 onPress={() => navigation.navigate('MatchResult', { matchData: match })}
             >
                 <View className="flex-row justify-between items-start mb-2">
-                    <View className="bg-gray-700/50 px-2 py-0.5 rounded">
-                        <Text className="text-[10px] text-gray-400 font-bold uppercase">
+                    <View className={`px-2 py-0.5 rounded ${dateBg}`}>
+                        <Text className={`text-[10px] font-bold uppercase ${dateTextColor}`}>
                             {match.completedAt ? new Date(match.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : t('common.completed')}
                         </Text>
                     </View>
@@ -139,30 +153,30 @@ export default function MatchesHistoryScreen() {
 
                 <View className="flex-row items-center justify-between">
                     <View className={`flex-1 items-center py-2 px-1 rounded-xl ${isTeamAWinner ? 'bg-blue-500/10' : ''}`}>
-                        <Text className={`text-white font-bold text-sm mb-1 text-center ${isTeamAWinner ? 'text-yellow-500' : ''}`} numberOfLines={1}>{match.teamA}</Text>
+                        <Text className={`font-bold text-sm mb-1 text-center ${isTeamAWinner ? 'text-yellow-500' : scoreTextColor}`} numberOfLines={1}>{match.teamA}</Text>
                         <View className="flex-row items-baseline">
-                            <Text className="text-white text-2xl font-black">{teamAScore}</Text>
-                            <Text className="text-gray-500 text-xl font-bold ml-0.5">/{teamAWickets}</Text>
+                            <Text className={`text-2xl font-black ${scoreTextColor}`}>{teamAScore}</Text>
+                            <Text className={`text-xl font-bold ml-0.5 ${wicketsColor}`}>/{teamAWickets}</Text>
                         </View>
                         {isTeamAWinner && <Ionicons name="trophy" size={12} color="#EAB308" style={{ marginTop: 2 }} />}
                     </View>
 
                     <View className="px-2 items-center">
-                        <Text className="text-gray-600 font-black italic text-base">VS</Text>
+                        <Text className={`font-black italic text-base ${vsColor}`}>VS</Text>
                     </View>
 
                     <View className={`flex-1 items-center py-2 px-1 rounded-xl ${isTeamBWinner ? 'bg-blue-500/10' : ''}`}>
-                        <Text className={`text-white font-bold text-sm mb-1 text-center ${isTeamBWinner ? 'text-yellow-500' : ''}`} numberOfLines={1}>{match.teamB}</Text>
+                        <Text className={`font-bold text-sm mb-1 text-center ${isTeamBWinner ? 'text-yellow-500' : scoreTextColor}`} numberOfLines={1}>{match.teamB}</Text>
                         <View className="flex-row items-baseline">
-                            <Text className="text-white text-2xl font-black">{teamBScore}</Text>
-                            <Text className="text-gray-500 text-xl font-bold ml-0.5">/{teamBWickets}</Text>
+                            <Text className={`text-2xl font-black ${scoreTextColor}`}>{teamBScore}</Text>
+                            <Text className={`text-xl font-bold ml-0.5 ${wicketsColor}`}>/{teamBWickets}</Text>
                         </View>
                         {isTeamBWinner && <Ionicons name="trophy" size={12} color="#EAB308" style={{ marginTop: 2 }} />}
                     </View>
                 </View>
 
-                <View className="mt-3 pt-2 border-t border-gray-700/30">
-                    <Text className="text-gray-400 text-center font-bold text-xs" numberOfLines={1}>
+                <View className={`mt-3 pt-2 border-t ${resultBorder}`}>
+                    <Text className={`text-center font-bold text-xs ${resultColor}`} numberOfLines={1}>
                         {match.matchResult?.winner === 'Draw'
                             ? t('common.matchDrawn')
                             : `${match.matchResult?.winner} ${match.matchResult?.resultType === 'runs'
@@ -178,7 +192,7 @@ export default function MatchesHistoryScreen() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['left', 'right']}>
+        <SafeAreaView className={`flex-1 ${bg}`} edges={['left', 'right']}>
             <FlatList
                 data={history}
                 keyExtractor={(item, index) => item.completedAt || index.toString()}

@@ -236,6 +236,13 @@
         "delete": "Delete",
         "shareResultPromo": "Want to score your own cricket matches and follow live scoring?",
         "shareLivePromo": "Follow this match live and score your own games!",
-        "downloadAppPrompt": "Download the Cric-Score App now: {{link}}"
+        "downloadAppPrompt": "Download the Cric-Score App now: {{link}}",
+        "theme": "Theme",
+        "appearance": "Appearance",
+        "selectTheme": "Select Theme",
+        "chooseAppearance": "Choose how the app looks",
+        "themeLight": "Light",
+        "themeDark": "Dark",
+        "themeSystem": "System"
     }
 }

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useMatchStore } from '../store/useMatchStore';
 import { useTranslation } from 'react-i18next';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 interface LiveMatchCardProps {
     onClear?: () => void;
@@ -21,11 +22,14 @@ export const LiveMatchCard: React.FC<LiveMatchCardProps> = ({
     const { t } = useTranslation();
     const { state } = useMatchStore();
     const navigation = useNavigation<any>();
+    const { isDark } = useAppTheme();
 
     if (!state.isPlaying) return null;
 
     const isBlue = variant === 'blue';
-    const bgClass = isBlue ? 'bg-blue-600/10 border-blue-500/30' : 'bg-gray-800 border-gray-700';
+    const bgClass = isBlue 
+        ? (isDark ? 'bg-blue-600/10 border-blue-500/30' : 'bg-blue-50 border-blue-200') 
+        : (isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200');
     const tagClass = isBlue ? 'text-blue-500' : 'text-green-500';
     const shadowClass = isBlue ? 'shadow-lg' : 'shadow-lg shadow-black/50';
 
@@ -34,7 +38,7 @@ export const LiveMatchCard: React.FC<LiveMatchCardProps> = ({
             <View className="flex-row justify-between items-start mb-4">
                 <View>
                     <Text className={`${tagClass} font-bold tracking-wider text-xs uppercase mb-1`}>{t('common.liveNow')}</Text>
-                    <Text className="text-white text-xl font-bold">
+                    <Text className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         {state.teamA} {t('common.vs')} {state.teamB}
                     </Text>
                 </View>
@@ -60,7 +64,7 @@ export const LiveMatchCard: React.FC<LiveMatchCardProps> = ({
                                     ]
                                 );
                             }}
-                            className="bg-red-500/10 p-2 rounded-lg"
+                            className={`p-2 rounded-lg ${isDark ? 'bg-red-500/10' : 'bg-red-50'}`}
                         >
                             <Ionicons name="trash-outline" size={20} color="#EF4444" />
                         </TouchableOpacity>
@@ -70,18 +74,18 @@ export const LiveMatchCard: React.FC<LiveMatchCardProps> = ({
 
             <View className="flex-row justify-between mb-6">
                 <View>
-                    <Text className="text-gray-400 text-xs mb-1">{state.innings1.battingTeam}</Text>
-                    <Text className="text-white text-2xl font-black">
+                    <Text className={`text-xs mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{state.innings1.battingTeam}</Text>
+                    <Text className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         {state.innings1.totalRuns}/{state.innings1.totalWickets}
-                        <Text className="text-gray-500 text-sm font-normal"> ({state.innings1.overs.length}.{state.innings1.currentOver.filter(b => b.isValidBall).length})</Text>
+                        <Text className={`text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-400'}`}> ({state.innings1.overs.length}.{state.innings1.currentOver.filter(b => b.isValidBall).length})</Text>
                     </Text>
                 </View>
                 {state.currentInnings === 2 && (
                     <View className="items-end">
-                        <Text className="text-gray-400 text-xs mb-1">{state.innings2.battingTeam}</Text>
-                        <Text className="text-white text-2xl font-black">
+                        <Text className={`text-xs mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{state.innings2.battingTeam}</Text>
+                        <Text className={`text-2xl font-black ${isDark ? 'text-white' : 'text-gray-900'}`}>
                             {state.innings2.totalRuns}/{state.innings2.totalWickets}
-                            <Text className="text-gray-500 text-sm font-normal"> ({state.innings2.overs.length}.{state.innings2.currentOver.filter(b => b.isValidBall).length})</Text>
+                            <Text className={`text-sm font-normal ${isDark ? 'text-gray-500' : 'text-gray-400'}`}> ({state.innings2.overs.length}.{state.innings2.currentOver.filter(b => b.isValidBall).length})</Text>
                         </Text>
                     </View>
                 )}
