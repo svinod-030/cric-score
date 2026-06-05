@@ -4,6 +4,7 @@ import { Player } from '../types/match';
 import { Ionicons } from '@expo/vector-icons';
 import { Dropdown as ElementDropdown } from 'react-native-element-dropdown';
 import { useTranslation } from 'react-i18next';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 interface MatchStartModalProps {
     visible: boolean;
@@ -15,6 +16,7 @@ interface MatchStartModalProps {
 
 export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayers, onStart, title }: MatchStartModalProps) => {
     const { t } = useTranslation();
+    const { isDark } = useAppTheme();
     const [strikerId, setStrikerId] = useState<string | null>(battingTeamPlayers[0].id);
     const [nonStrikerId, setNonStrikerId] = useState<string | null>(battingTeamPlayers[1].id);
     const [bowlerId, setBowlerId] = useState<string | null>(bowlingTeamPlayers[0].id);
@@ -42,8 +44,8 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
 
     const renderDropdownItem = (item: { label: string, value: string }) => {
         return (
-            <View className="p-4 bg-gray-800 border-b border-gray-700">
-                <Text className="text-white font-medium">{item.label}</Text>
+            <View style={[styles.dropdownItem, { backgroundColor: isDark ? '#1f2937' : '#f9fafb', borderBottomColor: isDark ? '#374151' : '#e5e7eb' }]}>
+                <Text style={[styles.dropdownItemText, { color: isDark ? '#ffffff' : '#111827' }]}>{item.label}</Text>
             </View>
         );
     };
@@ -53,6 +55,28 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
         value: player.id
     });
 
+    const dropdownStyle = {
+        ...styles.dropdown,
+        backgroundColor: isDark ? '#1f2937' : '#f3f4f6',
+        borderColor: isDark ? '#374151' : '#d1d5db',
+    };
+
+    const containerStyle = {
+        ...styles.containerStyle,
+        backgroundColor: isDark ? '#111827' : '#ffffff',
+        borderColor: isDark ? '#374151' : '#d1d5db',
+    };
+
+    const placeholderStyle = {
+        ...styles.placeholderStyle,
+        color: isDark ? '#6b7280' : '#9ca3af',
+    };
+
+    const selectedTextStyle = {
+        ...styles.selectedTextStyle,
+        color: isDark ? '#ffffff' : '#111827',
+    };
+
     return (
         <Modal
             visible={visible}
@@ -61,15 +85,15 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
             onRequestClose={() => { }} // Block back button
         >
             <View className="flex-1 bg-black/90 justify-center p-4">
-                <View className="bg-gray-900 rounded-3xl p-6 border border-gray-800 w-full max-w-lg self-center">
-                    <Text className="text-white text-2xl font-black mb-6 text-center">{title}</Text>
+                <View className={`rounded-3xl p-6 border w-full max-w-lg self-center ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
+                    <Text className={`text-2xl font-black mb-6 text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>{title}</Text>
 
-                    <Text className="text-gray-400 mb-2 font-bold uppercase text-xs">{t('common.striker')}</Text>
+                    <Text className={`mb-2 font-bold uppercase text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{t('common.striker')}</Text>
                     <ElementDropdown
-                        style={styles.dropdown}
-                        placeholderStyle={styles.placeholderStyle}
-                        selectedTextStyle={styles.selectedTextStyle}
-                        containerStyle={styles.containerStyle}
+                        style={dropdownStyle}
+                        placeholderStyle={placeholderStyle}
+                        selectedTextStyle={selectedTextStyle}
+                        containerStyle={containerStyle}
                         data={battingTeamPlayers.filter(p => p.id !== nonStrikerId).map(playerToOption)}
                         maxHeight={300}
                         labelField="label"
@@ -79,16 +103,16 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
                         onChange={item => setStrikerId(item.value)}
                         renderItem={renderDropdownItem}
                         renderRightIcon={() => (
-                            <Ionicons name="chevron-down" size={20} color="#9ca3af" />
+                            <Ionicons name="chevron-down" size={20} color={isDark ? '#9ca3af' : '#6b7280'} />
                         )}
                     />
 
-                    <Text className="text-gray-400 mt-4 mb-2 font-bold uppercase text-xs">{t('common.nonStriker')}</Text>
+                    <Text className={`mt-4 mb-2 font-bold uppercase text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{t('common.nonStriker')}</Text>
                     <ElementDropdown
-                        style={styles.dropdown}
-                        placeholderStyle={styles.placeholderStyle}
-                        selectedTextStyle={styles.selectedTextStyle}
-                        containerStyle={styles.containerStyle}
+                        style={dropdownStyle}
+                        placeholderStyle={placeholderStyle}
+                        selectedTextStyle={selectedTextStyle}
+                        containerStyle={containerStyle}
                         data={battingTeamPlayers.filter(p => p.id !== strikerId).map(playerToOption)}
                         maxHeight={300}
                         labelField="label"
@@ -98,18 +122,18 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
                         onChange={item => setNonStrikerId(item.value)}
                         renderItem={renderDropdownItem}
                         renderRightIcon={() => (
-                            <Ionicons name="chevron-down" size={20} color="#9ca3af" />
+                            <Ionicons name="chevron-down" size={20} color={isDark ? '#9ca3af' : '#6b7280'} />
                         )}
                     />
 
-                    <View className="h-[1px] bg-gray-800 my-6" />
+                    <View className={`h-[1px] my-6 ${isDark ? 'bg-gray-800' : 'bg-gray-200'}`} />
 
-                    <Text className="text-gray-400 mb-2 font-bold uppercase text-xs">{t('common.openingBowler')}</Text>
+                    <Text className={`mb-2 font-bold uppercase text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{t('common.openingBowler')}</Text>
                     <ElementDropdown
-                        style={styles.dropdown}
-                        placeholderStyle={styles.placeholderStyle}
-                        selectedTextStyle={styles.selectedTextStyle}
-                        containerStyle={styles.containerStyle}
+                        style={dropdownStyle}
+                        placeholderStyle={placeholderStyle}
+                        selectedTextStyle={selectedTextStyle}
+                        containerStyle={containerStyle}
                         data={bowlingTeamPlayers.map(playerToOption)}
                         maxHeight={300}
                         labelField="label"
@@ -119,7 +143,7 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
                         onChange={item => setBowlerId(item.value)}
                         renderItem={renderDropdownItem}
                         renderRightIcon={() => (
-                            <Ionicons name="chevron-down" size={20} color="#9ca3af" />
+                            <Ionicons name="chevron-down" size={20} color={isDark ? '#9ca3af' : '#6b7280'} />
                         )}
                     />
 
@@ -127,11 +151,11 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
                         onPress={handleStart}
                         className={`mt-10 p-4 rounded-xl items-center ${(strikerId && nonStrikerId && bowlerId)
                             ? 'bg-green-600 shadow-lg shadow-green-900/50'
-                            : 'bg-gray-700'
+                            : isDark ? 'bg-gray-700' : 'bg-gray-200'
                             }`}
                         disabled={!strikerId || !nonStrikerId || !bowlerId}
                     >
-                        <Text className={`text-lg font-bold ${(strikerId && nonStrikerId && bowlerId) ? 'text-white' : 'text-gray-500'
+                        <Text className={`text-lg font-bold ${(strikerId && nonStrikerId && bowlerId) ? 'text-white' : isDark ? 'text-gray-500' : 'text-gray-400'
                             }`}>
                             {t('common.startInnings')}
                         </Text>
@@ -145,28 +169,29 @@ export const MatchStartModal = ({ visible, battingTeamPlayers, bowlingTeamPlayer
 const styles = StyleSheet.create({
     dropdown: {
         height: 56,
-        backgroundColor: '#1f2937', // gray-800
         borderRadius: 12,
         paddingHorizontal: 16,
         borderWidth: 1,
-        borderColor: '#374151', // gray-700
     },
     placeholderStyle: {
         fontSize: 16,
-        color: '#6b7280', // gray-500
         fontWeight: 'bold',
     },
     selectedTextStyle: {
         fontSize: 16,
-        color: 'white',
         fontWeight: 'bold',
     },
     containerStyle: {
-        backgroundColor: '#111827', // gray-900
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: '#374151', // gray-700
         marginTop: 4,
         overflow: 'hidden',
+    },
+    dropdownItem: {
+        padding: 16,
+        borderBottomWidth: 1,
+    },
+    dropdownItemText: {
+        fontWeight: '500',
     },
 });

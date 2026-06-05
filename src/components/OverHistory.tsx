@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, FlatList } from 'react-native';
 import { Ball } from '../types/match';
 import { useTranslation } from 'react-i18next';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 interface OverHistoryProps {
     overs: { balls: Ball[], bowlerId: string }[];
@@ -11,11 +12,12 @@ interface OverHistoryProps {
 
 export const OverHistory = ({ overs, runsForNoBall, runsForWide }: OverHistoryProps) => {
     const { t } = useTranslation();
+    const { isDark } = useAppTheme();
     if (overs.length === 0) return null;
 
     return (
         <View className="mb-4">
-            <Text className="text-gray-400 mb-2 text-sm font-bold">{t('common.previousOvers')}</Text>
+            <Text className={`mb-2 text-sm font-bold ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{t('common.previousOvers')}</Text>
             <FlatList
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -25,13 +27,13 @@ export const OverHistory = ({ overs, runsForNoBall, runsForWide }: OverHistoryPr
                 renderItem={({ item: over, index }) => {
                     const overNumber = overs.length - index;
                     return (
-                        <View className="mr-3 bg-gray-800 p-2 rounded-xl min-w-[160px] border border-gray-700">
-                            <Text className="text-gray-500 text-xs mb-2 font-bold uppercase tracking-wider">{t('common.over')} {overNumber}</Text>
+                        <View className={`mr-3 p-2 rounded-xl min-w-[160px] border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-100 border-gray-300'}`}>
+                            <Text className={`text-xs mb-2 font-bold uppercase tracking-wider ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{t('common.over')} {overNumber}</Text>
                             <View className="flex-row flex-wrap gap-1.5">
                                 {over.balls.map((ball, idx) => (
                                     <View
                                         key={idx}
-                                        className={`w-7 h-7 rounded-full items-center justify-center border border-white/10 ${ball.isWicket ? 'bg-red-600' : ball.extraType !== 'none' ? 'bg-yellow-600' : ball.runs >= 4 ? 'bg-green-600' : 'bg-gray-700'}`}
+                                        className={`w-7 h-7 rounded-full items-center justify-center border border-white/10 ${ball.isWicket ? 'bg-red-600' : ball.extraType !== 'none' ? 'bg-yellow-600' : ball.runs >= 4 ? 'bg-green-600' : isDark ? 'bg-gray-700' : 'bg-gray-400'}`}
                                     >
                                         <View className="flex-row items-center">
                                             <Text className="text-white font-bold text-[10px]">

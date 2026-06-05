@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 interface CoinFlipModalProps {
     isVisible: boolean;
@@ -32,6 +33,7 @@ export const CoinFlipModal: React.FC<CoinFlipModalProps> = ({
 
     const rotation = useSharedValue(0);
     const scale = useSharedValue(1);
+    const { isDark } = useAppTheme();
 
     const handleFlip = () => {
         if (isFlipping) return;
@@ -95,9 +97,9 @@ export const CoinFlipModal: React.FC<CoinFlipModalProps> = ({
             onRequestClose={onClose}
         >
             <View className="flex-1 justify-center items-center bg-black/80 p-6">
-                <View className="bg-gray-900 w-full rounded-3xl p-8 border border-gray-800 items-center">
-                    <Text className="text-2xl font-bold text-white mb-2">{t('common.onlineToss')}</Text>
-                    <Text className="text-gray-400 text-center mb-10">
+                <View className={`bg-gray-900 w-full rounded-3xl p-8 border border-gray-800 items-center ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+                    <Text className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('common.onlineToss')}</Text>
+                    <Text className={`text-center mb-10 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                         {t('common.feelingLucky')}
                     </Text>
 

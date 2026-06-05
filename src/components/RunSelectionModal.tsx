@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, Switch } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useAppTheme } from '../hooks/useAppTheme';
 
 interface RunSelectionModalProps {
     visible: boolean;
@@ -20,6 +21,7 @@ export const RunSelectionModal = ({
     showByeToggle = false
 }: RunSelectionModalProps) => {
     const { t } = useTranslation();
+    const { isDark } = useAppTheme();
     const [isBye, setIsBye] = useState(false);
 
     // Reset state when modal opens
@@ -30,12 +32,12 @@ export const RunSelectionModal = ({
     return (
         <Modal visible={visible} transparent animationType="fade">
             <View className="flex-1 justify-center items-center bg-black/60 p-6">
-                <View className="bg-gray-800 w-full rounded-3xl p-6 border border-gray-700">
-                    <Text className="text-white text-xl font-bold mb-6 text-center">{title}</Text>
+                <View className={`w-full rounded-3xl p-6 border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                    <Text className={`text-xl font-bold mb-6 text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>{title}</Text>
 
                     {showByeToggle && (
-                        <View className="flex-row items-center justify-between mb-6 bg-gray-700/50 p-4 rounded-xl">
-                            <Text className="text-white font-medium text-lg">{t('common.byesNotFromBat')}</Text>
+                        <View className={`flex-row items-center justify-between mb-6 p-4 rounded-xl ${isDark ? 'bg-gray-700/50' : 'bg-gray-100'}`}>
+                            <Text className={`font-medium text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('common.byesNotFromBat')}</Text>
                             <Switch
                                 value={isBye}
                                 onValueChange={setIsBye}
@@ -50,18 +52,18 @@ export const RunSelectionModal = ({
                             <TouchableOpacity
                                 key={run}
                                 onPress={() => onSelect(run, isBye)}
-                                className="w-16 h-16 bg-gray-700 rounded-2xl items-center justify-center border border-gray-600 active:bg-blue-600"
+                                className={`w-16 h-16 rounded-2xl items-center justify-center border active:bg-blue-600 ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'}`}
                             >
-                                <Text className="text-white text-2xl font-bold">{run}</Text>
+                                <Text className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{run}</Text>
                             </TouchableOpacity>
                         ))}
                     </View>
 
                     <TouchableOpacity
                         onPress={onClose}
-                        className="mt-8 p-4 bg-gray-700 rounded-xl items-center"
+                        className={`mt-8 p-4 rounded-xl items-center ${isDark ? 'bg-gray-700' : 'bg-gray-200'}`}
                     >
-                        <Text className="text-gray-300 font-bold">{t('common.cancel')}</Text>
+                        <Text className={`font-bold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{t('common.cancel')}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
