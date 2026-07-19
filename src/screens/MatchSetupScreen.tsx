@@ -7,6 +7,7 @@ import { useMatchStore } from '../store/useMatchStore';
 import { MatchConfig } from '../types/match';
 import { LiveMatchCard } from '../components/LiveMatchCard';
 import { CoinFlipModal } from '../components/CoinFlipModal';
+import { ExtrasRulesEditor } from '../components/ExtrasRulesEditor';
 import { useTranslation } from 'react-i18next';
 
 export default function MatchSetupScreen({ navigation }: any) {
@@ -250,42 +251,19 @@ export default function MatchSetupScreen({ navigation }: any) {
                 <View className="mb-8 bg-gray-800 p-5 rounded-2xl border border-gray-700">
                     <Text className="text-lg font-semibold text-white mb-4">{t('common.extrasRules')}</Text>
 
-                    <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-gray-300">{t('common.runForWide')}</Text>
-                        <Switch
-                            value={config.runsForWide > 0}
-                            onValueChange={(v) => updateConfig('runsForWide', v ? 1 : 0)}
-                            trackColor={{ false: "#374151", true: "#2563EB" }}
-                            thumbColor="#fff"
-                        />
-                    </View>
-                    <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-gray-300">{t('common.runForNoBall')}</Text>
-                        <Switch
-                            value={config.runsForNoBall > 0}
-                            onValueChange={(v) => updateConfig('runsForNoBall', v ? 1 : 0)}
-                            trackColor={{ false: "#374151", true: "#2563EB" }}
-                            thumbColor="#fff"
-                        />
-                    </View>
-                    <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-gray-300">{t('common.reballForWide')}</Text>
-                        <Switch
-                            value={config.reballForWide}
-                            onValueChange={(v) => updateConfig('reballForWide', v)}
-                            trackColor={{ false: "#374151", true: "#2563EB" }}
-                            thumbColor="#fff"
-                        />
-                    </View>
-                    <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-gray-300">{t('common.reballForNoBall')}</Text>
-                        <Switch
-                            value={config.reballForNoBall}
-                            onValueChange={(v) => updateConfig('reballForNoBall', v)}
-                            trackColor={{ false: "#374151", true: "#2563EB" }}
-                            thumbColor="#fff"
-                        />
-                    </View>
+                    <ExtrasRulesEditor
+                        values={{
+                            runsForWide: config.runsForWide,
+                            runsForNoBall: config.runsForNoBall,
+                            reballForWide: config.reballForWide,
+                            reballForNoBall: config.reballForNoBall,
+                        }}
+                        onChange={(patch) => {
+                            (Object.keys(patch) as (keyof typeof patch)[]).forEach((key) => {
+                                updateConfig(key, patch[key]);
+                            });
+                        }}
+                    />
                 </View>
                 <TouchableOpacity
                     className={`p-4 rounded-xl items-center mb-10 shadow-lg ${(!canStartMatch()) ? 'bg-gray-700 shadow-none' : 'bg-blue-600 shadow-blue-900/50'}`}

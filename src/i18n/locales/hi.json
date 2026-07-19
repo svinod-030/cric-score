@@ -35,8 +35,8 @@
         "bat": "बल्लेबाजी",
         "bowl": "गेंदबाजी",
         "extrasRules": "अतिरिक्त और नियम",
-        "runForWide": "वाइड के लिए रन (1)",
-        "runForNoBall": "नो बॉल के लिए रन (1)",
+        "runForWide": "वाइड के लिए रन मूल्य",
+        "runForNoBall": "नो बॉल के लिए रन मूल्य",
         "reballForWide": "वाइड के लिए फिर से गेंद",
         "reballForNoBall": "नो बॉल के लिए फिर से गेंद",
         "startMatch": "मैच शुरू करें",
@@ -236,6 +236,17 @@
         "delete": "हटाएं",
         "shareResultPromo": "क्या आप अपने क्रिकेट मैचों को स्कोर करना और लाइव स्कोरिंग का पालन करना चाहते हैं?",
         "shareLivePromo": "इस मैच को लाइव देखें और अपने खुद के खेल स्कोर करें!",
-        "downloadAppPrompt": "अभी क्रिक-स्कोर ऐप डाउनलोड करें: {{link}}"
+        "downloadAppPrompt": "अभी क्रिक-स्कोर ऐप डाउनलोड करें: {{link}}",
+        "enterCustomRuns": "रन दर्ज करें",
+        "back": "पीछे",
+        "confirm": "पुष्टि करें",
+        "otherRuns": "अन्य रन (जैसे ओवरथ्रो)",
+        "matchSettingsMidGame": "मैच सेटिंग्स",
+        "editMatchRulesDescription": "इस मैच के बाकी हिस्से के लिए अतिरिक्त नियम समायोजित करें। पहले से स्कोर की गई गेंदें नहीं बदलेंगी।",
+        "runValueForWide": "वाइड के लिए रन मूल्य",
+        "runValueForNoBall": "नो बॉल के लिए रन मूल्य",
+        "saveChanges": "बदलाव सहेजें",
+        "settingsUpdated": "सेटिंग्स अपडेट हुईं",
+        "matchSettingsUpdatedMsg": "इस मैच के बाकी हिस्से के लिए नियम अपडेट कर दिए गए हैं।"
     }
 }

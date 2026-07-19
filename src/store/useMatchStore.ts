@@ -31,6 +31,7 @@ interface MatchStore {
     startLiveShare: () => Promise<string>;
     stopLiveShare: () => void;
     deleteMatch: (completedAt: string) => void;
+    updateMatchSettings: (updates: Partial<Pick<MatchConfig, 'runsForWide' | 'runsForNoBall' | 'reballForWide' | 'reballForNoBall'>>) => void;
 }
 
 const INITIAL_CONFIG: MatchConfig = {
@@ -608,6 +609,18 @@ export const useMatchStore = create<MatchStore>()(
                         ...store.state,
                         liveMatchId: undefined
                     }
+                }));
+            },
+            // Allows extras rules (run value for Wide/No Ball, whether an extra ball is
+            // bowled) to be corrected mid-match if they weren't set up correctly at the
+            // start. Updates BOTH the persistent config (which drives scoring going
+            // forward via processBall) and the live match `state` (which drives what's
+            // rendered on the scoreboard), so the two never drift apart mid-game.
+            // Balls already recorded keep whatever values were in effect when they were bowled.
+            updateMatchSettings: (updates) => {
+                set((store) => ({
+                    config: { ...store.config, ...updates },
+                    state: { ...store.state, ...updates },
                 }));
             },
             deleteMatch: (completedAt: string) => {

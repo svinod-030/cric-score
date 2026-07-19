@@ -203,6 +203,62 @@ describe('scoringUtils', () => {
             expect(newState.innings1.battingStats['p1'].ballsFaced).toBe(0);
         });
 
+        test('should credit a boundary to the batsman off a no-ball', () => {
+            const state = createInitialState();
+            const newState = processBall(state, mockConfig, 4, 'no-ball', false, undefined, undefined, undefined);
+
+            // Team total = 4 (bat) + 1 (no-ball penalty)
+            expect(newState.innings1.totalRuns).toBe(5);
+            // Batsman gets the 4 runs and a "four" on their card
+            expect(newState.innings1.battingStats['p1'].runs).toBe(4);
+            expect(newState.innings1.battingStats['p1'].fours).toBe(1);
+            // Bowler is charged for everything (runs off bat + the no-ball penalty)
+            expect(newState.innings1.bowlingStats['p4'].runsConceded).toBe(5);
+            // No-ball is not a legal delivery when re-ball is enabled
+            expect(newState.innings1.currentOver[0].isValidBall).toBe(false);
+        });
+
+        test('should credit a six to the batsman off a no-ball', () => {
+            const state = createInitialState();
+            const newState = processBall(state, mockConfig, 6, 'no-ball', false);
+
+            expect(newState.innings1.totalRuns).toBe(7);
+            expect(newState.innings1.battingStats['p1'].runs).toBe(6);
+            expect(newState.innings1.battingStats['p1'].sixes).toBe(1);
+            expect(newState.innings1.bowlingStats['p4'].runsConceded).toBe(7);
+        });
+
+        test('should support a custom/overthrow total off a no-ball (e.g. 2 run + overthrow)', () => {
+            const state = createInitialState();
+            const newState = processBall(state, mockConfig, 5, 'no-ball', false);
+
+            // 5 off the bat + 1 no-ball penalty
+            expect(newState.innings1.totalRuns).toBe(6);
+            expect(newState.innings1.battingStats['p1'].runs).toBe(5);
+            expect(newState.innings1.bowlingStats['p4'].runsConceded).toBe(6);
+        });
+
+        test('should NOT credit the batsman when runs off a no-ball are byes', () => {
+            const state = createInitialState();
+            // isByeForNoBall = true
+            const newState = processBall(state, mockConfig, 4, 'no-ball', false, undefined, undefined, true);
+
+            expect(newState.innings1.totalRuns).toBe(5); // 4 byes + 1 no-ball penalty
+            expect(newState.innings1.battingStats['p1'].runs).toBe(0);
+            expect(newState.innings1.battingStats['p1'].fours).toBe(0);
+            // Bowler is still charged for everything conceded off a no-ball, byes included
+            expect(newState.innings1.bowlingStats['p4'].runsConceded).toBe(5);
+        });
+
+        test('should honor a custom no-ball run value from match settings', () => {
+            const state = createInitialState();
+            const customConfig = { ...mockConfig, runsForNoBall: 2 };
+            const newState = processBall(state, customConfig, 1, 'no-ball', false);
+
+            expect(newState.innings1.totalRuns).toBe(3); // 1 run + 2 no-ball penalty
+            expect(newState.innings1.battingStats['p1'].runs).toBe(1);
+        });
+
         test('should swap strike on odd runs', () => {
             const state = createInitialState();
             const newState = processBall(state, mockConfig, 1, 'none', false);

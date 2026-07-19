@@ -17,6 +17,7 @@ import { WicketTypeSelectionModal } from '../components/WicketTypeSelectionModal
 import { FielderSelectionModal } from '../components/FielderSelectionModal';
 import { WhoIsOutModal } from '../components/WhoIsOutModal';
 import { MatchStartModal } from '../components/MatchStartModal';
+import { MatchSettingsModal } from '../components/MatchSettingsModal';
 import { MatchCard } from '../components/MatchCard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -80,7 +81,7 @@ const EditablePlayerName = ({
 
 export default function ScoreboardScreen({ navigation }: any) {
     const { t } = useTranslation();
-    const { state, config, recordBall, endInnings, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings, renamePlayer, startLiveShare } = useMatchStore();
+    const { state, config, recordBall, endInnings, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings, renamePlayer, startLiveShare, updateMatchSettings } = useMatchStore();
     const viewShotRef = useRef<any>(null);
     const innings = state.currentInnings === 1 ? state.innings1 : state.innings2;
     const currentOverValidBalls = innings.currentOver.filter(b => b.isValidBall).length;
@@ -112,6 +113,7 @@ export default function ScoreboardScreen({ navigation }: any) {
     const [isSharingLive, setIsSharingLive] = useState(false);
     const [isQRModalVisible, setQRModalVisible] = useState(false);
     const [isBatterSelectionVisible, setBatterSelectionVisible] = useState(false);
+    const [isMatchSettingsVisible, setMatchSettingsVisible] = useState(false);
 
     const handleShareMatch = async () => {
         const { isAuthenticated } = useAuthStore.getState();
@@ -276,6 +278,19 @@ export default function ScoreboardScreen({ navigation }: any) {
         recordBall(runs, 'none', false);
     };
 
+    // Handles odd/complex totals off the bat (e.g. runs + an overthrow) that
+    // don't fit the standard 0/1/2/3/4/6 quick buttons.
+    const handleCustomScore = () => {
+        setRunModalConfig({
+            title: t('common.enterCustomRuns'),
+            type: 'none',
+            runs: 0,
+            options: [5, 7, 8],
+            showByeToggle: false
+        });
+        setRunModalVisible(true);
+    };
+
     const handleExtra = (type: ExtraType) => {
         // If Wide Run is disabled, record immediately without modal
         if (type === 'wide' && config.runsForWide === 0) {
@@ -404,7 +419,15 @@ export default function ScoreboardScreen({ navigation }: any) {
             <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                 {/* Header / Score */}
                 {!state.isInningsBreak && (
-                    <View className="p-6 pb-2 border-b border-gray-800">
+                    <View className="p-6 pb-2 border-b border-gray-800 relative">
+                        {/* Match Settings (top right) */}
+                        <TouchableOpacity
+                            onPress={() => setMatchSettingsVisible(true)}
+                            className="absolute top-4 right-4 z-10 bg-gray-800 p-2 rounded-xl border border-gray-700 w-10 h-10 items-center justify-center"
+                        >
+                            <Ionicons name="settings-outline" size={18} color="#9ca3af" />
+                        </TouchableOpacity>
+
                         {/* Team Status Row */}
                         <View className="items-center mb-4">
                             <View className="flex-row items-center bg-gray-800/50 px-4 py-1.5 rounded-full border border-gray-700">
@@ -624,16 +647,23 @@ export default function ScoreboardScreen({ navigation }: any) {
                                     <TouchableOpacity
                                         key={run}
                                         onPress={() => handleScore(run)}
-                                        className="flex-1 aspect-video bg-gray-800 rounded-2xl items-center justify-center border border-gray-700 active:bg-gray-700"
+                                        className="flex-1 aspect-square bg-gray-800 rounded-2xl items-center justify-center border border-gray-700 active:bg-gray-700"
                                     >
                                         <Text className="text-white text-3xl font-bold">{run}</Text>
                                     </TouchableOpacity>
                                 ))}
                                 <TouchableOpacity
                                     onPress={handleWicket}
-                                    className="flex-1 aspect-video bg-red-900/50 rounded-2xl items-center justify-center border border-red-700 active:bg-red-800/50"
+                                    className="flex-1 aspect-square bg-red-900/50 rounded-2xl items-center justify-center border border-red-700 active:bg-red-800/50"
                                 >
-                                    <Text className="text-red-500 text-2xl font-bold">{t('common.wicket')}</Text>
+                                    <Text className="text-red-500 text-xl font-bold">{t('common.wicket')}</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={handleCustomScore}
+                                    className="flex-1 aspect-square bg-gray-800 rounded-2xl items-center justify-center border border-dashed border-gray-600"
+                                >
+                                    <Ionicons name="add-circle-outline" size={20} color="#9ca3af" />
+                                    <Text className="text-gray-300 font-bold text-[10px] mt-1 text-center">{t('common.other')}</Text>
                                 </TouchableOpacity>
                             </View>
 
@@ -716,6 +746,9 @@ export default function ScoreboardScreen({ navigation }: any) {
                 visible={isBowlerModalVisible}
                 players={availableBowlers}
                 onSelect={setBowler}
+                innings={innings}
+                oversLimit={state.overs}
+                allPlayers={[...state.teamAPlayers, ...state.teamBPlayers]}
             />
             <BatterSelectionModal
                 visible={isBatterSelectionVisible}
@@ -727,6 +760,9 @@ export default function ScoreboardScreen({ navigation }: any) {
                     return !isOtherBatter && (!stats || !stats.isOut);
                 })}
                 onSelect={handleBatterSelect}
+                innings={innings}
+                oversLimit={state.overs}
+                allPlayers={[...state.teamAPlayers, ...state.teamBPlayers]}
             />
             <RunSelectionModal
                 visible={runModalVisible}
@@ -760,6 +796,17 @@ export default function ScoreboardScreen({ navigation }: any) {
                 bowlingTeamPlayers={bowlingTeamPlayers}
                 onStart={handleMatchStart}
                 title={state.currentInnings === 1 ? t('common.start1stInnings') : t('common.start2ndInningsTitle')}
+            />
+            <MatchSettingsModal
+                visible={isMatchSettingsVisible}
+                onClose={() => setMatchSettingsVisible(false)}
+                values={{
+                    runsForWide: config.runsForWide,
+                    runsForNoBall: config.runsForNoBall,
+                    reballForWide: config.reballForWide,
+                    reballForNoBall: config.reballForNoBall,
+                }}
+                onSave={updateMatchSettings}
             />
 
             {/* QR View Modal */}

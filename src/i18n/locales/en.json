@@ -35,8 +35,8 @@
         "bat": "Bat",
         "bowl": "Bowl",
         "extrasRules": "Extras & Rules",
-        "runForWide": "Run for Wide (1)",
-        "runForNoBall": "Run for No Ball (1)",
+        "runForWide": "Run Value for Wide",
+        "runForNoBall": "Run Value for No Ball",
         "reballForWide": "Re-ball for Wide",
         "reballForNoBall": "Re-ball for No Ball",
         "startMatch": "Start Match",
@@ -236,6 +236,17 @@
         "delete": "Delete",
         "shareResultPromo": "Want to score your own cricket matches and follow live scoring?",
         "shareLivePromo": "Follow this match live and score your own games!",
-        "downloadAppPrompt": "Download the Cric-Score App now: {{link}}"
+        "downloadAppPrompt": "Download the Cric-Score App now: {{link}}",
+        "enterCustomRuns": "Enter Runs",
+        "back": "Back",
+        "confirm": "Confirm",
+        "otherRuns": "Other Runs (e.g. overthrows)",
+        "matchSettingsMidGame": "Match Settings",
+        "editMatchRulesDescription": "Adjust extras rules for the rest of this match. Balls already scored won't change.",
+        "runValueForWide": "Run Value for Wide",
+        "runValueForNoBall": "Run Value for No Ball",
+        "saveChanges": "Save Changes",
+        "settingsUpdated": "Settings Updated",
+        "matchSettingsUpdatedMsg": "Match rules have been updated for the rest of this match."
     }
 }
