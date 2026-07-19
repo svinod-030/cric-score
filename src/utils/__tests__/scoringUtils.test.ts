@@ -259,6 +259,27 @@ describe('scoringUtils', () => {
             expect(newState.innings1.battingStats['p1'].runs).toBe(1);
         });
 
+        test('should not create a battingStats entry keyed by an empty string when there is no non-striker (last man standing)', () => {
+            const state = createInitialState();
+            state.innings1.nonStrikerId = '';
+
+            const newState = processBall(state, mockConfig, 1, 'none', false);
+
+            expect(newState.innings1.battingStats['']).toBeUndefined();
+            expect(Object.keys(newState.innings1.battingStats)).toEqual(['p1']);
+            expect(newState.innings1.battingStats['p1'].runs).toBe(1);
+        });
+
+        test('should not create a battingStats entry keyed by an empty string when there is no striker', () => {
+            const state = createInitialState();
+            state.innings1.strikerId = '';
+
+            const newState = processBall(state, mockConfig, 0, 'none', false);
+
+            expect(newState.innings1.battingStats['']).toBeUndefined();
+            expect(Object.keys(newState.innings1.battingStats)).toEqual(['p2']);
+        });
+
         test('should swap strike on odd runs', () => {
             const state = createInitialState();
             const newState = processBall(state, mockConfig, 1, 'none', false);

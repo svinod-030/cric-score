@@ -246,8 +246,8 @@ export const processBall = (
             currentBowlerId: finalBowlerId,
             battingStats: {
                 ...innings.battingStats,
-                [strikerId]: strikerStats,
-                [nonStrikerId]: nonStrikerStats,
+                ...(strikerId ? { [strikerId]: strikerStats } : {}),
+                ...(nonStrikerId ? { [nonStrikerId]: nonStrikerStats } : {}),
             },
             bowlingStats: {
                 ...innings.bowlingStats,

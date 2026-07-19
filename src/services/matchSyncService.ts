@@ -9,6 +9,22 @@ const generateMatchId = () => {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
 };
 
+// Firestore rejects any document field keyed by an empty string. Local match state can
+// end up with one (e.g. a stray battingStats[''] entry from a "last man standing" innings),
+// so strip those before every sync rather than trusting upstream state to always be clean.
+const stripEmptyKeys = (value: any): any => {
+    if (Array.isArray(value)) return value.map(stripEmptyKeys);
+    if (value && typeof value === 'object') {
+        const result: Record<string, any> = {};
+        for (const [key, val] of Object.entries(value)) {
+            if (key === '') continue;
+            result[key] = stripEmptyKeys(val);
+        }
+        return result;
+    }
+    return value;
+};
+
 export const matchSyncService = {
     /**
      * Creates a new live match document in Firestore
@@ -21,7 +37,7 @@ export const matchSyncService = {
             const matchRef = doc(db, MATCHES_COLLECTION, matchId);
             
             // Clean up functions or non-serializable data if any exist (though Zustand state is usually clean)
-            const serializedState = JSON.parse(JSON.stringify(state));
+            const serializedState = stripEmptyKeys(JSON.parse(JSON.stringify(state)));
             serializedState.lastUpdatedAt = new Date().toISOString();
 
             await setDoc(matchRef, serializedState);
@@ -42,7 +58,7 @@ export const matchSyncService = {
         
         try {
             const matchRef = doc(db, MATCHES_COLLECTION, matchId);
-            const serializedState = JSON.parse(JSON.stringify(state));
+            const serializedState = stripEmptyKeys(JSON.parse(JSON.stringify(state)));
             serializedState.lastUpdatedAt = new Date().toISOString();
 
             await updateDoc(matchRef, serializedState);
