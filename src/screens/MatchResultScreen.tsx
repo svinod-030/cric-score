@@ -11,10 +11,14 @@ import { APP_CONFIG } from '../utils/constants';
 import { useTranslation } from 'react-i18next';
 import { Confetti } from '../components/Confetti';
 import { calculateAwards } from '../utils/awardsUtils';
+import { useSeriesStore } from '../features/series/useSeriesStore';
+import { computeTally } from '../features/series/seriesUtils';
+import { SeriesResultCard } from '../features/series/components/SeriesResultCard';
 
 export default function MatchResultScreen({ navigation, route }: any) {
     const { t } = useTranslation();
-    const { state, resetMatch, deleteMatch } = useMatchStore();
+    const { state, resetMatch, deleteMatch, history = [] } = useMatchStore();
+    const endSeries = useSeriesStore((s) => s.endSeries);
     const viewShotRef = useRef<any>(null);
     const [isSharing, setIsSharing] = React.useState(false);
     const [shouldShowConfetti, setShouldShowConfetti] = React.useState(false);
@@ -23,6 +27,10 @@ export default function MatchResultScreen({ navigation, route }: any) {
     const matchData = route.params?.matchData || state;
     const { matchResult, innings1, innings2, teamAPlayers, teamBPlayers } = matchData;
     const isHistoryView = !!route.params?.matchData;
+
+    // Matches of a series show the series score and can only be deleted together with the series.
+    const series = useSeriesStore((s) => s.series.find(x => x.id === matchData.seriesId));
+    const isSeriesActive = !!series && !series.endedAt;
 
     React.useEffect(() => {
         if (matchResult && matchResult.winner !== 'Draw' && matchData.completedAt) {
@@ -42,6 +50,14 @@ export default function MatchResultScreen({ navigation, route }: any) {
             index: 0,
             routes: [{ name: 'HomeTabs' }],
         });
+    };
+
+    const handleEndSeries = () => {
+        if (!series) return;
+        Alert.alert(t('common.endSeries'), t('common.endSeriesMsg'), [
+            { text: t('common.cancel'), style: 'cancel' },
+            { text: t('common.endSeries'), style: 'destructive', onPress: () => endSeries(series.id) },
+        ]);
     };
 
     if (!matchResult) {
@@ -212,6 +228,14 @@ export default function MatchResultScreen({ navigation, route }: any) {
                 </ViewShot>
 
                 <View className="p-6 pt-0">
+                    {series && (
+                        <SeriesResultCard
+                            series={series}
+                            tally={computeTally(history, series)}
+                            onView={() => navigation.navigate('SeriesSummary', { seriesId: series.id })}
+                            onEnd={isSeriesActive ? handleEndSeries : undefined}
+                        />
+                    )}
                     <TouchableOpacity
                         className={`bg-green-600 w-full p-4 rounded-xl flex-row items-center justify-center gap-2 shadow-lg shadow-green-900/50 mb-4 ${isSharing ? 'opacity-50' : ''}`}
                         onPress={handleShare}
@@ -232,18 +256,22 @@ export default function MatchResultScreen({ navigation, route }: any) {
                             className="bg-blue-600 w-full p-4 rounded-xl items-center shadow-lg shadow-blue-900/50 mb-4"
                             onPress={handleNewMatch}
                         >
-                            <Text className="text-white text-lg font-bold">{t('common.startNewMatch')}</Text>
+                            <Text className="text-white text-lg font-bold">
+                                {isSeriesActive && matchData.seriesId === series?.id ? t('common.nextMatchInSeries') : t('common.startNewMatch')}
+                            </Text>
                         </TouchableOpacity>
                     )}
-                    <TouchableOpacity
-                        className="bg-red-500/10 w-full p-4 rounded-xl items-center border border-red-500/30 mb-8"
-                        onPress={handleDeleteMatch}
-                    >
-                        <View className="flex-row items-center gap-2">
-                            <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                            <Text className="text-red-500 text-lg font-bold">{t('common.deleteMatch')}</Text>
-                        </View>
-                    </TouchableOpacity>
+                    {!matchData.seriesId && (
+                        <TouchableOpacity
+                            className="bg-red-500/10 w-full p-4 rounded-xl items-center border border-red-500/30 mb-8"
+                            onPress={handleDeleteMatch}
+                        >
+                            <View className="flex-row items-center gap-2">
+                                <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                                <Text className="text-red-500 text-lg font-bold">{t('common.deleteMatch')}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </ScrollView>
             <Confetti active={!isSharing && shouldShowConfetti} />

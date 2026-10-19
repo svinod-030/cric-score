@@ -13,6 +13,7 @@ export interface MatchConfig {
     teamAPlayerNames?: string[];
     teamBPlayerNames?: string[];
     savedTeams?: Record<string, string[]>; // Team Name -> Player Names
+    seriesId?: string; // Set when this match is part of a series
 }
 
 // Basic types

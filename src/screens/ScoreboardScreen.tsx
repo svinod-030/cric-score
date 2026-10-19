@@ -18,6 +18,7 @@ import { FielderSelectionModal } from '../components/FielderSelectionModal';
 import { WhoIsOutModal } from '../components/WhoIsOutModal';
 import { MatchStartModal } from '../components/MatchStartModal';
 import { MatchSettingsModal } from '../components/MatchSettingsModal';
+import { SeriesTallyPill } from '../features/series/components/SeriesTallyPill';
 import { MatchCard } from '../components/MatchCard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -81,7 +82,7 @@ const EditablePlayerName = ({
 
 export default function ScoreboardScreen({ navigation }: any) {
     const { t } = useTranslation();
-    const { state, config, recordBall, endInnings, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings, renamePlayer, startLiveShare, updateMatchSettings } = useMatchStore();
+    const { state, config, recordBall, endInnings, resetMatch, setBowler, setStriker, setNonStriker, undoBall, swapBatsmen, retirePlayer, startSecondInnings, renamePlayer, startLiveShare, updateMatchSettings, history = [] } = useMatchStore();
     const viewShotRef = useRef<any>(null);
     const innings = state.currentInnings === 1 ? state.innings1 : state.innings2;
     const currentOverValidBalls = innings.currentOver.filter(b => b.isValidBall).length;
@@ -439,6 +440,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                         </View>
 
                         <View className="items-center mb-6">
+                            <SeriesTallyPill seriesId={state.seriesId} history={history} />
                             <Text className="text-6xl font-black text-white">
                                 {innings.totalRuns}/{innings.totalWickets}
                             </Text>

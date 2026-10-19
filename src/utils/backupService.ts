@@ -46,6 +46,19 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}): Promi
     return response;
 };
 
+// Adds the persisted series state (series-storage) to the match backup under `seriesStorage`.
+// Falls back to the untouched match data if there is no series data or anything looks off.
+const withSeriesData = async (matchData: string): Promise<string> => {
+    try {
+        const seriesRaw = await AsyncStorage.getItem('series-storage');
+        const seriesState = seriesRaw ? JSON.parse(seriesRaw)?.state : undefined;
+        if (!seriesState || !Array.isArray(seriesState.series)) return matchData;
+        return JSON.stringify({ ...JSON.parse(matchData), seriesStorage: seriesState });
+    } catch {
+        return matchData;
+    }
+};
+
 export const backupToDrive = async () => {
     try {
         // 1. Get the data to backup
@@ -54,6 +67,9 @@ export const backupToDrive = async () => {
             console.log('No match data found to backup');
             return false;
         }
+
+        // Series metadata travels in the same file, as an extra key old versions ignore
+        const backupPayload = await withSeriesData(matchData);
 
         // 2. Find or Create Backup Folder
         let folderId = await findBackupFolder();
@@ -71,9 +87,9 @@ export const backupToDrive = async () => {
 
         // 4. Upload/Update file
         if (existingFileId) {
-            await updateBackupFile(existingFileId, matchData);
+            await updateBackupFile(existingFileId, backupPayload);
         } else {
-            await createBackupFile(folderId, matchData);
+            await createBackupFile(folderId, backupPayload);
         }
 
         console.log('Backup successful');
