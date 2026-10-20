@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MatchConfig, MatchState, InningsState, ExtraType, WicketType, Player } from '../types/match';
 import { calculateMatchResult, processBall } from '../utils/scoringUtils';
+import { getDefaultPlayerName } from '../utils/playerNameUtils';
 import { matchSyncService } from '../services/matchSyncService';
 import { useAuthStore } from './useAuthStore';
 
@@ -97,7 +98,7 @@ export const useMatchStore = create<MatchStore>()(
                 } else {
                     // Start generating default names if team is new/unsaved
                     const displayTeamName = teamName || (teamKey === 'teamA' ? config.teamA || "Team A" : config.teamB || "Team B");
-                    const defaultNames = Array.from({ length: config.playersPerTeam }, (_, i) => `${displayTeamName} Player ${i + 1}`);
+                    const defaultNames = Array.from({ length: config.playersPerTeam }, (_, i) => getDefaultPlayerName(displayTeamName, i + 1));
 
                     set((store) => ({
                         config: {
@@ -129,13 +130,13 @@ export const useMatchStore = create<MatchStore>()(
                     id: `A${i + 1}`,
                     name: config.isCustomNamesEnabled && config.teamAPlayerNames?.[i]
                         ? config.teamAPlayerNames[i]
-                        : `${config.teamA} Player ${i + 1}`,
+                        : getDefaultPlayerName(config.teamA, i + 1),
                 }));
                 const teamBPlayers = Array.from({ length: config.playersPerTeam }, (_, i) => ({
                     id: `B${i + 1}`,
                     name: config.isCustomNamesEnabled && config.teamBPlayerNames?.[i]
                         ? config.teamBPlayerNames[i]
-                        : `${config.teamB} Player ${i + 1}`,
+                        : getDefaultPlayerName(config.teamB, i + 1),
                 }));
 
                 // Auto-save teams on start match
@@ -509,11 +510,11 @@ export const useMatchStore = create<MatchStore>()(
                         if (!isNaN(index)) {
                             // Ensure array exists and has values
                             if (!nextConfig.teamAPlayerNames) {
-                                nextConfig.teamAPlayerNames = Array.from({ length: nextConfig.playersPerTeam }, (_, i) => `${nextConfig.teamA} Player ${i + 1}`);
+                                nextConfig.teamAPlayerNames = Array.from({ length: nextConfig.playersPerTeam }, (_, i) => getDefaultPlayerName(nextConfig.teamA, i + 1));
                             }
                             // Fill any gaps if array is shorter than index
                             while (nextConfig.teamAPlayerNames.length <= index) {
-                                nextConfig.teamAPlayerNames.push(`${nextConfig.teamA} Player ${nextConfig.teamAPlayerNames.length + 1}`);
+                                nextConfig.teamAPlayerNames.push(getDefaultPlayerName(nextConfig.teamA, nextConfig.teamAPlayerNames.length + 1));
                             }
                             nextConfig.teamAPlayerNames[index] = newName;
                             nextConfig.isCustomNamesEnabled = true;
@@ -525,10 +526,10 @@ export const useMatchStore = create<MatchStore>()(
                         const index = parseInt(playerId.substring(1)) - 1;
                         if (!isNaN(index)) {
                             if (!nextConfig.teamBPlayerNames) {
-                                nextConfig.teamBPlayerNames = Array.from({ length: nextConfig.playersPerTeam }, (_, i) => `${nextConfig.teamB} Player ${i + 1}`);
+                                nextConfig.teamBPlayerNames = Array.from({ length: nextConfig.playersPerTeam }, (_, i) => getDefaultPlayerName(nextConfig.teamB, i + 1));
                             }
                             while (nextConfig.teamBPlayerNames.length <= index) {
-                                nextConfig.teamBPlayerNames.push(`${nextConfig.teamB} Player ${nextConfig.teamBPlayerNames.length + 1}`);
+                                nextConfig.teamBPlayerNames.push(getDefaultPlayerName(nextConfig.teamB, nextConfig.teamBPlayerNames.length + 1));
                             }
                             nextConfig.teamBPlayerNames[index] = newName;
                             nextConfig.isCustomNamesEnabled = true;

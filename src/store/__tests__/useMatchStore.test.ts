@@ -159,4 +159,50 @@ describe('useMatchStore', () => {
         state = useMatchStore.getState();
         expect(state.state.innings1.battingStats['A3'].battingOrder).toBe(3);
     });
+    describe('default player names', () => {
+        const setup = (overrides = {}) => act(() => {
+            useMatchStore.getState().setConfig({
+                teamA: 'TEAM A', teamB: 'TEAM B', overs: 5, playersPerTeam: 3,
+                isCustomNamesEnabled: false, teamAPlayerNames: undefined, teamBPlayerNames: undefined,
+                tossWinner: 'teamA', tossDecision: 'bat', ...overrides,
+            });
+        });
+
+        test('startMatch names players with team initials and a number', () => {
+            setup();
+            act(() => useMatchStore.getState().startMatch());
+
+            const { teamAPlayers, teamBPlayers } = useMatchStore.getState().state;
+            expect(teamAPlayers.map(p => p.name)).toEqual(['TA1', 'TA2', 'TA3']);
+            expect(teamBPlayers.map(p => p.name)).toEqual(['TB1', 'TB2', 'TB3']);
+            // Match-local ids are unchanged
+            expect(teamAPlayers.map(p => p.id)).toEqual(['A1', 'A2', 'A3']);
+        });
+
+        test('uses the initials of every word in a longer team name', () => {
+            setup({ teamA: 'CHENNAI SUPER KINGS', teamB: 'LIONS' });
+            act(() => useMatchStore.getState().startMatch());
+
+            const { teamAPlayers, teamBPlayers } = useMatchStore.getState().state;
+            expect(teamAPlayers[0].name).toBe('CSK1');
+            expect(teamBPlayers[0].name).toBe('L1');
+        });
+
+        test('loadTeamRoster fills unsaved teams with short default names', () => {
+            setup();
+            act(() => useMatchStore.getState().loadTeamRoster('teamA', 'TEAM A'));
+
+            expect(useMatchStore.getState().config.teamAPlayerNames).toEqual(['TA1', 'TA2', 'TA3']);
+        });
+
+        test('custom player names are still used as typed', () => {
+            setup({ isCustomNamesEnabled: true, teamAPlayerNames: ['Asha', 'Anil', 'Arun'], teamBPlayerNames: ['Bala', '', 'Bina'] });
+            act(() => useMatchStore.getState().startMatch());
+
+            const { teamAPlayers, teamBPlayers } = useMatchStore.getState().state;
+            expect(teamAPlayers.map(p => p.name)).toEqual(['Asha', 'Anil', 'Arun']);
+            // A blank custom name falls back to the short default
+            expect(teamBPlayers.map(p => p.name)).toEqual(['Bala', 'TB2', 'Bina']);
+        });
+    });
 });
