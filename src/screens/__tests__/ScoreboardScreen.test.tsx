@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import ScoreboardScreen from '../ScoreboardScreen';
 import { useMatchStore } from '../../store/useMatchStore';
+import { useSeriesStore } from '../../features/series/useSeriesStore';
 
 // Mock child components to avoid environment issues and simplify testing
 jest.mock('../../components/BowlerSelectionModal', () => ({ BowlerSelectionModal: () => 'BowlerSelectionModal' }));
@@ -141,5 +142,39 @@ describe('ScoreboardScreen', () => {
         // Should NOT show header score elements
         expect(queryByText('Team A Batting')).toBeNull();
         expect(queryByText('100/2')).toBeNull();
+    });
+    describe('series tally pill', () => {
+        const withSeries = (seriesId?: string, history: any[] = []) =>
+            (useMatchStore as unknown as jest.Mock).mockReturnValue({
+                ...mockState,
+                state: { ...mockState.state, seriesId },
+                history,
+            });
+
+        beforeEach(() => {
+            useSeriesStore.setState({
+                series: [{ id: 'S1', teamA: 'LIONS', teamB: 'TIGERS', createdAt: '2026-06-01T10:00:00.000Z' }],
+                activeSeriesId: 'S1',
+            });
+        });
+
+        test('shows the series score and match number for a series match', () => {
+            const done = { seriesId: 'S1', teamA: 'LIONS', teamB: 'TIGERS', completedAt: '2026-06-01T11:00:00.000Z', matchResult: { winner: 'LIONS', reason: '' } };
+            withSeries('S1', [done]);
+
+            const { getByText } = render(<ScoreboardScreen navigation={mockNavigation} />);
+
+            expect(getByText('LIONS 1 - 0 TIGERS')).toBeTruthy();
+            expect(getByText('· Match 2')).toBeTruthy();
+        });
+
+        test('shows nothing for an individual match', () => {
+            withSeries(undefined);
+
+            const { queryByText } = render(<ScoreboardScreen navigation={mockNavigation} />);
+
+            expect(queryByText('Series')).toBeNull();
+            expect(queryByText(/LIONS/)).toBeNull();
+        });
     });
 });

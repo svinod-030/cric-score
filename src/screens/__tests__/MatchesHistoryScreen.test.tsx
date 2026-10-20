@@ -5,6 +5,7 @@ import MatchesHistoryScreen from '../MatchesHistoryScreen';
 import { useMatchStore } from '../../store/useMatchStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { restoreFromDrive } from '../../utils/backupService';
+import { useSeriesStore } from '../../features/series/useSeriesStore';
 
 // Mock dependencies
 jest.mock('../../store/useMatchStore');
@@ -267,6 +268,122 @@ describe('MatchesHistoryScreen', () => {
             const { getByText } = render(<MatchesHistoryScreen />);
 
             expect(getByText('Innings 1')).toBeTruthy();
+        });
+    });
+    describe('series in history', () => {
+        const match = (overrides: any) => ({
+            teamA: 'LIONS',
+            teamB: 'TIGERS',
+            matchResult: { winner: 'LIONS', reason: 'Won by 10 runs', resultType: 'runs', margin: 10 },
+            ...overrides,
+        });
+
+        const seriesMatch1 = match({ seriesId: 'S1', completedAt: '2026-02-01T10:00:00Z' });
+        const seriesMatch2 = match({
+            seriesId: 'S1',
+            completedAt: '2026-02-02T10:00:00Z',
+            matchResult: { winner: 'TIGERS', reason: 'Won by 5 runs', resultType: 'runs', margin: 5 },
+        });
+        const lonelySeriesMatch = match({ seriesId: 'S2', teamA: 'KINGS', teamB: 'QUEENS', matchResult: { winner: 'Draw', reason: 'Tied' }, completedAt: '2026-02-03T10:00:00Z' });
+        const individual = match({ teamA: 'INDIA', teamB: 'AUSTRALIA', completedAt: '2026-02-04T10:00:00Z', matchResult: { winner: 'INDIA', reason: 'Won by 1 run', resultType: 'runs', margin: 1 } });
+        const mockDeleteMatch = jest.fn();
+        const mockDeleteSeries = jest.fn(() => ({ ok: true }));
+
+        beforeEach(() => {
+            (useMatchStore as unknown as jest.Mock).mockReturnValue({
+                state: { isPlaying: false },
+                history: [individual, lonelySeriesMatch, seriesMatch2, seriesMatch1],
+                restoreMatches: jest.fn(),
+                deleteMatch: mockDeleteMatch,
+            });
+            (useAuthStore as unknown as jest.Mock).mockReturnValue({ isAuthenticated: false });
+            useSeriesStore.setState({
+                series: [
+                    { id: 'S1', teamA: 'LIONS', teamB: 'TIGERS', createdAt: '2026-02-01T10:00:00Z', endedAt: '2026-02-02T10:00:00Z' },
+                    { id: 'S2', teamA: 'KINGS', teamB: 'QUEENS', createdAt: '2026-02-03T10:00:00Z' },
+                ],
+                activeSeriesId: 'S2',
+                deleteSeries: mockDeleteSeries,
+            });
+        });
+
+        test('shows a series with several matches as one card with its tally', () => {
+            const { getByText, getAllByText } = render(<MatchesHistoryScreen />);
+
+            expect(getByText('Series · 2 matches')).toBeTruthy();
+            // Two matches of the series, but only one card for the two teams
+            expect(getAllByText('LIONS')).toHaveLength(1);
+            expect(getAllByText('TIGERS')).toHaveLength(1);
+        });
+
+        test('opens the series summary when a series card is pressed', () => {
+            const { getByText } = render(<MatchesHistoryScreen />);
+
+            fireEvent.press(getByText('Series · 2 matches'));
+
+            expect(mockNavigate).toHaveBeenCalledWith('SeriesSummary', { seriesId: 'S1' });
+        });
+
+        test('a series with a single match opens that match directly and shows a Series chip', () => {
+            const { getByText } = render(<MatchesHistoryScreen />);
+
+            expect(getByText('Series · Live')).toBeTruthy();
+
+            fireEvent.press(getByText('KINGS'));
+
+            expect(mockNavigate).toHaveBeenCalledWith('MatchResult', { matchData: lonelySeriesMatch });
+        });
+
+        test('an individual match still opens its match directly', () => {
+            const { getByText } = render(<MatchesHistoryScreen />);
+
+            fireEvent.press(getByText('INDIA'));
+
+            expect(mockNavigate).toHaveBeenCalledWith('MatchResult', { matchData: individual });
+        });
+
+        test('an individual match is deleted on its own', () => {
+            const { UNSAFE_getAllByProps } = render(<MatchesHistoryScreen />);
+
+            // Newest group first: the individual match is the first row
+            fireEvent.press(UNSAFE_getAllByProps({ name: 'trash-outline' })[0]);
+            const buttons = (Alert.alert as jest.Mock).mock.calls[0][2];
+            buttons.find((b: any) => b.text === 'Delete').onPress();
+
+            expect(Alert.alert).toHaveBeenCalledWith('Delete Match', expect.any(String), expect.any(Array));
+            expect(mockDeleteMatch).toHaveBeenCalledWith(individual.completedAt);
+            expect(mockDeleteSeries).not.toHaveBeenCalled();
+        });
+
+        test('a series match can only be deleted together with its series', () => {
+            const { UNSAFE_getAllByProps } = render(<MatchesHistoryScreen />);
+
+            // Rows: individual, single-match series S2, series card S1
+            fireEvent.press(UNSAFE_getAllByProps({ name: 'trash-outline' })[1]);
+            expect((Alert.alert as jest.Mock).mock.calls[0][0]).toBe('Delete Series');
+            (Alert.alert as jest.Mock).mock.calls[0][2].find((b: any) => b.text === 'Delete').onPress();
+
+            expect(mockDeleteSeries).toHaveBeenCalledWith('S2');
+            expect(mockDeleteMatch).not.toHaveBeenCalled();
+        });
+
+        test('deleting a series card removes the whole series', () => {
+            const { UNSAFE_getAllByProps } = render(<MatchesHistoryScreen />);
+
+            fireEvent.press(UNSAFE_getAllByProps({ name: 'trash-outline' })[2]);
+            (Alert.alert as jest.Mock).mock.calls[0][2].find((b: any) => b.text === 'Delete').onPress();
+
+            expect(mockDeleteSeries).toHaveBeenCalledWith('S1');
+        });
+
+        test('explains why a series cannot be deleted while one of its matches is in progress', () => {
+            mockDeleteSeries.mockReturnValueOnce({ ok: false });
+            const { UNSAFE_getAllByProps } = render(<MatchesHistoryScreen />);
+
+            fireEvent.press(UNSAFE_getAllByProps({ name: 'trash-outline' })[2]);
+            (Alert.alert as jest.Mock).mock.calls[0][2].find((b: any) => b.text === 'Delete').onPress();
+
+            expect(Alert.alert).toHaveBeenLastCalledWith('Delete Series', 'Finish or clear the match in progress before deleting this series.');
         });
     });
 });

@@ -9,11 +9,47 @@ import { LiveMatchCard } from '../components/LiveMatchCard';
 import { CoinFlipModal } from '../components/CoinFlipModal';
 import { ExtrasRulesEditor } from '../components/ExtrasRulesEditor';
 import { useTranslation } from 'react-i18next';
+import { useSeriesStore, getActiveSeries } from '../features/series/useSeriesStore';
+import { computeTally } from '../features/series/seriesUtils';
+import { MatchTypeToggle } from '../features/series/components/MatchTypeToggle';
+import { SeriesBanner } from '../features/series/components/SeriesBanner';
 
 export default function MatchSetupScreen({ navigation }: any) {
     const { t } = useTranslation();
-    const { config, setConfig, startMatch, loadTeamRoster, resetMatch } = useMatchStore();
+    const { config, setConfig, startMatch, loadTeamRoster, resetMatch, history = [] } = useMatchStore();
     const [isCoinFlipVisible, setIsCoinFlipVisible] = React.useState(false);
+
+    const activeSeries = useSeriesStore(getActiveSeries);
+    const startSeries = useSeriesStore((s) => s.startSeries);
+    const endSeries = useSeriesStore((s) => s.endSeries);
+    // With an active series the screen defaults to Series; otherwise it is an individual match.
+    const [isSeries, setIsSeries] = React.useState(!!activeSeries);
+    const teamsLocked = isSeries && !!activeSeries;
+
+    React.useEffect(() => {
+        setIsSeries(!!activeSeries);
+    }, [activeSeries?.id]);
+
+    // While playing a series the two teams are fixed to the series teams.
+    React.useEffect(() => {
+        if (!teamsLocked || !activeSeries) return;
+        if (config.teamA !== activeSeries.teamA) {
+            setConfig({ teamA: activeSeries.teamA });
+            loadTeamRoster('teamA', activeSeries.teamA);
+        }
+        if (config.teamB !== activeSeries.teamB) {
+            setConfig({ teamB: activeSeries.teamB });
+            loadTeamRoster('teamB', activeSeries.teamB);
+        }
+    }, [teamsLocked, activeSeries?.id, config.teamA, config.teamB]);
+
+    const handleEndSeries = () => {
+        if (!activeSeries) return;
+        Alert.alert(t('common.endSeries'), t('common.endSeriesMsg'), [
+            { text: t('common.cancel'), style: 'cancel' },
+            { text: t('common.endSeries'), style: 'destructive', onPress: () => endSeries(activeSeries.id) },
+        ]);
+    };
 
     const canStartMatch = () => {
         return config.tossWinner && config.tossDecision && config.teamA && config.teamB;
@@ -24,6 +60,17 @@ export default function MatchSetupScreen({ navigation }: any) {
             Alert.alert(t('common.incompleteSetup'), t('common.pleaseSelectTossWinner'));
             return;
         }
+
+        // Every start sets seriesId explicitly so a previous match's value never carries over.
+        let seriesId: string | undefined;
+        if (isSeries) {
+            if (!activeSeries && config.teamA.trim().toUpperCase() === config.teamB.trim().toUpperCase()) {
+                Alert.alert(t('common.incompleteSetup'), t('common.seriesNeedsDifferentTeams'));
+                return;
+            }
+            seriesId = activeSeries ? activeSeries.id : startSeries(config.teamA, config.teamB);
+        }
+        setConfig({ seriesId });
         startMatch();
         navigation.navigate('Scoreboard');
     };
@@ -57,14 +104,26 @@ export default function MatchSetupScreen({ navigation }: any) {
                     teamBName={config.teamB || t('common.teamB')}
                 />
 
+                <MatchTypeToggle isSeries={isSeries} onChange={setIsSeries} />
+
+                {activeSeries && isSeries && (
+                    <SeriesBanner
+                        series={activeSeries}
+                        tally={computeTally(history, activeSeries)}
+                        onEnd={handleEndSeries}
+                        onView={() => navigation.navigate('SeriesSummary', { seriesId: activeSeries.id })}
+                    />
+                )}
+
                 {/* Teams Section */}
                 <View className="mb-6">
                     <Text className="text-lg font-semibold text-gray-300 mb-2">{t('common.teams')}</Text>
                     <View className="flex-row gap-4">
                         <View className="flex-1">
                             <TextInput
-                                className="bg-gray-800 text-white p-4 rounded-xl border border-gray-700"
+                                className={`bg-gray-800 text-white p-4 rounded-xl border border-gray-700 ${teamsLocked ? 'opacity-60' : ''}`}
                                 value={config.teamA}
+                                editable={!teamsLocked}
                                 onChangeText={(text: string) => {
                                     const teamName = text?.toUpperCase();
                                     updateConfig('teamA', teamName);
@@ -77,8 +136,9 @@ export default function MatchSetupScreen({ navigation }: any) {
                         </View>
                         <View className="flex-1">
                             <TextInput
-                                className="bg-gray-800 text-white p-4 rounded-xl border border-gray-700"
+                                className={`bg-gray-800 text-white p-4 rounded-xl border border-gray-700 ${teamsLocked ? 'opacity-60' : ''}`}
                                 value={config.teamB}
+                                editable={!teamsLocked}
                                 onChangeText={(text: string) => {
                                     const teamName = text?.toUpperCase();
                                     updateConfig('teamB', teamName);

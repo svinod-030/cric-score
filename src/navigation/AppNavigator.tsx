@@ -18,6 +18,7 @@ import MatchesHistoryScreen from '../screens/MatchesHistoryScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import LicensesScreen from '../screens/LicensesScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import SeriesSummaryScreen from '../features/series/screens/SeriesSummaryScreen';
 
 import LanguageSelectionModal from '../components/LanguageSelectionModal';
 import { useSettingsStore } from '../store/useSettingsStore';
@@ -146,6 +147,7 @@ export default function AppNavigator() {
                     <Stack.Screen name="Scoreboard" component={ScoreboardScreen} options={{ title: t('common.scoreBoard') }} />
                     <Stack.Screen name="MatchResult" component={MatchResultScreen} options={{ title: t('common.matchResult') }} />
                     <Stack.Screen name="LiveViewer" component={LiveViewerScreen} options={{ title: t('common.liveMatch') || 'Live Match' }} />
+                    <Stack.Screen name="SeriesSummary" component={SeriesSummaryScreen} options={{ title: t('common.series') }} />
                     <Stack.Screen name="Licenses" component={LicensesScreen} options={{ headerShown: false }} />
                     <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: t('common.profile') }} />
                 </Stack.Navigator>

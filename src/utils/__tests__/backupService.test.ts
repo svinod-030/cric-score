@@ -58,6 +58,49 @@ describe('backupService', () => {
             expect(global.fetch).toHaveBeenCalledTimes(3);
         });
 
+        describe('series data', () => {
+            const matchStorage = JSON.stringify({ state: { history: [] }, version: 0 });
+            const seriesStorage = JSON.stringify({
+                state: { series: [{ id: 'S1', teamA: 'A', teamB: 'B', createdAt: 'x' }], activeSeriesId: 'S1' },
+                version: 0,
+            });
+
+            const mockDriveFlow = () =>
+                (global.fetch as jest.Mock)
+                    .mockResolvedValueOnce({ ok: true, json: async () => ({ files: [{ id: 'folder-1' }] }), clone: () => ({ json: async () => ({ files: [{ id: 'folder-1' }] }) }) })
+                    .mockResolvedValueOnce({ ok: true, json: async () => ({ files: [{ id: 'file-1' }] }), clone: () => ({ json: async () => ({ files: [{ id: 'file-1' }] }) }) })
+                    .mockResolvedValueOnce({ ok: true, clone: () => ({ json: async () => ({}), text: async () => '' }) });
+
+            const uploadedBody = () => JSON.parse((global.fetch as jest.Mock).mock.calls[2][1].body);
+
+            test('includes the series state in the uploaded backup', async () => {
+                (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) =>
+                    key === 'match-storage' ? matchStorage : key === 'series-storage' ? seriesStorage : null
+                );
+                mockDriveFlow();
+
+                expect(await backupToDrive()).toBe(true);
+
+                const body = uploadedBody();
+                expect(body.state).toEqual({ history: [] }); // match data is unchanged
+                expect(body.seriesStorage).toEqual({
+                    series: [{ id: 'S1', teamA: 'A', teamB: 'B', createdAt: 'x' }],
+                    activeSeriesId: 'S1',
+                });
+            });
+
+            test('uploads the match data untouched when there is no series data', async () => {
+                (AsyncStorage.getItem as jest.Mock).mockImplementation(async (key: string) =>
+                    key === 'match-storage' ? matchStorage : null
+                );
+                mockDriveFlow();
+
+                await backupToDrive();
+
+                expect((global.fetch as jest.Mock).mock.calls[2][1].body).toBe(matchStorage);
+            });
+        });
+
         test('should create folder if it does not exist', async () => {
             (AsyncStorage.getItem as jest.Mock).mockResolvedValue(mockMatchData);
 

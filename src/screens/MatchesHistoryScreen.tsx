@@ -5,9 +5,13 @@ import { useAuthStore } from '../store/useAuthStore';
 import { restoreFromDrive } from '../utils/backupService';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { LiveMatchCard } from '../components/LiveMatchCard';
 import { useTranslation } from 'react-i18next';
+import { useSeriesStore } from '../features/series/useSeriesStore';
+import { computeTally, deriveSeries, groupHistory } from '../features/series/seriesUtils';
+import { HistoryGroup } from '../features/series/types';
+import { restoreSeriesFromBackup } from '../features/series/seriesBackup';
 
 export default function MatchesHistoryScreen() {
     const { t } = useTranslation();
@@ -15,6 +19,26 @@ export default function MatchesHistoryScreen() {
     const { isAuthenticated } = useAuthStore();
     const [isRestoring, setIsRestoring] = useState(false);
     const navigation = useNavigation<any>();
+    const allSeries = useSeriesStore((s) => s.series);
+    const deleteSeries = useSeriesStore((s) => s.deleteSeries);
+
+    // History is a list of series; an individual match is a series of one.
+    const groups = useMemo(() => groupHistory(history || []), [history]);
+
+    const confirmDeleteSeries = (seriesId: string) => {
+        Alert.alert(t('common.deleteSeries'), t('common.deleteSeriesMsg'), [
+            { text: t('common.cancel'), style: 'cancel' },
+            {
+                text: t('common.delete'),
+                style: 'destructive',
+                onPress: () => {
+                    if (!deleteSeries(seriesId).ok) {
+                        Alert.alert(t('common.deleteSeries'), t('common.deleteSeriesBlocked'));
+                    }
+                },
+            },
+        ]);
+    };
 
     const handleRestore = async () => {
         if (!isAuthenticated) return;
@@ -32,6 +56,7 @@ export default function MatchesHistoryScreen() {
                             const backupData = await restoreFromDrive();
                             if (backupData) {
                                 restoreMatches(backupData);
+                                restoreSeriesFromBackup(backupData);
                                 Alert.alert(t('common.success'), t('common.matchesRestored'));
                             } else {
                                 Alert.alert(t('common.notFound'), t('common.noBackupFound'));
@@ -82,7 +107,8 @@ export default function MatchesHistoryScreen() {
         <Text className="text-gray-500 text-center py-10">{t('common.noCompletedMatches')}</Text>
     );
 
-    const renderItem = ({ item: match }: { item: any, index: number }) => {
+    const renderMatchRow = (match: any) => {
+        const matchSeries = match.seriesId ? allSeries.find(x => x.id === match.seriesId) : undefined;
         const isTeamAWinner = match.matchResult?.winner === match.teamA;
         const isTeamBWinner = match.matchResult?.winner === match.teamB;
 
@@ -103,6 +129,11 @@ export default function MatchesHistoryScreen() {
         const teamBWickets = teamBInnings?.totalWickets || 0;
 
         const handleDelete = () => {
+            // A match that belongs to a series can only be deleted together with the series
+            if (match.seriesId) {
+                confirmDeleteSeries(match.seriesId);
+                return;
+            }
             if (!match.completedAt) return;
             Alert.alert(
                 t('common.deleteMatch'),
@@ -124,10 +155,19 @@ export default function MatchesHistoryScreen() {
                 onPress={() => navigation.navigate('MatchResult', { matchData: match })}
             >
                 <View className="flex-row justify-between items-start mb-2">
-                    <View className="bg-gray-700/50 px-2 py-0.5 rounded">
-                        <Text className="text-[10px] text-gray-400 font-bold uppercase">
-                            {match.completedAt ? new Date(match.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : t('common.completed')}
-                        </Text>
+                    <View className="flex-row items-center gap-2">
+                        <View className="bg-gray-700/50 px-2 py-0.5 rounded">
+                            <Text className="text-[10px] text-gray-400 font-bold uppercase">
+                                {match.completedAt ? new Date(match.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : t('common.completed')}
+                            </Text>
+                        </View>
+                        {match.seriesId && (
+                            <View className="bg-blue-600/10 border border-blue-500/30 px-2 py-0.5 rounded">
+                                <Text className="text-[10px] text-blue-400 font-bold uppercase">
+                                    {t('common.series')}{matchSeries && !matchSeries.endedAt ? ` · ${t('common.seriesLive')}` : ''}
+                                </Text>
+                            </View>
+                        )}
                     </View>
                     <TouchableOpacity
                         onPress={handleDelete}
@@ -177,11 +217,75 @@ export default function MatchesHistoryScreen() {
         );
     };
 
+    const renderSeriesCard = (group: HistoryGroup) => {
+        const seriesId = group.seriesId!;
+        const series = allSeries.find(x => x.id === seriesId) ?? deriveSeries(seriesId, history);
+        if (!series) return renderMatchRow(group.matches[0]);
+
+        const tally = computeTally(history, series);
+        const isLive = !series.endedAt;
+        const latest = group.matches[0];
+
+        return (
+            <TouchableOpacity
+                className="bg-blue-600/10 p-3 rounded-xl mb-3 border border-blue-500/30"
+                onPress={() => navigation.navigate('SeriesSummary', { seriesId })}
+            >
+                <View className="flex-row justify-between items-start mb-2">
+                    <View className="flex-row items-center gap-2">
+                        <View className="bg-blue-600/20 px-2 py-0.5 rounded">
+                            <Text className="text-[10px] text-blue-300 font-bold uppercase">
+                                {t('common.seriesMatchCount', { count: group.matches.length })}
+                            </Text>
+                        </View>
+                        {isLive && (
+                            <View className="bg-green-600/20 px-2 py-0.5 rounded">
+                                <Text className="text-[10px] text-green-400 font-bold uppercase">{t('common.seriesLive')}</Text>
+                            </View>
+                        )}
+                    </View>
+                    <TouchableOpacity
+                        onPress={() => confirmDeleteSeries(seriesId)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                        <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                    </TouchableOpacity>
+                </View>
+
+                <View className="flex-row items-center justify-between">
+                    <View className="flex-1 items-center py-2 px-1">
+                        <Text className={`font-bold text-sm mb-1 text-center ${tally.winsA > tally.winsB ? 'text-yellow-500' : 'text-white'}`} numberOfLines={1}>{series.teamA}</Text>
+                        <Text className="text-white text-3xl font-black">{tally.winsA}</Text>
+                        {tally.winsA > tally.winsB && <Ionicons name="trophy" size={12} color="#EAB308" style={{ marginTop: 2 }} />}
+                    </View>
+                    <View className="px-2 items-center">
+                        <Text className="text-gray-600 font-black italic text-base">VS</Text>
+                    </View>
+                    <View className="flex-1 items-center py-2 px-1">
+                        <Text className={`font-bold text-sm mb-1 text-center ${tally.winsB > tally.winsA ? 'text-yellow-500' : 'text-white'}`} numberOfLines={1}>{series.teamB}</Text>
+                        <Text className="text-white text-3xl font-black">{tally.winsB}</Text>
+                        {tally.winsB > tally.winsA && <Ionicons name="trophy" size={12} color="#EAB308" style={{ marginTop: 2 }} />}
+                    </View>
+                </View>
+
+                <View className="mt-3 pt-2 border-t border-gray-700/30">
+                    <Text className="text-gray-400 text-center font-bold text-xs">
+                        {latest.completedAt ? new Date(latest.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
+                        {tally.ties + tally.noResult > 0 ? ` · ${t('common.seriesTiesNoResult', { count: tally.ties + tally.noResult })}` : ''}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        );
+    };
+
+    const renderItem = ({ item: group }: { item: HistoryGroup }) =>
+        group.seriesId && group.matches.length > 1 ? renderSeriesCard(group) : renderMatchRow(group.matches[0]);
+
     return (
         <SafeAreaView className="flex-1 bg-gray-900" edges={['left', 'right']}>
             <FlatList
-                data={history}
-                keyExtractor={(item, index) => item.completedAt || index.toString()}
+                data={groups}
+                keyExtractor={(item) => item.key}
                 renderItem={renderItem}
                 ListHeaderComponent={renderHeader}
                 ListEmptyComponent={renderEmpty}
