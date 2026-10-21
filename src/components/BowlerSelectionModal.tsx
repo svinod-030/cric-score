@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import { Player, InningsState } from '../types/match';
 import { useTranslation } from 'react-i18next';
 import { PersistentScoreStrip } from './PersistentScoreStrip';
+import { PlayerAvatar } from '../features/teamTheme/components/PlayerAvatar';
 
 interface BowlerSelectionModalProps {
     visible: boolean;
@@ -35,7 +36,10 @@ export const BowlerSelectionModal = ({ visible, players, onSelect, innings, over
                                 className="p-4 border-b border-gray-800 active:bg-gray-800"
                                 onPress={() => onSelect(player.id)}
                             >
-                                <Text className="text-white text-lg">{player.name}</Text>
+                                <View className="flex-row items-center">
+                                    <View className="mr-3"><PlayerAvatar playerId={player.id} seed={player.name} size={32} /></View>
+                                    <Text className="text-white text-lg">{player.name}</Text>
+                                </View>
                             </TouchableOpacity>
                         ))}
                     </ScrollView>

@@ -81,6 +81,22 @@ describe('SeriesSummaryScreen', () => {
         expect(text.indexOf('Player of the Series')).toBeLessThan(text.indexOf('Match 2'));
     });
 
+    test('shows the team banner with both teams and their logos', () => {
+        const { getByTestId, getAllByTestId, getAllByText } = render(<SeriesSummaryScreen navigation={navigation} route={route} />);
+
+        expect(getByTestId('match-banner')).toBeTruthy();
+        expect(getAllByTestId('team-logo')).toHaveLength(2);
+        expect(getAllByText('LIONS').length).toBeGreaterThan(0);
+        expect(getAllByText('TIGERS').length).toBeGreaterThan(0);
+    });
+
+    test('award cards show a player avatar', () => {
+        const { getAllByTestId } = render(<SeriesSummaryScreen navigation={navigation} route={route} />);
+
+        // MVP, best batsman and best bowler
+        expect(getAllByTestId('player-avatar').length).toBeGreaterThanOrEqual(3);
+    });
+
     test('lists matches newest first and opens a match on press', () => {
         const { getAllByText } = render(<SeriesSummaryScreen navigation={navigation} route={route} />);
 

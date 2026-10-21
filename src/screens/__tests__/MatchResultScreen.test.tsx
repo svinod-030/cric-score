@@ -50,6 +50,18 @@ describe('MatchResultScreen with series', () => {
         return match;
     };
 
+    test('shows the team banner with both teams, their logos and the scores', () => {
+        const match = completedMatch();
+        act(() => useMatchStore.setState({ history: [match], state: match }));
+
+        const { getByTestId, getAllByTestId, getAllByText } = render(<MatchResultScreen navigation={navigation} route={{ params: {} }} />);
+
+        expect(getByTestId('match-banner')).toBeTruthy();
+        expect(getAllByTestId('team-logo')).toHaveLength(2);
+        expect(getAllByText('LIONS').length).toBeGreaterThan(0);
+        expect(getAllByText('TIGERS').length).toBeGreaterThan(0);
+    });
+
     test('a series match shows the series score and has no Delete Match button', () => {
         setupSeries();
 

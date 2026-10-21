@@ -46,32 +46,35 @@ export const groupHistory = (history: MatchState[]): HistoryGroup[] => {
     return result.sort((a, b) => completedTime(b.matches[0]) - completedTime(a.matches[0]));
 };
 
-type PlayerTotals = { runs: number; wickets: number; dismissals: number; points: number; ballsFaced: number; runsConceded: number };
+type PlayerTotals = { teamName: string; runs: number; wickets: number; dismissals: number; points: number; ballsFaced: number; runsConceded: number };
 
-const emptyTotals = (): PlayerTotals => ({ runs: 0, wickets: 0, dismissals: 0, points: 0, ballsFaced: 0, runsConceded: 0 });
+const emptyTotals = (teamName: string): PlayerTotals => ({ teamName, runs: 0, wickets: 0, dismissals: 0, points: 0, ballsFaced: 0, runsConceded: 0 });
 
 // Series awards use the same scoring as the per-match awards in awardsUtils.ts
 // (1 pt per run, 25 per wicket, 10 per fielding dismissal, same tie-breaks).
 // Match-local player ids (A1, B2...) are not stable across matches, so totals are keyed by player name.
 export const computeSeriesAwards = (matches: MatchState[]): SeriesAward[] => {
     const totals: Record<string, PlayerTotals> = {};
-    const get = (name: string) => (totals[name] ??= emptyTotals());
+    const get = (name: string, teamName: string) => (totals[name] ??= emptyTotals(teamName));
 
     matches.forEach(match => {
         const nameById: Record<string, string> = {};
-        [...match.teamAPlayers, ...match.teamBPlayers].forEach(p => (nameById[p.id] = p.name));
+        const teamById: Record<string, string> = {};
+        match.teamAPlayers.forEach(p => { nameById[p.id] = p.name; teamById[p.id] = match.teamA; });
+        match.teamBPlayers.forEach(p => { nameById[p.id] = p.name; teamById[p.id] = match.teamB; });
         const nameOf = (id: string) => nameById[id] || 'Unknown';
+        const teamOf = (id: string) => teamById[id] || '';
 
         [match.innings1, match.innings2].forEach(innings => {
             Object.values(innings.battingStats).forEach(stats => {
-                const t = get(nameOf(stats.playerId));
+                const t = get(nameOf(stats.playerId), teamOf(stats.playerId));
                 t.runs += stats.runs;
                 t.ballsFaced += stats.ballsFaced;
                 t.points += stats.runs;
             });
 
             Object.values(innings.bowlingStats).forEach(stats => {
-                const t = get(nameOf(stats.playerId));
+                const t = get(nameOf(stats.playerId), teamOf(stats.playerId));
                 t.wickets += stats.wickets;
                 t.runsConceded += stats.runsConceded;
                 t.points += stats.wickets * 25;
@@ -79,7 +82,7 @@ export const computeSeriesAwards = (matches: MatchState[]): SeriesAward[] => {
 
             [...innings.overs.flatMap(o => o.balls), ...innings.currentOver].forEach(ball => {
                 if (ball.fielderId) {
-                    const t = get(nameOf(ball.fielderId));
+                    const t = get(nameOf(ball.fielderId), teamOf(ball.fielderId));
                     t.dismissals += 1;
                     t.points += 10;
                 }
@@ -100,6 +103,7 @@ export const computeSeriesAwards = (matches: MatchState[]): SeriesAward[] => {
         awards.push({
             type: 'bestBatsman',
             playerName: bestBatsman,
+            teamName: totals[bestBatsman].teamName,
             stats: `${totals[bestBatsman].runs} Runs (${totals[bestBatsman].ballsFaced} Balls)`,
         });
     }
@@ -112,6 +116,7 @@ export const computeSeriesAwards = (matches: MatchState[]): SeriesAward[] => {
         awards.push({
             type: 'bestBowler',
             playerName: bestBowler,
+            teamName: totals[bestBowler].teamName,
             stats: `${totals[bestBowler].wickets} Wickets`,
         });
     }
@@ -121,6 +126,7 @@ export const computeSeriesAwards = (matches: MatchState[]): SeriesAward[] => {
         awards.unshift({
             type: 'mvp',
             playerName: mvp,
+            teamName: totals[mvp].teamName,
             stats: `${totals[mvp].runs} Runs, ${totals[mvp].wickets} Wkts`,
         });
     }

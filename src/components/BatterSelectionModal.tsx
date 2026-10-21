@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Player, BattingStats, InningsState } from '../types/match';
 import { PersistentScoreStrip } from './PersistentScoreStrip';
+import { PlayerAvatar } from '../features/teamTheme/components/PlayerAvatar';
 
 interface BatterSelectionModalProps {
     visible: boolean;
@@ -39,7 +40,10 @@ export const BatterSelectionModal = ({ visible, players, battingStats, onSelect,
                                 onPress={() => onSelect(player.id)}
                             >
                                 <View className="flex-row items-center justify-between">
-                                    <Text className="text-white text-lg">{player.name}</Text>
+                                    <View className="flex-row items-center flex-1">
+                                        <View className="mr-3"><PlayerAvatar playerId={player.id} seed={player.name} size={32} /></View>
+                                        <Text className="text-white text-lg">{player.name}</Text>
+                                    </View>
                                     {battingStats[player.id]?.isRetired && (
                                         <Text className="text-orange-500 text-sm italic font-bold">
                                             ({t('common.retired')})

@@ -8,6 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { useMatchStore } from '../../../store/useMatchStore';
 import { APP_CONFIG } from '../../../utils/constants';
 import { useSeriesStore } from '../useSeriesStore';
+import { MatchThemeProvider } from '../../teamTheme/MatchThemeContext';
+import { MatchBanner } from '../../teamTheme/components/MatchBanner';
+import { PlayerAvatar } from '../../teamTheme/components/PlayerAvatar';
 import { computeSeriesAwards, computeTally, deriveSeries, getMatchScores, getSeriesMatches } from '../seriesUtils';
 
 const AWARD_STYLE = {
@@ -91,133 +94,142 @@ export default function SeriesSummaryScreen({ navigation, route }: any) {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
-            <ScrollView className="flex-1">
-                <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 0.9 }} style={{ backgroundColor: '#111827' }}>
-                    <View className="bg-gray-900 pb-4">
-                        {/* Header */}
-                        <View className="p-6 items-center border-b border-gray-800 mb-4">
-                            <Text className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-2">
-                                {t('common.series')} · {isActive ? t('common.seriesLive') : t('common.seriesEnded')}
-                            </Text>
-                            <View className="flex-row items-center justify-between w-full">
-                                <Text className="text-white text-lg font-bold flex-1" numberOfLines={1}>{series.teamA}</Text>
-                                <Text className="text-white text-4xl font-black mx-3">{tally.winsA} - {tally.winsB}</Text>
-                                <Text className="text-white text-lg font-bold flex-1 text-right" numberOfLines={1}>{series.teamB}</Text>
+        <MatchThemeProvider teamA={series.teamA} teamB={series.teamB}>
+            <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
+                <ScrollView className="flex-1">
+                    <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 0.9 }} style={{ backgroundColor: '#111827' }}>
+                        <View className="bg-gray-900 pb-4">
+                            {/* Header */}
+                            <View className="mb-4 border-b border-gray-800">
+                                <MatchBanner
+                                    teamA={series.teamA}
+                                    teamB={series.teamB}
+                                    center={(
+                                        <>
+                                            <Text className="text-blue-300 text-[10px] font-black uppercase tracking-widest mb-1">
+                                                {t('common.series')} · {isActive ? t('common.seriesLive') : t('common.seriesEnded')}
+                                            </Text>
+                                            <Text className="text-white text-4xl font-black">{tally.winsA} - {tally.winsB}</Text>
+                                            {tally.ties + tally.noResult > 0 && (
+                                                <Text className="text-gray-200 text-xs mt-1 text-center">
+                                                    {t('common.seriesTiesNoResult', { count: tally.ties + tally.noResult })}
+                                                </Text>
+                                            )}
+                                        </>
+                                    )}
+                                />
                             </View>
-                            {tally.ties + tally.noResult > 0 && (
-                                <Text className="text-gray-400 text-xs mt-2">
-                                    {t('common.seriesTiesNoResult', { count: tally.ties + tally.noResult })}
-                                </Text>
-                            )}
-                        </View>
 
-                        {/* Awards */}
-                        {awards.length > 0 && (
-                            <View className="px-4 mb-6">
-                                <View className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700">
-                                    <Text className="text-white text-lg font-bold mb-4">
-                                        <Ionicons name="trophy-outline" size={20} color="#EAB308" /> {t('common.seriesAwards')}
-                                    </Text>
-                                    <View className="flex-row flex-wrap justify-between" style={{ gap: 12 }}>
-                                        {awards.map(award => {
-                                            const style = AWARD_STYLE[award.type];
-                                            return (
-                                                <View
-                                                    key={award.type}
-                                                    className="bg-gray-900/80 p-3 rounded-xl border border-gray-800 items-center justify-center mb-3"
-                                                    style={{ width: '47%' }}
-                                                >
-                                                    <View className="mb-2">
-                                                        <Ionicons name={style.icon} size={24} color={style.color} />
+                            {/* Awards */}
+                            {awards.length > 0 && (
+                                <View className="px-4 mb-6">
+                                    <View className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700">
+                                        <Text className="text-white text-lg font-bold mb-4">
+                                            <Ionicons name="trophy-outline" size={20} color="#EAB308" /> {t('common.seriesAwards')}
+                                        </Text>
+                                        <View className="flex-row flex-wrap justify-between" style={{ gap: 12 }}>
+                                            {awards.map(award => {
+                                                const style = AWARD_STYLE[award.type];
+                                                return (
+                                                    <View
+                                                        key={award.type}
+                                                        className="bg-gray-900/80 p-3 rounded-xl border border-gray-800 items-center justify-center mb-3"
+                                                        style={{ width: '47%' }}
+                                                    >
+                                                        <View className="mb-2">
+                                                            <Ionicons name={style.icon} size={24} color={style.color} />
+                                                        </View>
+                                                        <Text className="text-gray-400 text-[10px] uppercase font-bold tracking-tighter mb-1 text-center">
+                                                            {t(style.labelKey)}
+                                                        </Text>
+                                                        <View className="flex-row items-center justify-center">
+                                                            <View className="mr-1.5"><PlayerAvatar teamName={award.teamName} seed={award.playerName} size={20} /></View>
+                                                            <Text className="text-white font-bold text-center text-xs flex-shrink" numberOfLines={1}>{award.playerName}</Text>
+                                                        </View>
+                                                        <Text className="text-gray-500 text-[10px] mt-1 text-center">{award.stats}</Text>
                                                     </View>
-                                                    <Text className="text-gray-400 text-[10px] uppercase font-bold tracking-tighter mb-1 text-center">
-                                                        {t(style.labelKey)}
-                                                    </Text>
-                                                    <Text className="text-white font-bold text-center text-xs" numberOfLines={1}>{award.playerName}</Text>
-                                                    <Text className="text-gray-500 text-[10px] mt-1 text-center">{award.stats}</Text>
-                                                </View>
-                                            );
-                                        })}
+                                                );
+                                            })}
+                                        </View>
                                     </View>
                                 </View>
+                            )}
+
+                            {/* Matches (newest first) */}
+                            <View className="px-4">
+                                <Text className="text-white text-xl font-bold mb-3">{t('common.seriesMatches')}</Text>
+                                {matches.map((match, index) => {
+                                    const scores = getMatchScores(match);
+                                    const result = match.matchResult;
+                                    return (
+                                        <TouchableOpacity
+                                            key={match.completedAt}
+                                            className="bg-gray-800/40 p-3 rounded-xl mb-3 border border-gray-700/50"
+                                            onPress={() => navigation.navigate('MatchResult', { matchData: match })}
+                                        >
+                                            <View className="flex-row justify-between mb-2">
+                                                <Text className="text-[10px] text-gray-400 font-bold uppercase">
+                                                    {t('common.matchNumber', { n: matches.length - index })}
+                                                </Text>
+                                                <Text className="text-[10px] text-gray-500">
+                                                    {match.completedAt ? new Date(match.completedAt).toLocaleDateString() : ''}
+                                                </Text>
+                                            </View>
+                                            <View className="flex-row justify-between">
+                                                <Text className="text-white font-bold">{match.teamA}</Text>
+                                                <Text className="text-white font-bold">{scores.teamARuns}/{scores.teamAWickets}</Text>
+                                            </View>
+                                            <View className="flex-row justify-between mt-1">
+                                                <Text className="text-white font-bold">{match.teamB}</Text>
+                                                <Text className="text-white font-bold">{scores.teamBRuns}/{scores.teamBWickets}</Text>
+                                            </View>
+                                            {result && (
+                                                <Text className="text-yellow-500 text-xs mt-2">
+                                                    {result.winner === 'Draw' ? t('common.matchDrawn') : `${result.winner} ${t('common.winsExclamation')}`}
+                                                </Text>
+                                            )}
+                                        </TouchableOpacity>
+                                    );
+                                })}
                             </View>
+
+                            <View className="p-4 items-center">
+                                <Text className="text-gray-600 text-xs italic">{t('common.brandingFooter')}</Text>
+                            </View>
+                        </View>
+                    </ViewShot>
+
+                    <View className="p-6 pt-0">
+                        <TouchableOpacity
+                            className={`bg-green-600 w-full p-4 rounded-xl flex-row items-center justify-center gap-2 mb-4 ${isSharing ? 'opacity-50' : ''}`}
+                            onPress={handleShare}
+                            disabled={isSharing}
+                        >
+                            <Ionicons name="share-social" size={20} color="white" />
+                            <Text className="text-white text-lg font-bold">{t('common.shareSeries')}</Text>
+                        </TouchableOpacity>
+
+                        {isActive && (
+                            <TouchableOpacity
+                                className="bg-gray-800 w-full p-4 rounded-xl items-center border border-gray-700 mb-4"
+                                onPress={handleEnd}
+                            >
+                                <Text className="text-white text-lg font-bold">{t('common.endSeries')}</Text>
+                            </TouchableOpacity>
                         )}
 
-                        {/* Matches (newest first) */}
-                        <View className="px-4">
-                            <Text className="text-white text-xl font-bold mb-3">{t('common.seriesMatches')}</Text>
-                            {matches.map((match, index) => {
-                                const scores = getMatchScores(match);
-                                const result = match.matchResult;
-                                return (
-                                    <TouchableOpacity
-                                        key={match.completedAt}
-                                        className="bg-gray-800/40 p-3 rounded-xl mb-3 border border-gray-700/50"
-                                        onPress={() => navigation.navigate('MatchResult', { matchData: match })}
-                                    >
-                                        <View className="flex-row justify-between mb-2">
-                                            <Text className="text-[10px] text-gray-400 font-bold uppercase">
-                                                {t('common.matchNumber', { n: matches.length - index })}
-                                            </Text>
-                                            <Text className="text-[10px] text-gray-500">
-                                                {match.completedAt ? new Date(match.completedAt).toLocaleDateString() : ''}
-                                            </Text>
-                                        </View>
-                                        <View className="flex-row justify-between">
-                                            <Text className="text-white font-bold">{match.teamA}</Text>
-                                            <Text className="text-white font-bold">{scores.teamARuns}/{scores.teamAWickets}</Text>
-                                        </View>
-                                        <View className="flex-row justify-between mt-1">
-                                            <Text className="text-white font-bold">{match.teamB}</Text>
-                                            <Text className="text-white font-bold">{scores.teamBRuns}/{scores.teamBWickets}</Text>
-                                        </View>
-                                        {result && (
-                                            <Text className="text-yellow-500 text-xs mt-2">
-                                                {result.winner === 'Draw' ? t('common.matchDrawn') : `${result.winner} ${t('common.winsExclamation')}`}
-                                            </Text>
-                                        )}
-                                    </TouchableOpacity>
-                                );
-                            })}
-                        </View>
-
-                        <View className="p-4 items-center">
-                            <Text className="text-gray-600 text-xs italic">{t('common.brandingFooter')}</Text>
-                        </View>
-                    </View>
-                </ViewShot>
-
-                <View className="p-6 pt-0">
-                    <TouchableOpacity
-                        className={`bg-green-600 w-full p-4 rounded-xl flex-row items-center justify-center gap-2 mb-4 ${isSharing ? 'opacity-50' : ''}`}
-                        onPress={handleShare}
-                        disabled={isSharing}
-                    >
-                        <Ionicons name="share-social" size={20} color="white" />
-                        <Text className="text-white text-lg font-bold">{t('common.shareSeries')}</Text>
-                    </TouchableOpacity>
-
-                    {isActive && (
                         <TouchableOpacity
-                            className="bg-gray-800 w-full p-4 rounded-xl items-center border border-gray-700 mb-4"
-                            onPress={handleEnd}
+                            className="bg-red-500/10 w-full p-4 rounded-xl items-center border border-red-500/30 mb-8"
+                            onPress={handleDelete}
                         >
-                            <Text className="text-white text-lg font-bold">{t('common.endSeries')}</Text>
+                            <View className="flex-row items-center gap-2">
+                                <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                                <Text className="text-red-500 text-lg font-bold">{t('common.deleteSeries')}</Text>
+                            </View>
                         </TouchableOpacity>
-                    )}
-
-                    <TouchableOpacity
-                        className="bg-red-500/10 w-full p-4 rounded-xl items-center border border-red-500/30 mb-8"
-                        onPress={handleDelete}
-                    >
-                        <View className="flex-row items-center gap-2">
-                            <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                            <Text className="text-red-500 text-lg font-bold">{t('common.deleteSeries')}</Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                    </View>
+                </ScrollView>
+            </SafeAreaView>
+        </MatchThemeProvider>
     );
 }

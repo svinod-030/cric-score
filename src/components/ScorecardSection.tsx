@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { InningsState, Player } from '../types/match';
 import { useTranslation } from 'react-i18next';
+import { PlayerAvatar } from '../features/teamTheme/components/PlayerAvatar';
 
 // Helper to calc extras
 const calculateExtras = (innings: InningsState) => {
@@ -89,7 +90,9 @@ export const ScorecardSection = ({
                         const sr = stats.ballsFaced > 0 ? ((stats.runs / stats.ballsFaced) * 100).toFixed(0) : "0";
                         return (
                             <View key={player.id} className="flex-row p-3 border-b border-gray-700/50">
-                                <View className="flex-[3] pr-2">
+                                <View className="flex-[3] pr-2 flex-row items-start">
+                                    <View className="mr-2 mt-0.5"><PlayerAvatar playerId={player.id} seed={player.name} size={26} /></View>
+                                    <View className="flex-1">
                                     <Text className="text-white font-medium">{player.name}</Text>
                                     {(stats.isOut || stats.isRetired) ? (
                                         <Text className="text-gray-500 text-[10px] leading-tight mt-0.5">
@@ -105,6 +108,7 @@ export const ScorecardSection = ({
                                     ) : (
                                         <Text className="text-blue-400 text-[10px] font-bold mt-0.5">{t('common.notOut')}</Text>
                                     )}
+                                    </View>
                                 </View>
                                 <Text className="flex-1 text-white font-bold text-center">{stats.runs}</Text>
                                 <Text className="flex-1 text-gray-400 text-center">{stats.ballsFaced}</Text>
@@ -158,7 +162,10 @@ export const ScorecardSection = ({
 
                         return (
                             <View key={player.id} className="flex-row p-3 border-b border-gray-700/50">
-                                <Text className="flex-[3] text-white font-medium">{player.name}</Text>
+                                <View className="flex-[3] flex-row items-center pr-2">
+                                    <View className="mr-2"><PlayerAvatar playerId={player.id} seed={player.name} size={26} /></View>
+                                    <Text className="text-white font-medium flex-1">{player.name}</Text>
+                                </View>
                                 <Text className="flex-1 text-gray-400 text-center">{oversDisplay}</Text>
                                 <Text className="flex-1 text-gray-400 text-center">{stats.maidens}</Text>
                                 <Text className="flex-1 text-gray-400 text-center">{stats.runsConceded}</Text>

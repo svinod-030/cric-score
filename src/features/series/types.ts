@@ -26,5 +26,6 @@ export type HistoryGroup = {
 export type SeriesAward = {
     type: 'mvp' | 'bestBatsman' | 'bestBowler';
     playerName: string;
+    teamName: string; // Team the player played for (the team whose roster the name came from)
     stats: string;
 };

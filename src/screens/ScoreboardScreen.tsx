@@ -19,6 +19,8 @@ import { WhoIsOutModal } from '../components/WhoIsOutModal';
 import { MatchStartModal } from '../components/MatchStartModal';
 import { MatchSettingsModal } from '../components/MatchSettingsModal';
 import { SeriesTallyPill } from '../features/series/components/SeriesTallyPill';
+import { MatchThemeProvider } from '../features/teamTheme/MatchThemeContext';
+import { TeamLogo } from '../features/teamTheme/components/TeamLogo';
 import { MatchCard } from '../components/MatchCard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -409,431 +411,434 @@ export default function ScoreboardScreen({ navigation }: any) {
 
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
-            {/* Hidden ViewShot for Match Card sharing */}
-            <View style={{ position: 'absolute', left: -9999, top: -9999 }}>
-                <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 0.9 }}>
-                    <MatchCard state={state} matchId={state.liveMatchId || ''} t={t} />
-                </ViewShot>
-            </View>
+        <MatchThemeProvider teamA={state.teamA} teamB={state.teamB}>
+            <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
+                {/* Hidden ViewShot for Match Card sharing */}
+                <View style={{ position: 'absolute', left: -9999, top: -9999 }}>
+                    <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 0.9 }}>
+                        <MatchCard state={state} matchId={state.liveMatchId || ''} t={t} />
+                    </ViewShot>
+                </View>
 
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                {/* Header / Score */}
-                {!state.isInningsBreak && (
-                    <View className="p-6 pb-2 border-b border-gray-800 relative">
-                        {/* Match Settings (top right) */}
-                        <TouchableOpacity
-                            onPress={() => setMatchSettingsVisible(true)}
-                            className="absolute top-4 right-4 z-10 bg-gray-800 p-2 rounded-xl border border-gray-700 w-10 h-10 items-center justify-center"
-                        >
-                            <Ionicons name="settings-outline" size={18} color="#9ca3af" />
-                        </TouchableOpacity>
+                <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                    {/* Header / Score */}
+                    {!state.isInningsBreak && (
+                        <View className="p-6 pb-2 border-b border-gray-800 relative">
+                            {/* Match Settings (top right) */}
+                            <TouchableOpacity
+                                onPress={() => setMatchSettingsVisible(true)}
+                                className="absolute top-4 right-4 z-10 bg-gray-800 p-2 rounded-xl border border-gray-700 w-10 h-10 items-center justify-center"
+                            >
+                                <Ionicons name="settings-outline" size={18} color="#9ca3af" />
+                            </TouchableOpacity>
 
-                        {/* Team Status Row */}
-                        <View className="items-center mb-4">
-                            <View className="flex-row items-center bg-gray-800/50 px-4 py-1.5 rounded-full border border-gray-700">
-                                <View className="w-2 h-2 rounded-full bg-red-600 mr-2 animate-pulse" />
-                                <Text className="text-gray-300 font-black uppercase tracking-[2px] text-[10px]">
-                                    {innings.battingTeam} {t('common.batting')}
-                                </Text>
-                            </View>
-                        </View>
-
-                        <View className="items-center mb-6">
-                            <SeriesTallyPill seriesId={state.seriesId} history={history} />
-                            <Text className="text-6xl font-black text-white">
-                                {innings.totalRuns}/{innings.totalWickets}
-                            </Text>
-                            <Text className="text-xl text-gray-400 mt-2">
-                                {t('common.overs')}: {innings.overs.length}.{currentOverValidBalls} ({state.overs})
-                            </Text>
-
-                            {state.currentInnings === 2 && (
-                                <View className="mt-4 bg-gray-800 px-4 py-2 rounded-lg">
-                                    <Text className="text-yellow-500 font-bold text-lg text-center">
-                                        {t('common.target')}: {state.innings1.totalRuns + 1}
-                                    </Text>
-                                    <Text className="text-gray-300 text-sm text-center mt-1">
-                                        {t('common.needRunsInBalls', {
-                                            runs: state.innings1.totalRuns + 1 - innings.totalRuns,
-                                            balls: (state.overs * 6) - (innings.overs.length * 6 + currentOverValidBalls)
-                                        })}
+                            {/* Team Status Row */}
+                            <View className="items-center mb-4">
+                                <View className="flex-row items-center bg-gray-800/50 px-4 py-1.5 rounded-full border border-gray-700">
+                                    <View className="mr-2"><TeamLogo teamName={innings.battingTeam} size={20} /></View>
+                                    <View className="w-2 h-2 rounded-full bg-red-600 mr-2 animate-pulse" />
+                                    <Text className="text-gray-300 font-black uppercase tracking-[2px] text-[10px]">
+                                        {innings.battingTeam} {t('common.batting')}
                                     </Text>
                                 </View>
-                            )}
-                        </View>
-                        {/* Action Buttons Row */}
-                        <View className="flex-row justify-between items-center mb-4">
-                            <View className="flex-row items-center gap-2">
-                                <TouchableOpacity
-                                    onPress={handleShareMatch}
-                                    disabled={isSharingLive}
-                                    className="flex-row items-center bg-blue-600 px-3 py-2 rounded-xl shadow-lg shadow-blue-500/20"
-                                >
-                                    {isSharingLive ? (
-                                        <ActivityIndicator color="white" size="small" />
-                                    ) : (
-                                        <>
-                                            <Ionicons name={state.liveMatchId ? "share-social" : "radio"} size={14} color="white" />
-                                            <Text className="text-white text-[10px] font-black ml-1.5 uppercase tracking-wider">
-                                                {state.liveMatchId ? t('common.shareMatchScore') : t('common.goLive')}
-                                            </Text>
-                                        </>
-                                    )}
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    onPress={handleShowQR}
-                                    className="bg-gray-800 p-2 rounded-xl border border-gray-700 w-10 h-10 items-center justify-center"
-                                >
-                                    <Ionicons name="qr-code-outline" size={18} color="#3b82f6" />
-                                </TouchableOpacity>
                             </View>
 
-                            <TouchableOpacity
-                                onPress={handleEndInnings}
-                                className="bg-red-900/20 px-4 py-2 rounded-xl border border-red-900/40"
-                            >
-                                <Text className="text-red-500 text-[10px] font-black uppercase tracking-widest">{t('common.end')}</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Player Stats Bar */}
-                        <View className={`flex-row ${innings.isLastManStanding ? 'justify-center' : 'justify-between'} bg-gray-800 p-3 rounded-xl mb-4`}>
-                            <View className={innings.isLastManStanding ? 'items-center' : ''}>
-                                <EditablePlayerName
-                                    name={getPlayerName(innings.strikerId) + "*"}
-                                    onSave={(newName) => renamePlayer(innings.strikerId, newName.replace('*', ''))}
-                                />
-                                <Text className="text-gray-400">
-                                    {strikerStats.runs} ({strikerStats.ballsFaced})
+                            <View className="items-center mb-6">
+                                <SeriesTallyPill seriesId={state.seriesId} history={history} />
+                                <Text className="text-6xl font-black text-white">
+                                    {innings.totalRuns}/{innings.totalWickets}
                                 </Text>
-                            </View>
-                            {!innings.isLastManStanding && (
-                                <View className="items-end">
-                                    <EditablePlayerName
-                                        name={getPlayerName(innings.nonStrikerId)}
-                                        onSave={(newName) => renamePlayer(innings.nonStrikerId, newName)}
-                                    />
-                                    <Text className="text-gray-400">
-                                        {nonStrikerStats.runs} ({nonStrikerStats.ballsFaced})
-                                    </Text>
-                                </View>
-                            )}
-                        </View>
-
-                        {/* Current Bowler Bar */}
-                        <View className="flex-row justify-between items-center bg-gray-800 p-3 rounded-xl mb-4">
-                            <View>
-                                <Text className="text-gray-400 text-xs uppercase font-bold">{t('common.bowler')}</Text>
-                                {innings.currentBowlerId ? (
-                                    <EditablePlayerName
-                                        name={getPlayerName(innings.currentBowlerId)}
-                                        onSave={(newName) => renamePlayer(innings.currentBowlerId!, newName)}
-                                    />
-                                ) : (
-                                    <Text className="text-white font-bold text-lg">{t('common.selectBowler')}</Text>
-                                )}
-                            </View>
-                            <View className="items-end">
-                                <Text className="text-white font-bold">
-                                    {currentBowlerStats ? `${currentBowlerStats.wickets}-${currentBowlerStats.runsConceded}` : "0-0"}
+                                <Text className="text-xl text-gray-400 mt-2">
+                                    {t('common.overs')}: {innings.overs.length}.{currentOverValidBalls} ({state.overs})
                                 </Text>
-                                <Text className="text-gray-400 text-xs">
-                                    {bowlerOversDisplay} {t('common.overs')}
-                                </Text>
-                            </View>
-                        </View>
-
-
-                        <View className="mb-4">
-                            <Text className="text-gray-400 mb-2 text-sm">{t('common.thisOver')}</Text>
-                            <View className="flex-row gap-2 min-h-[32px] flex-wrap">
-                                {innings.currentOver.length > 0 ? (
-                                    innings.currentOver.map((ball, idx) => (
-                                        <View
-                                            key={idx}
-                                            className={`px-2 h-8 rounded-full items-center justify-center border border-white/10 ${ball.isWicket ? 'bg-red-600' : ball.extraType !== 'none' ? 'bg-yellow-600' : ball.runs >= 4 ? 'bg-green-600' : 'bg-gray-700'}`}
-                                        >
-                                            <View className="flex-row items-center">
-                                                <Text className="text-white font-bold text-xs">
-                                                    {ball.isWicket ? 'W' : ball.extraType !== 'none' ? ball.extraType === 'wide' ? 'WD' : ball.extraType === 'no-ball' ? 'NB' : ball.extraType === 'bye' ? 'B' : 'LB' : ball.runs}
-                                                </Text>
-                                                {(ball.extraType === 'bye' || ball.extraType === 'leg-bye' || (ball.isWicket && ball.runs > 0) || (ball.extraType === 'no-ball' && ball.runs > state.runsForNoBall) || (ball.extraType === 'wide' && ball.runs > state.runsForWide)) && (
-                                                    <Text className="text-white font-bold text-[10px] ml-0.5">+{ball.extraType === 'no-ball' ? ball.runs - state.runsForNoBall : ball.extraType === 'wide' ? ball.runs - state.runsForWide : ball.runs}</Text>
-                                                )}
-                                            </View>
-                                        </View>
-                                    ))
-                                ) : (
-                                    <Text className="text-gray-600 text-sm italic">-</Text>
-                                )}
-                            </View>
-                        </View>
-
-                        {/* Quick Controls */}
-                        <View className="flex-row gap-2 mt-2">
-                            <TouchableOpacity
-                                onPress={undoBall}
-                                className="flex-1 bg-red-900/30 py-2 rounded-lg flex-row items-center justify-center border border-red-800/50"
-                            >
-                                <Ionicons name="arrow-undo" size={16} color="#ef4444" />
-                                <Text className="text-red-500 font-bold ml-2">{t('common.undo')}</Text>
-                            </TouchableOpacity>
-                            {!innings.isLastManStanding && (
-                                <TouchableOpacity
-                                    onPress={swapBatsmen}
-                                    className="flex-1 bg-blue-900/30 py-2 rounded-lg flex-row items-center justify-center border border-blue-800/50"
-                                >
-                                    <Ionicons name="swap-horizontal" size={16} color="#3b82f6" />
-                                    <Text className="text-blue-500 font-bold ml-2">{t('common.swap')}</Text>
-                                </TouchableOpacity>
-                            )}
-                            <TouchableOpacity
-                                onPress={() => retirePlayer(innings.strikerId)}
-                                className="flex-1 bg-orange-900/30 py-2 rounded-lg flex-row items-center justify-center border border-orange-800/50"
-                            >
-                                <Ionicons name="exit-outline" size={16} color="#f97316" />
-                                <Text className="text-orange-500 font-bold ml-2">{t('common.retire')}</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                )}
-
-
-                {state.isInningsBreak ? (
-                    <View className="flex-1 p-6">
-                        <View className="items-center mb-8 bg-gray-800 p-8 rounded-3xl border border-blue-900/30">
-                            <Ionicons name="trophy" size={64} color="#fbbf24" className="mb-4" />
-                            <Text className="text-white text-3xl font-black text-center">{t('common.inningsOver')}</Text>
-                            <Text className="text-gray-400 text-lg mt-2">{t('common.finishedTheirInnings', { team: state.innings1.battingTeam })}</Text>
-                            <View className="mt-6 flex-row items-baseline">
-                                <Text className="text-5xl font-bold text-white">{state.innings1.totalRuns}</Text>
-                                <Text className="text-2xl text-gray-500 font-medium ml-2">/ {state.innings1.totalWickets}</Text>
-                            </View>
-                        </View>
-
-                        <ScorecardSection
-                            title={`${t('common.stInnings')}: ${state.innings1.battingTeam}`}
-                            innings={state.innings1}
-                            battingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
-                            bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
-                        />
-
-                        <TouchableOpacity
-                            onPress={startSecondInnings}
-                            className="mt-10 mb-20 bg-blue-600 p-5 rounded-2xl items-center shadow-lg shadow-blue-500/30 active:bg-blue-700"
-                        >
-                            <Text className="text-white text-xl font-black">{t('common.start2ndInnings')}</Text>
-                            <Text className="text-blue-200 text-sm mt-1 uppercase tracking-widest font-bold">{t('common.target')}: {state.innings1.totalRuns + 1}</Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (
-                    <View className="flex-1 p-4">
-                        <View className="flex-col gap-4">
-                            {/* Runs Grid */}
-                            <View className="flex-row gap-4 justify-between">
-                                {[0, 1, 2, 3].map(run => (
-                                    <TouchableOpacity
-                                        key={run}
-                                        onPress={() => handleScore(run)}
-                                        className="flex-1 aspect-square bg-gray-800 rounded-2xl items-center justify-center border border-gray-700 active:bg-gray-700"
-                                    >
-                                        <Text className="text-white text-3xl font-bold">{run}</Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-
-                            <View className="flex-row gap-4 justify-between">
-                                {[4, 6].map(run => (
-                                    <TouchableOpacity
-                                        key={run}
-                                        onPress={() => handleScore(run)}
-                                        className="flex-1 aspect-square bg-gray-800 rounded-2xl items-center justify-center border border-gray-700 active:bg-gray-700"
-                                    >
-                                        <Text className="text-white text-3xl font-bold">{run}</Text>
-                                    </TouchableOpacity>
-                                ))}
-                                <TouchableOpacity
-                                    onPress={handleWicket}
-                                    className="flex-1 aspect-square bg-red-900/50 rounded-2xl items-center justify-center border border-red-700 active:bg-red-800/50"
-                                >
-                                    <Text className="text-red-500 text-xl font-bold">{t('common.wicket')}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={handleCustomScore}
-                                    className="flex-1 aspect-square bg-gray-800 rounded-2xl items-center justify-center border border-dashed border-gray-600"
-                                >
-                                    <Ionicons name="add-circle-outline" size={20} color="#9ca3af" />
-                                    <Text className="text-gray-300 font-bold text-[10px] mt-1 text-center">{t('common.other')}</Text>
-                                </TouchableOpacity>
-                            </View>
-
-                            {/* Extras */}
-                            <Text className="text-gray-400 mt-4 mb-2">{t('common.extras')}</Text>
-                            <View className="flex-row gap-4">
-                                <TouchableOpacity
-                                    onPress={() => handleExtra('wide')}
-                                    className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
-                                >
-                                    <Text className="text-yellow-500 font-bold text-lg">{t('common.wide')}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={() => handleExtra('no-ball')}
-                                    className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
-                                >
-                                    <Text className="text-yellow-500 font-bold text-lg">{t('common.noBall')}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={() => handleExtra('bye')}
-                                    className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
-                                >
-                                    <Text className="text-yellow-500 font-bold text-lg">{t('common.byes')}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={() => handleExtra('leg-bye')}
-                                    className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
-                                >
-                                    <Text className="text-yellow-500 font-bold text-lg">{t('common.lBye')}</Text>
-                                </TouchableOpacity>
-                            </View>
-
-                            {/* Full Scorecard Section */}
-                            <View className="mt-10 mb-20">
-                                <Text className="text-white text-2xl font-bold mb-4 px-2">{t('common.scorecard')}</Text>
 
                                 {state.currentInnings === 2 && (
-                                    <View className="mb-4">
-                                        <ScorecardSection
-                                            title={`${t('common.stInnings')}: ${state.innings1.battingTeam}`}
-                                            innings={state.innings1}
-                                            battingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
-                                            bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
-                                            isCollapsible={true}
-                                            defaultExpanded={true}
-                                        />
-                                        <OverSummarySection
-                                            title={t('common.overSummaryTitle', { innings: t('common.stInnings') })}
-                                            innings={state.innings1}
-                                            bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
-                                            defaultExpanded={false}
-                                        />
+                                    <View className="mt-4 bg-gray-800 px-4 py-2 rounded-lg">
+                                        <Text className="text-yellow-500 font-bold text-lg text-center">
+                                            {t('common.target')}: {state.innings1.totalRuns + 1}
+                                        </Text>
+                                        <Text className="text-gray-300 text-sm text-center mt-1">
+                                            {t('common.needRunsInBalls', {
+                                                runs: state.innings1.totalRuns + 1 - innings.totalRuns,
+                                                balls: (state.overs * 6) - (innings.overs.length * 6 + currentOverValidBalls)
+                                            })}
+                                        </Text>
                                     </View>
                                 )}
-
-                                <ScorecardSection
-                                    title={`${state.currentInnings === 2 ? t('common.ndInnings') : t('common.stInnings')}: ${innings.battingTeam}`}
-                                    innings={innings}
-                                    battingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
-                                    bowlingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
-                                    isCollapsible={true}
-                                    defaultExpanded={state.currentInnings === 1}
-                                />
-
-                                <OverSummarySection
-                                    title={t('common.overSummaryTitle', { innings: state.currentInnings === 2 ? t('common.ndInnings') : t('common.stInnings') })}
-                                    innings={innings}
-                                    bowlingTeamPlayers={bowlingTeamPlayers}
-                                    defaultExpanded={false}
-                                />
                             </View>
+                            {/* Action Buttons Row */}
+                            <View className="flex-row justify-between items-center mb-4">
+                                <View className="flex-row items-center gap-2">
+                                    <TouchableOpacity
+                                        onPress={handleShareMatch}
+                                        disabled={isSharingLive}
+                                        className="flex-row items-center bg-blue-600 px-3 py-2 rounded-xl shadow-lg shadow-blue-500/20"
+                                    >
+                                        {isSharingLive ? (
+                                            <ActivityIndicator color="white" size="small" />
+                                        ) : (
+                                            <>
+                                                <Ionicons name={state.liveMatchId ? "share-social" : "radio"} size={14} color="white" />
+                                                <Text className="text-white text-[10px] font-black ml-1.5 uppercase tracking-wider">
+                                                    {state.liveMatchId ? t('common.shareMatchScore') : t('common.goLive')}
+                                                </Text>
+                                            </>
+                                        )}
+                                    </TouchableOpacity>
 
-                        </View>
-                    </View>
-                )}
+                                    <TouchableOpacity
+                                        onPress={handleShowQR}
+                                        className="bg-gray-800 p-2 rounded-xl border border-gray-700 w-10 h-10 items-center justify-center"
+                                    >
+                                        <Ionicons name="qr-code-outline" size={18} color="#3b82f6" />
+                                    </TouchableOpacity>
+                                </View>
 
-            </ScrollView>
-
-            <BowlerSelectionModal
-                visible={isBowlerModalVisible}
-                players={availableBowlers}
-                onSelect={setBowler}
-                innings={innings}
-                oversLimit={state.overs}
-                allPlayers={[...state.teamAPlayers, ...state.teamBPlayers]}
-            />
-            <BatterSelectionModal
-                visible={isBatterSelectionVisible}
-                title={batterSelectionType === 'striker' ? t('common.selectStriker') : t('common.selectNonStriker')}
-                battingStats={innings.battingStats}
-                players={(innings.battingTeam === state.teamA ? state.teamAPlayers : state.teamBPlayers).filter(p => {
-                    const stats = innings.battingStats[p.id];
-                    const isOtherBatter = batterSelectionType === 'striker' ? p.id === innings.nonStrikerId : p.id === innings.strikerId;
-                    return !isOtherBatter && (!stats || !stats.isOut);
-                })}
-                onSelect={handleBatterSelect}
-                innings={innings}
-                oversLimit={state.overs}
-                allPlayers={[...state.teamAPlayers, ...state.teamBPlayers]}
-            />
-            <RunSelectionModal
-                visible={runModalVisible}
-                title={runModalConfig.title}
-                onSelect={handleRunSelection}
-                onClose={() => setRunModalVisible(false)}
-                options={runModalConfig.options}
-            />
-            <WicketTypeSelectionModal
-                visible={wicketModalVisible}
-                onSelect={handleWicketSelect}
-                onClose={() => setWicketModalVisible(false)}
-            />
-            <FielderSelectionModal
-                visible={fielderModalVisible}
-                players={bowlingTeamPlayers}
-                onSelect={handleFielderSelect}
-                title={pendingWicket.type === 'caught' ? t('common.whoCaughtIt') : pendingWicket.type === 'stumped' ? t('common.whoStumpedIt') : t('common.whoMadeRunOut')}
-                onCancel={() => setFielderModalVisible(false)}
-            />
-            <WhoIsOutModal
-                visible={whoIsOutModalVisible}
-                strikerName={getPlayerName(innings.strikerId)}
-                nonStrikerName={getPlayerName(innings.nonStrikerId)}
-                onSelect={handleWhoIsOutSelect}
-                onCancel={() => setWhoIsOutModalVisible(false)}
-            />
-            <MatchStartModal
-                visible={isMatchStartModalVisible}
-                battingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
-                bowlingTeamPlayers={bowlingTeamPlayers}
-                onStart={handleMatchStart}
-                title={state.currentInnings === 1 ? t('common.start1stInnings') : t('common.start2ndInningsTitle')}
-            />
-            <MatchSettingsModal
-                visible={isMatchSettingsVisible}
-                onClose={() => setMatchSettingsVisible(false)}
-                values={{
-                    runsForWide: config.runsForWide,
-                    runsForNoBall: config.runsForNoBall,
-                    reballForWide: config.reballForWide,
-                    reballForNoBall: config.reballForNoBall,
-                }}
-                onSave={updateMatchSettings}
-            />
-
-            {/* QR View Modal */}
-            <Modal
-                visible={isQRModalVisible}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setQRModalVisible(false)}
-            >
-                <TouchableWithoutFeedback onPress={() => setQRModalVisible(false)}>
-                    <View className="flex-1 bg-black/80 justify-center items-center p-4">
-                        <TouchableWithoutFeedback>
-                            <View className="bg-gray-900 rounded-[40px] overflow-hidden border border-gray-800 shadow-2xl">
-                                <MatchCard state={state} matchId={state.liveMatchId || ''} t={t} />
                                 <TouchableOpacity
-                                    onPress={() => setQRModalVisible(false)}
-                                    className="absolute top-4 right-4 bg-black/40 p-2 rounded-full"
+                                    onPress={handleEndInnings}
+                                    className="bg-red-900/20 px-4 py-2 rounded-xl border border-red-900/40"
                                 >
-                                    <Ionicons name="close" size={24} color="#fff" />
+                                    <Text className="text-red-500 text-[10px] font-black uppercase tracking-widest">{t('common.end')}</Text>
                                 </TouchableOpacity>
                             </View>
-                        </TouchableWithoutFeedback>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
-        </SafeAreaView>
+
+                            {/* Player Stats Bar */}
+                            <View className={`flex-row ${innings.isLastManStanding ? 'justify-center' : 'justify-between'} bg-gray-800 p-3 rounded-xl mb-4`}>
+                                <View className={innings.isLastManStanding ? 'items-center' : ''}>
+                                    <EditablePlayerName
+                                        name={getPlayerName(innings.strikerId) + "*"}
+                                        onSave={(newName) => renamePlayer(innings.strikerId, newName.replace('*', ''))}
+                                    />
+                                    <Text className="text-gray-400">
+                                        {strikerStats.runs} ({strikerStats.ballsFaced})
+                                    </Text>
+                                </View>
+                                {!innings.isLastManStanding && (
+                                    <View className="items-end">
+                                        <EditablePlayerName
+                                            name={getPlayerName(innings.nonStrikerId)}
+                                            onSave={(newName) => renamePlayer(innings.nonStrikerId, newName)}
+                                        />
+                                        <Text className="text-gray-400">
+                                            {nonStrikerStats.runs} ({nonStrikerStats.ballsFaced})
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+
+                            {/* Current Bowler Bar */}
+                            <View className="flex-row justify-between items-center bg-gray-800 p-3 rounded-xl mb-4">
+                                <View>
+                                    <Text className="text-gray-400 text-xs uppercase font-bold">{t('common.bowler')}</Text>
+                                    {innings.currentBowlerId ? (
+                                        <EditablePlayerName
+                                            name={getPlayerName(innings.currentBowlerId)}
+                                            onSave={(newName) => renamePlayer(innings.currentBowlerId!, newName)}
+                                        />
+                                    ) : (
+                                        <Text className="text-white font-bold text-lg">{t('common.selectBowler')}</Text>
+                                    )}
+                                </View>
+                                <View className="items-end">
+                                    <Text className="text-white font-bold">
+                                        {currentBowlerStats ? `${currentBowlerStats.wickets}-${currentBowlerStats.runsConceded}` : "0-0"}
+                                    </Text>
+                                    <Text className="text-gray-400 text-xs">
+                                        {bowlerOversDisplay} {t('common.overs')}
+                                    </Text>
+                                </View>
+                            </View>
+
+
+                            <View className="mb-4">
+                                <Text className="text-gray-400 mb-2 text-sm">{t('common.thisOver')}</Text>
+                                <View className="flex-row gap-2 min-h-[32px] flex-wrap">
+                                    {innings.currentOver.length > 0 ? (
+                                        innings.currentOver.map((ball, idx) => (
+                                            <View
+                                                key={idx}
+                                                className={`px-2 h-8 rounded-full items-center justify-center border border-white/10 ${ball.isWicket ? 'bg-red-600' : ball.extraType !== 'none' ? 'bg-yellow-600' : ball.runs >= 4 ? 'bg-green-600' : 'bg-gray-700'}`}
+                                            >
+                                                <View className="flex-row items-center">
+                                                    <Text className="text-white font-bold text-xs">
+                                                        {ball.isWicket ? 'W' : ball.extraType !== 'none' ? ball.extraType === 'wide' ? 'WD' : ball.extraType === 'no-ball' ? 'NB' : ball.extraType === 'bye' ? 'B' : 'LB' : ball.runs}
+                                                    </Text>
+                                                    {(ball.extraType === 'bye' || ball.extraType === 'leg-bye' || (ball.isWicket && ball.runs > 0) || (ball.extraType === 'no-ball' && ball.runs > state.runsForNoBall) || (ball.extraType === 'wide' && ball.runs > state.runsForWide)) && (
+                                                        <Text className="text-white font-bold text-[10px] ml-0.5">+{ball.extraType === 'no-ball' ? ball.runs - state.runsForNoBall : ball.extraType === 'wide' ? ball.runs - state.runsForWide : ball.runs}</Text>
+                                                    )}
+                                                </View>
+                                            </View>
+                                        ))
+                                    ) : (
+                                        <Text className="text-gray-600 text-sm italic">-</Text>
+                                    )}
+                                </View>
+                            </View>
+
+                            {/* Quick Controls */}
+                            <View className="flex-row gap-2 mt-2">
+                                <TouchableOpacity
+                                    onPress={undoBall}
+                                    className="flex-1 bg-red-900/30 py-2 rounded-lg flex-row items-center justify-center border border-red-800/50"
+                                >
+                                    <Ionicons name="arrow-undo" size={16} color="#ef4444" />
+                                    <Text className="text-red-500 font-bold ml-2">{t('common.undo')}</Text>
+                                </TouchableOpacity>
+                                {!innings.isLastManStanding && (
+                                    <TouchableOpacity
+                                        onPress={swapBatsmen}
+                                        className="flex-1 bg-blue-900/30 py-2 rounded-lg flex-row items-center justify-center border border-blue-800/50"
+                                    >
+                                        <Ionicons name="swap-horizontal" size={16} color="#3b82f6" />
+                                        <Text className="text-blue-500 font-bold ml-2">{t('common.swap')}</Text>
+                                    </TouchableOpacity>
+                                )}
+                                <TouchableOpacity
+                                    onPress={() => retirePlayer(innings.strikerId)}
+                                    className="flex-1 bg-orange-900/30 py-2 rounded-lg flex-row items-center justify-center border border-orange-800/50"
+                                >
+                                    <Ionicons name="exit-outline" size={16} color="#f97316" />
+                                    <Text className="text-orange-500 font-bold ml-2">{t('common.retire')}</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
+
+
+                    {state.isInningsBreak ? (
+                        <View className="flex-1 p-6">
+                            <View className="items-center mb-8 bg-gray-800 p-8 rounded-3xl border border-blue-900/30">
+                                <Ionicons name="trophy" size={64} color="#fbbf24" className="mb-4" />
+                                <Text className="text-white text-3xl font-black text-center">{t('common.inningsOver')}</Text>
+                                <Text className="text-gray-400 text-lg mt-2">{t('common.finishedTheirInnings', { team: state.innings1.battingTeam })}</Text>
+                                <View className="mt-6 flex-row items-baseline">
+                                    <Text className="text-5xl font-bold text-white">{state.innings1.totalRuns}</Text>
+                                    <Text className="text-2xl text-gray-500 font-medium ml-2">/ {state.innings1.totalWickets}</Text>
+                                </View>
+                            </View>
+
+                            <ScorecardSection
+                                title={`${t('common.stInnings')}: ${state.innings1.battingTeam}`}
+                                innings={state.innings1}
+                                battingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
+                                bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
+                            />
+
+                            <TouchableOpacity
+                                onPress={startSecondInnings}
+                                className="mt-10 mb-20 bg-blue-600 p-5 rounded-2xl items-center shadow-lg shadow-blue-500/30 active:bg-blue-700"
+                            >
+                                <Text className="text-white text-xl font-black">{t('common.start2ndInnings')}</Text>
+                                <Text className="text-blue-200 text-sm mt-1 uppercase tracking-widest font-bold">{t('common.target')}: {state.innings1.totalRuns + 1}</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : (
+                        <View className="flex-1 p-4">
+                            <View className="flex-col gap-4">
+                                {/* Runs Grid */}
+                                <View className="flex-row gap-4 justify-between">
+                                    {[0, 1, 2, 3].map(run => (
+                                        <TouchableOpacity
+                                            key={run}
+                                            onPress={() => handleScore(run)}
+                                            className="flex-1 aspect-square bg-gray-800 rounded-2xl items-center justify-center border border-gray-700 active:bg-gray-700"
+                                        >
+                                            <Text className="text-white text-3xl font-bold">{run}</Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+
+                                <View className="flex-row gap-4 justify-between">
+                                    {[4, 6].map(run => (
+                                        <TouchableOpacity
+                                            key={run}
+                                            onPress={() => handleScore(run)}
+                                            className="flex-1 aspect-square bg-gray-800 rounded-2xl items-center justify-center border border-gray-700 active:bg-gray-700"
+                                        >
+                                            <Text className="text-white text-3xl font-bold">{run}</Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                    <TouchableOpacity
+                                        onPress={handleWicket}
+                                        className="flex-1 aspect-square bg-red-900/50 rounded-2xl items-center justify-center border border-red-700 active:bg-red-800/50"
+                                    >
+                                        <Text className="text-red-500 text-xl font-bold">{t('common.wicket')}</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={handleCustomScore}
+                                        className="flex-1 aspect-square bg-gray-800 rounded-2xl items-center justify-center border border-dashed border-gray-600"
+                                    >
+                                        <Ionicons name="add-circle-outline" size={20} color="#9ca3af" />
+                                        <Text className="text-gray-300 font-bold text-[10px] mt-1 text-center">{t('common.other')}</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                {/* Extras */}
+                                <Text className="text-gray-400 mt-4 mb-2">{t('common.extras')}</Text>
+                                <View className="flex-row gap-4">
+                                    <TouchableOpacity
+                                        onPress={() => handleExtra('wide')}
+                                        className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
+                                    >
+                                        <Text className="text-yellow-500 font-bold text-lg">{t('common.wide')}</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => handleExtra('no-ball')}
+                                        className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
+                                    >
+                                        <Text className="text-yellow-500 font-bold text-lg">{t('common.noBall')}</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => handleExtra('bye')}
+                                        className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
+                                    >
+                                        <Text className="text-yellow-500 font-bold text-lg">{t('common.byes')}</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => handleExtra('leg-bye')}
+                                        className="flex-1 h-14 bg-gray-800 rounded-xl items-center justify-center border border-gray-700"
+                                    >
+                                        <Text className="text-yellow-500 font-bold text-lg">{t('common.lBye')}</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                {/* Full Scorecard Section */}
+                                <View className="mt-10 mb-20">
+                                    <Text className="text-white text-2xl font-bold mb-4 px-2">{t('common.scorecard')}</Text>
+
+                                    {state.currentInnings === 2 && (
+                                        <View className="mb-4">
+                                            <ScorecardSection
+                                                title={`${t('common.stInnings')}: ${state.innings1.battingTeam}`}
+                                                innings={state.innings1}
+                                                battingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
+                                                bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
+                                                isCollapsible={true}
+                                                defaultExpanded={true}
+                                            />
+                                            <OverSummarySection
+                                                title={t('common.overSummaryTitle', { innings: t('common.stInnings') })}
+                                                innings={state.innings1}
+                                                bowlingTeamPlayers={state.innings1.battingTeamKey === 'teamA' ? state.teamBPlayers : state.teamAPlayers}
+                                                defaultExpanded={false}
+                                            />
+                                        </View>
+                                    )}
+
+                                    <ScorecardSection
+                                        title={`${state.currentInnings === 2 ? t('common.ndInnings') : t('common.stInnings')}: ${innings.battingTeam}`}
+                                        innings={innings}
+                                        battingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
+                                        bowlingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
+                                        isCollapsible={true}
+                                        defaultExpanded={state.currentInnings === 1}
+                                    />
+
+                                    <OverSummarySection
+                                        title={t('common.overSummaryTitle', { innings: state.currentInnings === 2 ? t('common.ndInnings') : t('common.stInnings') })}
+                                        innings={innings}
+                                        bowlingTeamPlayers={bowlingTeamPlayers}
+                                        defaultExpanded={false}
+                                    />
+                                </View>
+
+                            </View>
+                        </View>
+                    )}
+
+                </ScrollView>
+
+                <BowlerSelectionModal
+                    visible={isBowlerModalVisible}
+                    players={availableBowlers}
+                    onSelect={setBowler}
+                    innings={innings}
+                    oversLimit={state.overs}
+                    allPlayers={[...state.teamAPlayers, ...state.teamBPlayers]}
+                />
+                <BatterSelectionModal
+                    visible={isBatterSelectionVisible}
+                    title={batterSelectionType === 'striker' ? t('common.selectStriker') : t('common.selectNonStriker')}
+                    battingStats={innings.battingStats}
+                    players={(innings.battingTeam === state.teamA ? state.teamAPlayers : state.teamBPlayers).filter(p => {
+                        const stats = innings.battingStats[p.id];
+                        const isOtherBatter = batterSelectionType === 'striker' ? p.id === innings.nonStrikerId : p.id === innings.strikerId;
+                        return !isOtherBatter && (!stats || !stats.isOut);
+                    })}
+                    onSelect={handleBatterSelect}
+                    innings={innings}
+                    oversLimit={state.overs}
+                    allPlayers={[...state.teamAPlayers, ...state.teamBPlayers]}
+                />
+                <RunSelectionModal
+                    visible={runModalVisible}
+                    title={runModalConfig.title}
+                    onSelect={handleRunSelection}
+                    onClose={() => setRunModalVisible(false)}
+                    options={runModalConfig.options}
+                />
+                <WicketTypeSelectionModal
+                    visible={wicketModalVisible}
+                    onSelect={handleWicketSelect}
+                    onClose={() => setWicketModalVisible(false)}
+                />
+                <FielderSelectionModal
+                    visible={fielderModalVisible}
+                    players={bowlingTeamPlayers}
+                    onSelect={handleFielderSelect}
+                    title={pendingWicket.type === 'caught' ? t('common.whoCaughtIt') : pendingWicket.type === 'stumped' ? t('common.whoStumpedIt') : t('common.whoMadeRunOut')}
+                    onCancel={() => setFielderModalVisible(false)}
+                />
+                <WhoIsOutModal
+                    visible={whoIsOutModalVisible}
+                    strikerName={getPlayerName(innings.strikerId)}
+                    nonStrikerName={getPlayerName(innings.nonStrikerId)}
+                    onSelect={handleWhoIsOutSelect}
+                    onCancel={() => setWhoIsOutModalVisible(false)}
+                />
+                <MatchStartModal
+                    visible={isMatchStartModalVisible}
+                    battingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
+                    bowlingTeamPlayers={bowlingTeamPlayers}
+                    onStart={handleMatchStart}
+                    title={state.currentInnings === 1 ? t('common.start1stInnings') : t('common.start2ndInningsTitle')}
+                />
+                <MatchSettingsModal
+                    visible={isMatchSettingsVisible}
+                    onClose={() => setMatchSettingsVisible(false)}
+                    values={{
+                        runsForWide: config.runsForWide,
+                        runsForNoBall: config.runsForNoBall,
+                        reballForWide: config.reballForWide,
+                        reballForNoBall: config.reballForNoBall,
+                    }}
+                    onSave={updateMatchSettings}
+                />
+
+                {/* QR View Modal */}
+                <Modal
+                    visible={isQRModalVisible}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setQRModalVisible(false)}
+                >
+                    <TouchableWithoutFeedback onPress={() => setQRModalVisible(false)}>
+                        <View className="flex-1 bg-black/80 justify-center items-center p-4">
+                            <TouchableWithoutFeedback>
+                                <View className="bg-gray-900 rounded-[40px] overflow-hidden border border-gray-800 shadow-2xl">
+                                    <MatchCard state={state} matchId={state.liveMatchId || ''} t={t} />
+                                    <TouchableOpacity
+                                        onPress={() => setQRModalVisible(false)}
+                                        className="absolute top-4 right-4 bg-black/40 p-2 rounded-full"
+                                    >
+                                        <Ionicons name="close" size={24} color="#fff" />
+                                    </TouchableOpacity>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </Modal>
+            </SafeAreaView>
+        </MatchThemeProvider>
     );
 }
