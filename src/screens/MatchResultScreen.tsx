@@ -196,7 +196,7 @@ export default function MatchResultScreen({ navigation, route }: any) {
                                                 </View>
                                                 <Text className="text-gray-400 text-[10px] uppercase font-bold tracking-tighter mb-1 text-center">{t(`common.${award.type}`)}</Text>
                                                 <View className="flex-row items-center justify-center">
-                                                    <View className="mr-1.5"><PlayerAvatar playerId={award.playerId} seed={award.playerName} size={20} /></View>
+                                                    <View className="mr-1.5"><PlayerAvatar playerId={award.playerId} seed={award.playerName} size={24} /></View>
                                                     <Text className="text-white font-bold text-center text-xs flex-shrink" numberOfLines={1}>{award.playerName}</Text>
                                                 </View>
                                                 <Text className="text-gray-500 text-[10px] mt-1 text-center">{award.stats}</Text>

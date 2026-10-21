@@ -60,6 +60,25 @@ describe('teamTheme components', () => {
             expect(bg(getByTestId('player-avatar'))).toBe(getPlayerColor(getMatchTheme('LIONS', 'TIGERS').teamB.color, 'Bala'));
         });
 
+        test('shows the jersey number for a default name and initials for a real name', () => {
+            const { getAllByTestId } = render(
+                <MatchThemeProvider teamA="LIONS" teamB="TIGERS">
+                    <PlayerAvatar playerId="A11" seed="L11" />
+                    <PlayerAvatar playerId="B1" seed="Bala Rao" />
+                    <PlayerAvatar playerId="A2" seed="Asha" />
+                </MatchThemeProvider>
+            );
+
+            expect(getAllByTestId('player-avatar-label').map(n => n.props.children)).toEqual(['11', 'BR', 'AS']);
+        });
+
+        test('falls back to a person icon when there is no name', () => {
+            const { queryByTestId, UNSAFE_getByProps } = render(<PlayerAvatar playerId="A1" />);
+
+            expect(queryByTestId('player-avatar-label')).toBeNull();
+            expect(UNSAFE_getByProps({ name: 'person' })).toBeTruthy();
+        });
+
         test('is neutral grey outside a match theme', () => {
             const { getByTestId } = render(<PlayerAvatar playerId="A1" />);
 

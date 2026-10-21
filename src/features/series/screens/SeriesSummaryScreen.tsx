@@ -143,7 +143,7 @@ export default function SeriesSummaryScreen({ navigation, route }: any) {
                                                             {t(style.labelKey)}
                                                         </Text>
                                                         <View className="flex-row items-center justify-center">
-                                                            <View className="mr-1.5"><PlayerAvatar teamName={award.teamName} seed={award.playerName} size={20} /></View>
+                                                            <View className="mr-1.5"><PlayerAvatar teamName={award.teamName} seed={award.playerName} size={24} /></View>
                                                             <Text className="text-white font-bold text-center text-xs flex-shrink" numberOfLines={1}>{award.playerName}</Text>
                                                         </View>
                                                         <Text className="text-gray-500 text-[10px] mt-1 text-center">{award.stats}</Text>
