@@ -19,6 +19,9 @@ import { useSeriesStore } from '../features/series/useSeriesStore';
 import { computeTally } from '../features/series/seriesUtils';
 import { SeriesResultCard } from '../features/series/components/SeriesResultCard';
 
+// The result text sits on the picture, so give it a soft shadow instead of a dark band behind it
+const RESULT_SHADOW = { textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 5 };
+
 export default function MatchResultScreen({ navigation, route }: any) {
     const { t } = useTranslation();
     const { state, resetMatch, deleteMatch, history = [] } = useMatchStore();
@@ -158,24 +161,23 @@ export default function MatchResultScreen({ navigation, route }: any) {
                                                 <Text className="text-white text-2xl font-black">{scores.teamBRuns}/{scores.teamBWickets}</Text>
                                             </>
                                         )}
-                                    />
+                                    >
+                                        <Text className="text-3xl font-black text-white text-center mb-1" style={RESULT_SHADOW}>
+                                            {matchResult.winner === 'Draw' ? t('common.matchDrawn') : `${matchResult.winner} ${t('common.winsExclamation')}`}
+                                        </Text>
+                                        <Text className="text-lg text-yellow-400 font-medium lowercase" style={RESULT_SHADOW}>
+                                            {matchResult.resultType === 'runs'
+                                                ? t('common.wonByRuns', { count: matchResult.margin })
+                                                : matchResult.resultType === 'wickets'
+                                                    ? t('common.wonByWickets', { count: matchResult.margin })
+                                                    : matchResult.resultType === 'tied'
+                                                        ? t('common.scoresTied')
+                                                        : matchResult.reason}
+                                        </Text>
+                                    </MatchBanner>
                                 );
                             })()}
-                            <View className="p-6 items-center border-b border-gray-800 mb-4">
-                                <Text className="text-gray-400 text-lg mb-1">{t('common.matchResult')}</Text>
-                                <Text className="text-3xl font-black text-white text-center mb-1">
-                                    {matchResult.winner === 'Draw' ? t('common.matchDrawn') : `${matchResult.winner} ${t('common.winsExclamation')}`}
-                                </Text>
-                                <Text className="text-lg text-yellow-500 font-medium lowercase">
-                                    {matchResult.resultType === 'runs'
-                                        ? t('common.wonByRuns', { count: matchResult.margin })
-                                        : matchResult.resultType === 'wickets'
-                                            ? t('common.wonByWickets', { count: matchResult.margin })
-                                            : matchResult.resultType === 'tied'
-                                                ? t('common.scoresTied')
-                                                : matchResult.reason}
-                                </Text>
-                            </View>
+                            <View className="mb-4" />
 
                             <View className="px-4 mb-6">
                                 <View className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700">

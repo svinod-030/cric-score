@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react-native';
+import { render, fireEvent, act, within } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import MatchResultScreen from '../MatchResultScreen';
 import { useMatchStore } from '../../store/useMatchStore';
@@ -60,6 +60,19 @@ describe('MatchResultScreen with series', () => {
         expect(getAllByTestId('team-logo')).toHaveLength(2);
         expect(getAllByText('LIONS').length).toBeGreaterThan(0);
         expect(getAllByText('TIGERS').length).toBeGreaterThan(0);
+    });
+
+    test('the result text sits inside the banner so the ground picture covers it', () => {
+        const match = completedMatch();
+        act(() => useMatchStore.setState({ history: [match], state: match }));
+
+        const { getByTestId, queryByText } = render(<MatchResultScreen navigation={navigation} route={{ params: {} }} />);
+        const banner = within(getByTestId('match-banner'));
+
+        expect(banner.getByText('LIONS Wins!')).toBeTruthy();
+        expect(banner.getByText('Won by 10 runs')).toBeTruthy();
+        // The result speaks for itself: no separate "Match Result" caption
+        expect(queryByText('Match Result')).toBeNull();
     });
 
     test('a series match shows the series score and has no Delete Match button', () => {
