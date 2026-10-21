@@ -77,6 +77,10 @@ export default function SettingsScreen() {
             Linking.openURL(`mailto:${APP_CONFIG.SUPPORT_EMAIL}?subject=CricScore Support ${APP_CONFIG.APP_VERSION}`);
             return;
         }
+        if (action === "Instagram") {
+            Linking.openURL(APP_CONFIG.INSTAGRAM_URL);
+            return;
+        }
         if (action === "Backup") {
             handleBackup();
             return;
@@ -124,6 +128,13 @@ export default function SettingsScreen() {
                         subtitle={t('common.supportFeedback')}
                         onPress={() => handlePress("Contact Us")}
                         color="#3B82F6"
+                    />
+                    <SettingItem
+                        icon="logo-instagram"
+                        title={t('common.followUsOnInstagram')}
+                        subtitle={APP_CONFIG.INSTAGRAM_HANDLE}
+                        onPress={() => handlePress("Instagram")}
+                        color="#E1306C"
                     />
                 </View>
 

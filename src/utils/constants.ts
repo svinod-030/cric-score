@@ -1,5 +1,7 @@
 export const APP_CONFIG = {
     SUPPORT_EMAIL: 'vinod.sigadana.labs@gmail.com',
+    INSTAGRAM_URL: 'https://www.instagram.com/vin.siga.labs',
+    INSTAGRAM_HANDLE: '@vin.siga.labs',
     ANDROID_PACKAGE_NAME: 'com.vinodsigadana.cricscore',
     IOS_APP_ID: '1234567890', // Placeholder
     APP_VERSION: '3.0.0',
