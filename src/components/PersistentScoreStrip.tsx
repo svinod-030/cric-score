@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { InningsState, Player } from '../types/match';
 import { useTranslation } from 'react-i18next';
+import { PlayerAvatar } from '../features/teamTheme/components/PlayerAvatar';
 
 interface PersistentScoreStripProps {
     innings: InningsState;
@@ -40,13 +41,19 @@ export const PersistentScoreStrip = ({ innings, oversLimit, allPlayers }: Persis
             </Text>
             {(innings.strikerId || innings.nonStrikerId) && (
                 <View className="flex-row justify-between mt-2 pt-2 border-t border-gray-700">
-                    <Text className="text-gray-300 text-sm font-medium" numberOfLines={1}>
-                        {getPlayerName(innings.strikerId)}{innings.strikerId ? '*' : ''} {strikerStats ? `${strikerStats.runs} (${strikerStats.ballsFaced})` : ''}
-                    </Text>
-                    {innings.nonStrikerId ? (
-                        <Text className="text-gray-300 text-sm font-medium" numberOfLines={1}>
-                            {getPlayerName(innings.nonStrikerId)} {nonStrikerStats ? `${nonStrikerStats.runs} (${nonStrikerStats.ballsFaced})` : ''}
+                    <View className="flex-row items-center flex-shrink gap-1.5">
+                        {!!innings.strikerId && <PlayerAvatar playerId={innings.strikerId} seed={getPlayerName(innings.strikerId)} size={20} />}
+                        <Text className="text-gray-300 text-sm font-medium flex-shrink" numberOfLines={1}>
+                            {getPlayerName(innings.strikerId)}{innings.strikerId ? '*' : ''} {strikerStats ? `${strikerStats.runs} (${strikerStats.ballsFaced})` : ''}
                         </Text>
+                    </View>
+                    {innings.nonStrikerId ? (
+                        <View className="flex-row items-center flex-shrink gap-1.5">
+                            <PlayerAvatar playerId={innings.nonStrikerId} seed={getPlayerName(innings.nonStrikerId)} size={20} />
+                            <Text className="text-gray-300 text-sm font-medium flex-shrink" numberOfLines={1}>
+                                {getPlayerName(innings.nonStrikerId)} {nonStrikerStats ? `${nonStrikerStats.runs} (${nonStrikerStats.ballsFaced})` : ''}
+                            </Text>
+                        </View>
                     ) : null}
                 </View>
             )}

@@ -3,11 +3,12 @@ import { render, fireEvent } from '@testing-library/react-native';
 import ScoreboardScreen from '../ScoreboardScreen';
 import { useMatchStore } from '../../store/useMatchStore';
 import { useSeriesStore } from '../../features/series/useSeriesStore';
+import { ScorecardSection } from '../../components/ScorecardSection';
 
 // Mock child components to avoid environment issues and simplify testing
 jest.mock('../../components/BowlerSelectionModal', () => ({ BowlerSelectionModal: () => 'BowlerSelectionModal' }));
 jest.mock('../../components/BatterSelectionModal', () => ({ BatterSelectionModal: () => 'BatterSelectionModal' }));
-jest.mock('../../components/ScorecardSection', () => ({ ScorecardSection: () => 'ScorecardSection' }));
+jest.mock('../../components/ScorecardSection', () => ({ ScorecardSection: jest.fn(() => 'ScorecardSection') }));
 jest.mock('../../components/OverSummarySection', () => ({ OverSummarySection: () => 'OverSummarySection' }));
 jest.mock('../../components/RunSelectionModal', () => ({ RunSelectionModal: () => 'RunSelectionModal' }));
 jest.mock('../../components/WicketTypeSelectionModal', () => ({ WicketTypeSelectionModal: () => 'WicketTypeSelectionModal' }));
@@ -143,6 +144,54 @@ describe('ScoreboardScreen', () => {
         expect(queryByText('Team A Batting')).toBeNull();
         expect(queryByText('100/2')).toBeNull();
     });
+    describe('live scorecard teams', () => {
+        const ids = (players: { id: string }[]) => players.map(p => p.id);
+        const liveScorecardProps = () => {
+            const calls = (ScorecardSection as unknown as jest.Mock).mock.calls;
+            return calls[calls.length - 1][0];
+        };
+
+        const withBattingTeam = (battingTeamKey: 'teamA' | 'teamB') =>
+            (useMatchStore as unknown as jest.Mock).mockReturnValue({
+                ...mockState,
+                history: [],
+                state: {
+                    ...mockState.state,
+                    teamBPlayers: [{ id: 'b1', name: 'Bowler 1' }, { id: 'b2', name: 'Bowler 2' }],
+                    innings1: { ...mockState.state.innings1, battingTeamKey },
+                },
+            });
+
+        test('team A batting: batters are team A and bowlers are team B', () => {
+            withBattingTeam('teamA');
+            render(<ScoreboardScreen navigation={mockNavigation} />);
+
+            const props = liveScorecardProps();
+            expect(ids(props.battingTeamPlayers)).toEqual(['p1', 'p2']);
+            expect(ids(props.bowlingTeamPlayers)).toEqual(['b1', 'b2']);
+        });
+
+        test('team B batting: batters are team B and bowlers are team A', () => {
+            withBattingTeam('teamB');
+            render(<ScoreboardScreen navigation={mockNavigation} />);
+
+            const props = liveScorecardProps();
+            expect(ids(props.battingTeamPlayers)).toEqual(['b1', 'b2']);
+            expect(ids(props.bowlingTeamPlayers)).toEqual(['p1', 'p2']);
+        });
+    });
+
+    describe('player avatars', () => {
+        test('shows an avatar beside the striker, non-striker and current bowler', () => {
+            (useMatchStore as unknown as jest.Mock).mockReturnValue({ ...mockState, history: [] });
+
+            const { getAllByTestId } = render(<ScoreboardScreen navigation={mockNavigation} />);
+
+            // Striker, non-striker and bowler bars (the scorecard tables add more)
+            expect(getAllByTestId('player-avatar').length).toBeGreaterThanOrEqual(3);
+        });
+    });
+
     describe('series tally pill', () => {
         const withSeries = (seriesId?: string, history: any[] = []) =>
             (useMatchStore as unknown as jest.Mock).mockReturnValue({

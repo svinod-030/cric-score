@@ -21,6 +21,7 @@ import { MatchSettingsModal } from '../components/MatchSettingsModal';
 import { SeriesTallyPill } from '../features/series/components/SeriesTallyPill';
 import { MatchThemeProvider } from '../features/teamTheme/MatchThemeContext';
 import { TeamLogo } from '../features/teamTheme/components/TeamLogo';
+import { PlayerAvatar } from '../features/teamTheme/components/PlayerAvatar';
 import { MatchCard } from '../components/MatchCard';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -505,20 +506,26 @@ export default function ScoreboardScreen({ navigation }: any) {
                             {/* Player Stats Bar */}
                             <View className={`flex-row ${innings.isLastManStanding ? 'justify-center' : 'justify-between'} bg-gray-800 p-3 rounded-xl mb-4`}>
                                 <View className={innings.isLastManStanding ? 'items-center' : ''}>
-                                    <EditablePlayerName
-                                        name={getPlayerName(innings.strikerId) + "*"}
-                                        onSave={(newName) => renamePlayer(innings.strikerId, newName.replace('*', ''))}
-                                    />
+                                    <View className="flex-row items-center gap-2">
+                                        <PlayerAvatar playerId={innings.strikerId} seed={getPlayerName(innings.strikerId)} size={30} />
+                                        <EditablePlayerName
+                                            name={getPlayerName(innings.strikerId) + "*"}
+                                            onSave={(newName) => renamePlayer(innings.strikerId, newName.replace('*', ''))}
+                                        />
+                                    </View>
                                     <Text className="text-gray-400">
                                         {strikerStats.runs} ({strikerStats.ballsFaced})
                                     </Text>
                                 </View>
                                 {!innings.isLastManStanding && (
                                     <View className="items-end">
-                                        <EditablePlayerName
-                                            name={getPlayerName(innings.nonStrikerId)}
-                                            onSave={(newName) => renamePlayer(innings.nonStrikerId, newName)}
-                                        />
+                                        <View className="flex-row items-center gap-2">
+                                            <PlayerAvatar playerId={innings.nonStrikerId} seed={getPlayerName(innings.nonStrikerId)} size={30} />
+                                            <EditablePlayerName
+                                                name={getPlayerName(innings.nonStrikerId)}
+                                                onSave={(newName) => renamePlayer(innings.nonStrikerId, newName)}
+                                            />
+                                        </View>
                                         <Text className="text-gray-400">
                                             {nonStrikerStats.runs} ({nonStrikerStats.ballsFaced})
                                         </Text>
@@ -531,10 +538,13 @@ export default function ScoreboardScreen({ navigation }: any) {
                                 <View>
                                     <Text className="text-gray-400 text-xs uppercase font-bold">{t('common.bowler')}</Text>
                                     {innings.currentBowlerId ? (
-                                        <EditablePlayerName
-                                            name={getPlayerName(innings.currentBowlerId)}
-                                            onSave={(newName) => renamePlayer(innings.currentBowlerId!, newName)}
-                                        />
+                                        <View className="flex-row items-center gap-2">
+                                            <PlayerAvatar playerId={innings.currentBowlerId} seed={getPlayerName(innings.currentBowlerId)} size={30} />
+                                            <EditablePlayerName
+                                                name={getPlayerName(innings.currentBowlerId)}
+                                                onSave={(newName) => renamePlayer(innings.currentBowlerId!, newName)}
+                                            />
+                                        </View>
                                     ) : (
                                         <Text className="text-white font-bold text-lg">{t('common.selectBowler')}</Text>
                                     )}
@@ -729,7 +739,7 @@ export default function ScoreboardScreen({ navigation }: any) {
                                         title={`${state.currentInnings === 2 ? t('common.ndInnings') : t('common.stInnings')}: ${innings.battingTeam}`}
                                         innings={innings}
                                         battingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
-                                        bowlingTeamPlayers={innings.battingTeamKey === 'teamA' ? state.teamAPlayers : state.teamBPlayers}
+                                        bowlingTeamPlayers={bowlingTeamPlayers}
                                         isCollapsible={true}
                                         defaultExpanded={state.currentInnings === 1}
                                     />

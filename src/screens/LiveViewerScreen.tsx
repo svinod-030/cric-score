@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MatchThemeProvider } from '../features/teamTheme/MatchThemeContext';
+import { PlayerAvatar } from '../features/teamTheme/components/PlayerAvatar';
 import { matchSyncService } from '../services/matchSyncService';
 import { MatchState } from '../types/match';
 import { ScorecardSection } from '../components/ScorecardSection';
@@ -130,14 +131,20 @@ export default function LiveViewerScreen({ route, navigation }: any) {
                     {/* Player Stats Bar */}
                     <View className={`flex-row ${innings.isLastManStanding ? 'justify-center' : 'justify-between'} bg-gray-800 p-4 rounded-xl mb-4 shadow-lg border border-gray-700`}>
                         <View className={innings.isLastManStanding ? 'items-center' : ''}>
-                            <Text className="text-white font-bold text-lg max-w-[150px]">{getPlayerName(innings.strikerId)}*</Text>
+                            <View className="flex-row items-center gap-2">
+                                <PlayerAvatar playerId={innings.strikerId} seed={getPlayerName(innings.strikerId)} size={30} />
+                                <Text className="text-white font-bold text-lg max-w-[150px]">{getPlayerName(innings.strikerId)}*</Text>
+                            </View>
                             <Text className="text-blue-400 font-bold mt-1">
                                 {strikerStats.runs} <Text className="text-gray-400 text-sm font-normal">({strikerStats.ballsFaced})</Text>
                             </Text>
                         </View>
                         {!innings.isLastManStanding && (
                             <View className="items-end">
-                                <Text className="text-white font-bold text-lg max-w-[150px] text-right">{getPlayerName(innings.nonStrikerId)}</Text>
+                                <View className="flex-row items-center gap-2">
+                                    <PlayerAvatar playerId={innings.nonStrikerId} seed={getPlayerName(innings.nonStrikerId)} size={30} />
+                                    <Text className="text-white font-bold text-lg max-w-[150px] text-right">{getPlayerName(innings.nonStrikerId)}</Text>
+                                </View>
                                 <Text className="text-blue-400 font-bold mt-1">
                                     {nonStrikerStats.runs} <Text className="text-gray-400 text-sm font-normal">({nonStrikerStats.ballsFaced})</Text>
                                 </Text>
@@ -149,7 +156,10 @@ export default function LiveViewerScreen({ route, navigation }: any) {
                     <View className="flex-row justify-between items-center bg-gray-800 p-4 rounded-xl mb-6 shadow-lg border border-gray-700">
                         <View>
                             <Text className="text-gray-500 text-xs uppercase font-black tracking-wider mb-1">{t('common.bowler')}</Text>
-                            <Text className="text-white font-bold text-lg">{getPlayerName(innings.currentBowlerId)}</Text>
+                            <View className="flex-row items-center gap-2">
+                                <PlayerAvatar playerId={innings.currentBowlerId ?? undefined} seed={getPlayerName(innings.currentBowlerId)} size={30} />
+                                <Text className="text-white font-bold text-lg">{getPlayerName(innings.currentBowlerId)}</Text>
+                            </View>
                         </View>
                         <View className="items-end">
                             <Text className="text-white font-black text-xl">
@@ -212,7 +222,7 @@ export default function LiveViewerScreen({ route, navigation }: any) {
                         title={`${match.currentInnings === 2 ? t('common.ndInnings') : t('common.stInnings')}: ${innings.battingTeam}`}
                         innings={innings}
                         battingTeamPlayers={innings.battingTeamKey === 'teamA' ? match.teamAPlayers : match.teamBPlayers}
-                        bowlingTeamPlayers={innings.battingTeamKey === 'teamA' ? match.teamAPlayers : match.teamBPlayers}
+                        bowlingTeamPlayers={innings.battingTeamKey === 'teamA' ? match.teamBPlayers : match.teamAPlayers}
                         isCollapsible={true}
                         defaultExpanded={true}
                     />
