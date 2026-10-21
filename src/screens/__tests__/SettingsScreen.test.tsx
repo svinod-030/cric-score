@@ -184,6 +184,15 @@ describe('SettingsScreen', () => {
     });
 
     describe('Licenses navigation', () => {
+        test('opens the Instagram page', () => {
+            const { getByText } = render(<SettingsScreen />);
+
+            expect(getByText('@vin.siga.labs')).toBeTruthy();
+            fireEvent.press(getByText('Follow us on Instagram'));
+
+            expect(Linking.openURL).toHaveBeenCalledWith('https://www.instagram.com/vin.siga.labs');
+        });
+
         test('navigates to Licenses screen', () => {
             const mockNavigate = jest.fn();
             jest.spyOn(require('@react-navigation/native'), 'useNavigation').mockReturnValue({

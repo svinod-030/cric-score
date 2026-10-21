@@ -12,6 +12,8 @@ import { useSeriesStore } from '../features/series/useSeriesStore';
 import { computeTally, deriveSeries, groupHistory } from '../features/series/seriesUtils';
 import { HistoryGroup } from '../features/series/types';
 import { restoreSeriesFromBackup } from '../features/series/seriesBackup';
+import { getMatchTheme } from '../features/teamTheme/teamTheme';
+import { TeamLogo } from '../features/teamTheme/components/TeamLogo';
 
 export default function MatchesHistoryScreen() {
     const { t } = useTranslation();
@@ -120,6 +122,7 @@ export default function MatchesHistoryScreen() {
             return null;
         };
 
+        const rowTheme = getMatchTheme(match.teamA, match.teamB);
         const teamAInnings = getTeamInnings(match.teamA);
         const teamBInnings = getTeamInnings(match.teamB);
 
@@ -179,6 +182,7 @@ export default function MatchesHistoryScreen() {
 
                 <View className="flex-row items-center justify-between">
                     <View className={`flex-1 items-center py-2 px-1 rounded-xl ${isTeamAWinner ? 'bg-blue-500/10' : ''}`}>
+                        <View className="mb-1"><TeamLogo theme={rowTheme.teamA} size={28} /></View>
                         <Text className={`text-white font-bold text-sm mb-1 text-center ${isTeamAWinner ? 'text-yellow-500' : ''}`} numberOfLines={1}>{match.teamA}</Text>
                         <View className="flex-row items-baseline">
                             <Text className="text-white text-2xl font-black">{teamAScore}</Text>
@@ -192,6 +196,7 @@ export default function MatchesHistoryScreen() {
                     </View>
 
                     <View className={`flex-1 items-center py-2 px-1 rounded-xl ${isTeamBWinner ? 'bg-blue-500/10' : ''}`}>
+                        <View className="mb-1"><TeamLogo theme={rowTheme.teamB} size={28} /></View>
                         <Text className={`text-white font-bold text-sm mb-1 text-center ${isTeamBWinner ? 'text-yellow-500' : ''}`} numberOfLines={1}>{match.teamB}</Text>
                         <View className="flex-row items-baseline">
                             <Text className="text-white text-2xl font-black">{teamBScore}</Text>
@@ -223,6 +228,7 @@ export default function MatchesHistoryScreen() {
         if (!series) return renderMatchRow(group.matches[0]);
 
         const tally = computeTally(history, series);
+        const cardTheme = getMatchTheme(series.teamA, series.teamB);
         const isLive = !series.endedAt;
         const latest = group.matches[0];
 
@@ -254,6 +260,7 @@ export default function MatchesHistoryScreen() {
 
                 <View className="flex-row items-center justify-between">
                     <View className="flex-1 items-center py-2 px-1">
+                        <View className="mb-1"><TeamLogo theme={cardTheme.teamA} size={28} /></View>
                         <Text className={`font-bold text-sm mb-1 text-center ${tally.winsA > tally.winsB ? 'text-yellow-500' : 'text-white'}`} numberOfLines={1}>{series.teamA}</Text>
                         <Text className="text-white text-3xl font-black">{tally.winsA}</Text>
                         {tally.winsA > tally.winsB && <Ionicons name="trophy" size={12} color="#EAB308" style={{ marginTop: 2 }} />}
@@ -262,6 +269,7 @@ export default function MatchesHistoryScreen() {
                         <Text className="text-gray-600 font-black italic text-base">VS</Text>
                     </View>
                     <View className="flex-1 items-center py-2 px-1">
+                        <View className="mb-1"><TeamLogo theme={cardTheme.teamB} size={28} /></View>
                         <Text className={`font-bold text-sm mb-1 text-center ${tally.winsB > tally.winsA ? 'text-yellow-500' : 'text-white'}`} numberOfLines={1}>{series.teamB}</Text>
                         <Text className="text-white text-3xl font-black">{tally.winsB}</Text>
                         {tally.winsB > tally.winsA && <Ionicons name="trophy" size={12} color="#EAB308" style={{ marginTop: 2 }} />}

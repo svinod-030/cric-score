@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { InningsState, Player } from '../types/match';
 import { useTranslation } from 'react-i18next';
+import { PlayerAvatar } from '../features/teamTheme/components/PlayerAvatar';
 
 // Helper to calc extras
 const calculateExtras = (innings: InningsState) => {
@@ -43,6 +44,11 @@ export const ScorecardSection = ({
     const validBalls = innings.currentOver.filter(b => b.isValidBall).length;
     const totalOvers = `${innings.overs.length}.${validBalls}`;
 
+    // Batters at the crease and the current bowler appear straight away, before their first ball.
+    const isAtCrease = (id: string) => !!id && (id === innings.strikerId || id === innings.nonStrikerId);
+    const isCurrentBowler = (id: string) => !!id && id === innings.currentBowlerId;
+    const NOT_YET_BATTED_ORDER = 9999;
+
     const toggleExpanded = () => {
         if (isCollapsible) {
             setInternalExpanded(!internalExpanded);
@@ -80,16 +86,20 @@ export const ScorecardSection = ({
                     </View>
 
                     {battingTeamPlayers
-                        .filter(player => !!innings.battingStats[player.id])
-                        .sort((a, b) => (innings.battingStats[a.id]?.battingOrder || 0) - (innings.battingStats[b.id]?.battingOrder || 0))
+                        .filter(player => !!innings.battingStats[player.id] || isAtCrease(player.id))
+                        .sort((a, b) => (innings.battingStats[a.id]?.battingOrder ?? NOT_YET_BATTED_ORDER) - (innings.battingStats[b.id]?.battingOrder ?? NOT_YET_BATTED_ORDER))
                         .map(player => {
-                        const stats = innings.battingStats[player.id];
-                        if (!stats) return null;
+                        const stats = innings.battingStats[player.id] ?? {
+                            playerId: player.id, runs: 0, ballsFaced: 0, fours: 0, sixes: 0,
+                            isOut: false, isRetired: false, battingOrder: NOT_YET_BATTED_ORDER,
+                        };
 
                         const sr = stats.ballsFaced > 0 ? ((stats.runs / stats.ballsFaced) * 100).toFixed(0) : "0";
                         return (
                             <View key={player.id} className="flex-row p-3 border-b border-gray-700/50">
-                                <View className="flex-[3] pr-2">
+                                <View className="flex-[3] pr-2 flex-row items-start">
+                                    <View className="mr-2 mt-0.5"><PlayerAvatar playerId={player.id} seed={player.name} size={26} /></View>
+                                    <View className="flex-1">
                                     <Text className="text-white font-medium">{player.name}</Text>
                                     {(stats.isOut || stats.isRetired) ? (
                                         <Text className="text-gray-500 text-[10px] leading-tight mt-0.5">
@@ -105,6 +115,7 @@ export const ScorecardSection = ({
                                     ) : (
                                         <Text className="text-blue-400 text-[10px] font-bold mt-0.5">{t('common.notOut')}</Text>
                                     )}
+                                    </View>
                                 </View>
                                 <Text className="flex-1 text-white font-bold text-center">{stats.runs}</Text>
                                 <Text className="flex-1 text-gray-400 text-center">{stats.ballsFaced}</Text>
@@ -147,8 +158,10 @@ export const ScorecardSection = ({
                     </View>
 
                     {bowlingTeamPlayers.map(player => {
-                        const stats = innings.bowlingStats[player.id];
-                        if (!stats) return null;
+                        if (!innings.bowlingStats[player.id] && !isCurrentBowler(player.id)) return null;
+                        const stats = innings.bowlingStats[player.id] ?? {
+                            playerId: player.id, overs: 0, balls: 0, maidens: 0, runsConceded: 0, wickets: 0,
+                        };
 
                         const economy = stats.overs > 0
                             ? (stats.runsConceded / (stats.overs + (stats.balls % 6) / 6)).toFixed(1)
@@ -158,7 +171,10 @@ export const ScorecardSection = ({
 
                         return (
                             <View key={player.id} className="flex-row p-3 border-b border-gray-700/50">
-                                <Text className="flex-[3] text-white font-medium">{player.name}</Text>
+                                <View className="flex-[3] flex-row items-center pr-2">
+                                    <View className="mr-2"><PlayerAvatar playerId={player.id} seed={player.name} size={26} /></View>
+                                    <Text className="text-white font-medium flex-1">{player.name}</Text>
+                                </View>
                                 <Text className="flex-1 text-gray-400 text-center">{oversDisplay}</Text>
                                 <Text className="flex-1 text-gray-400 text-center">{stats.maidens}</Text>
                                 <Text className="flex-1 text-gray-400 text-center">{stats.runsConceded}</Text>

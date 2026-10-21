@@ -174,6 +174,18 @@ describe('seriesUtils', () => {
             expect(byType.bestBowler).toMatchObject({ playerName: 'Bala', stats: '3 Wickets' });
         });
 
+        test('awards carry the team the player played for', () => {
+            const match = createMatch({
+                innings1: innings('LIONS', 'teamA', [bat('A1', 40, 20)], [bowl('A1', 0, 0)]),
+                innings2: innings('TIGERS', 'teamB', [bat('B1', 5, 5)], [bowl('B1', 2, 10)]),
+            });
+
+            const byType = Object.fromEntries(computeSeriesAwards([match]).map(a => [a.type, a]));
+
+            expect(byType.bestBatsman).toMatchObject({ playerName: 'Asha', teamName: 'LIONS' });
+            expect(byType.bestBowler).toMatchObject({ playerName: 'Bala', teamName: 'TIGERS' });
+        });
+
         test('mvp is the player with the most points and appears first', () => {
             const match = createMatch({
                 innings1: innings('LIONS', 'teamA', [bat('A1', 20, 15)], [bowl('A2', 0, 0)]),

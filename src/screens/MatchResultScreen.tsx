@@ -11,9 +11,16 @@ import { APP_CONFIG } from '../utils/constants';
 import { useTranslation } from 'react-i18next';
 import { Confetti } from '../components/Confetti';
 import { calculateAwards } from '../utils/awardsUtils';
+import { MatchThemeProvider } from '../features/teamTheme/MatchThemeContext';
+import { MatchBanner } from '../features/teamTheme/components/MatchBanner';
+import { PlayerAvatar } from '../features/teamTheme/components/PlayerAvatar';
+import { getMatchScores } from '../features/series/seriesUtils';
 import { useSeriesStore } from '../features/series/useSeriesStore';
 import { computeTally } from '../features/series/seriesUtils';
 import { SeriesResultCard } from '../features/series/components/SeriesResultCard';
+
+// The result text sits on the picture, so give it a soft shadow instead of a dark band behind it
+const RESULT_SHADOW = { textShadowColor: 'rgba(0,0,0,0.7)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 5 };
 
 export default function MatchResultScreen({ navigation, route }: any) {
     const { t } = useTranslation();
@@ -132,149 +139,169 @@ export default function MatchResultScreen({ navigation, route }: any) {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
-            <ScrollView className="flex-1">
-                <ViewShot
-                    ref={viewShotRef}
-                    options={{ format: 'png', quality: 0.9 }}
-                    style={{ backgroundColor: '#111827' }} // Matches gray-900
-                >
-                    <View className="bg-gray-900">
-                        <View className="p-6 items-center border-b border-gray-800 mb-4">
-                            <Text className="text-gray-400 text-lg mb-1">{t('common.matchResult')}</Text>
-                            <Text className="text-3xl font-black text-white text-center mb-1">
-                                {matchResult.winner === 'Draw' ? t('common.matchDrawn') : `${matchResult.winner} ${t('common.winsExclamation')}`}
-                            </Text>
-                            <Text className="text-lg text-yellow-500 font-medium lowercase">
-                                {matchResult.resultType === 'runs'
-                                    ? t('common.wonByRuns', { count: matchResult.margin })
-                                    : matchResult.resultType === 'wickets'
-                                        ? t('common.wonByWickets', { count: matchResult.margin })
-                                        : matchResult.resultType === 'tied'
-                                            ? t('common.scoresTied')
-                                            : matchResult.reason}
-                            </Text>
-                        </View>
+        <MatchThemeProvider teamA={matchData.teamA} teamB={matchData.teamB}>
+            <SafeAreaView className="flex-1 bg-gray-900" edges={['bottom', 'left', 'right']}>
+                <ScrollView className="flex-1">
+                    <ViewShot
+                        ref={viewShotRef}
+                        options={{ format: 'png', quality: 0.9 }}
+                        style={{ backgroundColor: '#111827' }} // Matches gray-900
+                    >
+                        <View className="bg-gray-900">
+                            {(() => {
+                                const scores = getMatchScores(matchData);
+                                return (
+                                    <MatchBanner
+                                        teamA={matchData.teamA}
+                                        teamB={matchData.teamB}
+                                        center={(
+                                            <>
+                                                <Text className="text-white text-2xl font-black">{scores.teamARuns}/{scores.teamAWickets}</Text>
+                                                <Text className="text-gray-200 text-xs font-bold italic my-0.5">VS</Text>
+                                                <Text className="text-white text-2xl font-black">{scores.teamBRuns}/{scores.teamBWickets}</Text>
+                                            </>
+                                        )}
+                                    >
+                                        <Text className="text-3xl font-black text-white text-center mb-1" style={RESULT_SHADOW}>
+                                            {matchResult.winner === 'Draw' ? t('common.matchDrawn') : `${matchResult.winner} ${t('common.winsExclamation')}`}
+                                        </Text>
+                                        <Text className="text-lg text-yellow-400 font-medium lowercase" style={RESULT_SHADOW}>
+                                            {matchResult.resultType === 'runs'
+                                                ? t('common.wonByRuns', { count: matchResult.margin })
+                                                : matchResult.resultType === 'wickets'
+                                                    ? t('common.wonByWickets', { count: matchResult.margin })
+                                                    : matchResult.resultType === 'tied'
+                                                        ? t('common.scoresTied')
+                                                        : matchResult.reason}
+                                        </Text>
+                                    </MatchBanner>
+                                );
+                            })()}
+                            <View className="mb-4" />
 
-                        <View className="px-4 mb-6">
-                            <View className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700">
-                                <Text className="text-white text-lg font-bold mb-4 flex-row items-center">
-                                    <Ionicons name="trophy-outline" size={20} color="#EAB308" /> {t('common.matchAwards')}
-                                </Text>
-                                <View className="flex-row flex-wrap justify-between" style={{ gap: 12 }}>
-                                    {calculateAwards(matchData).map((award, idx) => (
-                                        <View key={idx} className="bg-gray-900/80 p-3 rounded-xl border border-gray-800 items-center justify-center mb-3" style={{ width: '47%' }}>
-                                            <View className="mb-2">
-                                                <Ionicons
-                                                    name={award.type === 'potm' ? "star" : award.type === 'bestBatsman' ? "medal" : award.type === 'bestBowler' ? "flash" : "hand-right"}
-                                                    size={24}
-                                                    color={award.type === 'potm' ? "#EAB308" : award.type === 'bestBatsman' ? "#FCA5A5" : award.type === 'bestBowler' ? "#93C5FD" : "#86EFAC"}
-                                                />
+                            <View className="px-4 mb-6">
+                                <View className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700">
+                                    <Text className="text-white text-lg font-bold mb-4 flex-row items-center">
+                                        <Ionicons name="trophy-outline" size={20} color="#EAB308" /> {t('common.matchAwards')}
+                                    </Text>
+                                    <View className="flex-row flex-wrap justify-between" style={{ gap: 12 }}>
+                                        {calculateAwards(matchData).map((award, idx) => (
+                                            <View key={idx} className="bg-gray-900/80 p-3 rounded-xl border border-gray-800 items-center justify-center mb-3" style={{ width: '47%' }}>
+                                                <View className="mb-2">
+                                                    <Ionicons
+                                                        name={award.type === 'potm' ? "star" : award.type === 'bestBatsman' ? "medal" : award.type === 'bestBowler' ? "flash" : "hand-right"}
+                                                        size={24}
+                                                        color={award.type === 'potm' ? "#EAB308" : award.type === 'bestBatsman' ? "#FCA5A5" : award.type === 'bestBowler' ? "#93C5FD" : "#86EFAC"}
+                                                    />
+                                                </View>
+                                                <Text className="text-gray-400 text-[10px] uppercase font-bold tracking-tighter mb-1 text-center">{t(`common.${award.type}`)}</Text>
+                                                <View className="flex-row items-center justify-center">
+                                                    <View className="mr-1.5"><PlayerAvatar playerId={award.playerId} seed={award.playerName} size={24} /></View>
+                                                    <Text className="text-white font-bold text-center text-xs flex-shrink" numberOfLines={1}>{award.playerName}</Text>
+                                                </View>
+                                                <Text className="text-gray-500 text-[10px] mt-1 text-center">{award.stats}</Text>
                                             </View>
-                                            <Text className="text-gray-400 text-[10px] uppercase font-bold tracking-tighter mb-1 text-center">{t(`common.${award.type}`)}</Text>
-                                            <Text className="text-white font-bold text-center text-xs" numberOfLines={1}>{award.playerName}</Text>
-                                            <Text className="text-gray-500 text-[10px] mt-1 text-center">{award.stats}</Text>
-                                        </View>
-                                    ))}
+                                        ))}
+                                    </View>
                                 </View>
                             </View>
-                        </View>
 
-                        <View className="px-4">
-                            <ScorecardSection
-                                title={`${t('common.stInnings')}: ${innings1.battingTeam}`}
-                                innings={innings1}
-                                battingTeamPlayers={innings1.battingTeam === matchData.teamA ? teamAPlayers : teamBPlayers}
-                                bowlingTeamPlayers={innings1.battingTeam === matchData.teamA ? teamBPlayers : teamAPlayers}
-                                isCollapsible={true}
-                                defaultExpanded={true}
-                                expanded={isSharing ? true : undefined}
+                            <View className="px-4">
+                                <ScorecardSection
+                                    title={`${t('common.stInnings')}: ${innings1.battingTeam}`}
+                                    innings={innings1}
+                                    battingTeamPlayers={innings1.battingTeam === matchData.teamA ? teamAPlayers : teamBPlayers}
+                                    bowlingTeamPlayers={innings1.battingTeam === matchData.teamA ? teamBPlayers : teamAPlayers}
+                                    isCollapsible={true}
+                                    defaultExpanded={true}
+                                    expanded={isSharing ? true : undefined}
+                                />
+
+                                <OverSummarySection
+                                    title={t('common.overSummaryTitle', { innings: t('common.stInnings') })}
+                                    innings={innings1}
+                                    bowlingTeamPlayers={innings1.battingTeam === matchData.teamA ? teamBPlayers : teamAPlayers}
+                                    defaultExpanded={false}
+                                    expanded={isSharing ? true : undefined}
+                                />
+
+                                {(innings2.totalRuns > 0 || innings2.overs.length > 0 || innings2.currentOver.length > 0) && (
+                                    <>
+                                        <ScorecardSection
+                                            title={`${t('common.ndInnings')}: ${innings2.battingTeam}`}
+                                            innings={innings2}
+                                            battingTeamPlayers={innings2.battingTeam === matchData.teamA ? teamAPlayers : teamBPlayers}
+                                            bowlingTeamPlayers={innings2.battingTeam === matchData.teamA ? teamBPlayers : teamAPlayers}
+                                            isCollapsible={true}
+                                            defaultExpanded={false}
+                                            expanded={isSharing ? true : undefined}
+                                        />
+                                        <OverSummarySection
+                                            title={t('common.overSummaryTitle', { innings: t('common.ndInnings') })}
+                                            innings={innings2}
+                                            bowlingTeamPlayers={innings2.battingTeam === matchData.teamA ? teamBPlayers : teamAPlayers}
+                                            defaultExpanded={false}
+                                            expanded={isSharing ? true : undefined}
+                                        />
+                                    </>
+                                )}
+                            </View>
+                            {/* Add branding or footer for the screenshot */}
+                            <View className="p-4 items-center">
+                                <Text className="text-gray-600 text-xs italic">{t('common.brandingFooter')}</Text>
+                            </View>
+                        </View>
+                    </ViewShot>
+
+                    <View className="p-6 pt-0">
+                        {series && (
+                            <SeriesResultCard
+                                series={series}
+                                tally={computeTally(history, series)}
+                                onView={() => navigation.navigate('SeriesSummary', { seriesId: series.id })}
+                                onEnd={isSeriesActive ? handleEndSeries : undefined}
                             />
+                        )}
+                        <TouchableOpacity
+                            className={`bg-green-600 w-full p-4 rounded-xl flex-row items-center justify-center gap-2 shadow-lg shadow-green-900/50 mb-4 ${isSharing ? 'opacity-50' : ''}`}
+                            onPress={handleShare}
+                            disabled={isSharing}
+                        >
+                            <Ionicons name="share-social" size={20} color="white" />
+                            <Text className="text-white text-lg font-bold">{t('common.shareScoreboard')}</Text>
+                        </TouchableOpacity>
 
-                            <OverSummarySection
-                                title={t('common.overSummaryTitle', { innings: t('common.stInnings') })}
-                                innings={innings1}
-                                bowlingTeamPlayers={innings1.battingTeam === matchData.teamA ? teamBPlayers : teamAPlayers}
-                                defaultExpanded={false}
-                                expanded={isSharing ? true : undefined}
-                            />
-
-                            {(innings2.totalRuns > 0 || innings2.overs.length > 0 || innings2.currentOver.length > 0) && (
-                                <>
-                                    <ScorecardSection
-                                        title={`${t('common.ndInnings')}: ${innings2.battingTeam}`}
-                                        innings={innings2}
-                                        battingTeamPlayers={innings2.battingTeam === matchData.teamA ? teamAPlayers : teamBPlayers}
-                                        bowlingTeamPlayers={innings2.battingTeam === matchData.teamA ? teamBPlayers : teamAPlayers}
-                                        isCollapsible={true}
-                                        defaultExpanded={false}
-                                        expanded={isSharing ? true : undefined}
-                                    />
-                                    <OverSummarySection
-                                        title={t('common.overSummaryTitle', { innings: t('common.ndInnings') })}
-                                        innings={innings2}
-                                        bowlingTeamPlayers={innings2.battingTeam === matchData.teamA ? teamBPlayers : teamAPlayers}
-                                        defaultExpanded={false}
-                                        expanded={isSharing ? true : undefined}
-                                    />
-                                </>
-                            )}
-                        </View>
-                        {/* Add branding or footer for the screenshot */}
-                        <View className="p-4 items-center">
-                            <Text className="text-gray-600 text-xs italic">{t('common.brandingFooter')}</Text>
-                        </View>
-                    </View>
-                </ViewShot>
-
-                <View className="p-6 pt-0">
-                    {series && (
-                        <SeriesResultCard
-                            series={series}
-                            tally={computeTally(history, series)}
-                            onView={() => navigation.navigate('SeriesSummary', { seriesId: series.id })}
-                            onEnd={isSeriesActive ? handleEndSeries : undefined}
-                        />
-                    )}
-                    <TouchableOpacity
-                        className={`bg-green-600 w-full p-4 rounded-xl flex-row items-center justify-center gap-2 shadow-lg shadow-green-900/50 mb-4 ${isSharing ? 'opacity-50' : ''}`}
-                        onPress={handleShare}
-                        disabled={isSharing}
-                    >
-                        <Ionicons name="share-social" size={20} color="white" />
-                        <Text className="text-white text-lg font-bold">{t('common.shareScoreboard')}</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        className="bg-blue-600 w-full p-4 rounded-xl items-center shadow-lg shadow-blue-900/50 mb-4"
-                        onPress={handleRateApp}
-                    >
-                        <Text className="text-white text-lg font-bold">{t('common.rateApp')}</Text>
-                    </TouchableOpacity>
-                    {!isHistoryView && (
                         <TouchableOpacity
                             className="bg-blue-600 w-full p-4 rounded-xl items-center shadow-lg shadow-blue-900/50 mb-4"
-                            onPress={handleNewMatch}
+                            onPress={handleRateApp}
                         >
-                            <Text className="text-white text-lg font-bold">
-                                {isSeriesActive && matchData.seriesId === series?.id ? t('common.nextMatchInSeries') : t('common.startNewMatch')}
-                            </Text>
+                            <Text className="text-white text-lg font-bold">{t('common.rateApp')}</Text>
                         </TouchableOpacity>
-                    )}
-                    {!matchData.seriesId && (
-                        <TouchableOpacity
-                            className="bg-red-500/10 w-full p-4 rounded-xl items-center border border-red-500/30 mb-8"
-                            onPress={handleDeleteMatch}
-                        >
-                            <View className="flex-row items-center gap-2">
-                                <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                                <Text className="text-red-500 text-lg font-bold">{t('common.deleteMatch')}</Text>
-                            </View>
-                        </TouchableOpacity>
-                    )}
-                </View>
-            </ScrollView>
-            <Confetti active={!isSharing && shouldShowConfetti} />
-        </SafeAreaView>
+                        {!isHistoryView && (
+                            <TouchableOpacity
+                                className="bg-blue-600 w-full p-4 rounded-xl items-center shadow-lg shadow-blue-900/50 mb-4"
+                                onPress={handleNewMatch}
+                            >
+                                <Text className="text-white text-lg font-bold">
+                                    {isSeriesActive && matchData.seriesId === series?.id ? t('common.nextMatchInSeries') : t('common.startNewMatch')}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                        {!matchData.seriesId && (
+                            <TouchableOpacity
+                                className="bg-red-500/10 w-full p-4 rounded-xl items-center border border-red-500/30 mb-8"
+                                onPress={handleDeleteMatch}
+                            >
+                                <View className="flex-row items-center gap-2">
+                                    <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                                    <Text className="text-red-500 text-lg font-bold">{t('common.deleteMatch')}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                </ScrollView>
+                <Confetti active={!isSharing && shouldShowConfetti} />
+            </SafeAreaView>
+        </MatchThemeProvider>
     );
 }

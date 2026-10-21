@@ -269,6 +269,7 @@
         "deleteSeries": "सीरीज़ हटाएं",
         "deleteSeriesMsg": "इस सीरीज़ और इसके सभी मैच हटाएं? इसे वापस नहीं किया जा सकता।",
         "deleteSeriesBlocked": "इस सीरीज़ को हटाने से पहले चल रहे मैच को पूरा करें या साफ़ करें।",
-        "seriesMatchCount": "सीरीज़ · {{count}} मैच"
+        "seriesMatchCount": "सीरीज़ · {{count}} मैच",
+        "followUsOnInstagram": "इंस्टाग्राम पर हमें फॉलो करें"
     }
 }

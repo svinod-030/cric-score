@@ -269,6 +269,7 @@
         "deleteSeries": "Delete Series",
         "deleteSeriesMsg": "Delete this series and all its matches? This cannot be undone.",
         "deleteSeriesBlocked": "Finish or clear the match in progress before deleting this series.",
-        "seriesMatchCount": "Series · {{count}} matches"
+        "seriesMatchCount": "Series · {{count}} matches",
+        "followUsOnInstagram": "Follow us on Instagram"
     }
 }
