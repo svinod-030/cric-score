@@ -183,6 +183,28 @@ describe('SettingsScreen', () => {
         });
     });
 
+    describe('Donate', () => {
+        test('shows the donate entry on Android and opens the Donate screen', () => {
+            Platform.OS = 'android';
+            const mockNavigate = jest.fn();
+            jest.spyOn(require('@react-navigation/native'), 'useNavigation').mockReturnValue({ navigate: mockNavigate });
+
+            const { getByText } = render(<SettingsScreen />);
+
+            expect(getByText('Help keep the app free and ad-free')).toBeTruthy();
+            fireEvent.press(getByText('Support Cric Score'));
+
+            expect(mockNavigate).toHaveBeenCalledWith('Donate');
+        });
+
+        test('hides the donate entry on iOS, where it would need Apple in-app purchase', () => {
+            Platform.OS = 'ios';
+            const { queryByText } = render(<SettingsScreen />);
+
+            expect(queryByText('Support Cric Score')).toBeNull();
+        });
+    });
+
     describe('Licenses navigation', () => {
         test('opens the Instagram page', () => {
             const { getByText } = render(<SettingsScreen />);

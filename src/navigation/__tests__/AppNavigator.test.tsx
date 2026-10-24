@@ -52,6 +52,10 @@ jest.mock('../../screens/LicensesScreen', () => {
     const { Text } = require('react-native');
     return () => <Text>LicensesScreen</Text>;
 });
+jest.mock('../../features/donate/DonateScreen', () => {
+    const { Text } = require('react-native');
+    return () => <Text>DonateScreen</Text>;
+});
 
 describe('AppNavigator', () => {
     test('renders without crashing', () => {

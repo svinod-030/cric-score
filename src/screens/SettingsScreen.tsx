@@ -69,6 +69,10 @@ export default function SettingsScreen() {
             }
             return;
         }
+        if (action === "Donate") {
+            navigation.navigate('Donate');
+            return;
+        }
         if (action === "Licenses") {
             navigation.navigate('Licenses');
             return;
@@ -104,6 +108,17 @@ export default function SettingsScreen() {
                         onPress={() => handlePress("Rate App")}
                         color="#F59E0B"
                     />
+
+                    {/* Donations use Google Play Billing, so the entry is Android only */}
+                    {Platform.OS === 'android' && (
+                        <SettingItem
+                            icon="heart"
+                            title={t('common.supportTheApp')}
+                            subtitle={t('common.donateSubtitle')}
+                            onPress={() => handlePress("Donate")}
+                            color="#EC4899"
+                        />
+                    )}
 
                     <SettingItem
                         icon="cloud-upload"
