@@ -270,6 +270,22 @@
         "deleteSeriesMsg": "Delete this series and all its matches? This cannot be undone.",
         "deleteSeriesBlocked": "Finish or clear the match in progress before deleting this series.",
         "seriesMatchCount": "Series · {{count}} matches",
-        "followUsOnInstagram": "Follow us on Instagram"
+        "followUsOnInstagram": "Follow us on Instagram",
+        "supportTheApp": "Support Cric Score",
+        "donate": "Donate",
+        "donateSubtitle": "Help keep the app free and ad-free",
+        "donateIntro": "Cric Score is free and has no ads. If you enjoy it, a small donation helps us keep improving it.",
+        "donateTierChai": "Buy us a chai",
+        "donateTierSnack": "Treat us to a snack",
+        "donateTierMeal": "Buy us a meal",
+        "donateTierChampion": "Be a champion",
+        "donateThanks": "Thank you for your support! It means a lot.",
+        "donateFailed": "Something went wrong and the donation could not be completed. Please try again.",
+        "donatePending": "Your donation is pending. It will complete as soon as the payment goes through. Thank you!",
+        "donateUnavailable": "Donations aren't available right now. Please try again later.",
+        "donateStoreUnavailable": "Couldn't connect to Google Play. Check your connection and make sure Google Play is up to date.",
+        "donateNote": "Donations are one-time and don't unlock any features. Payments are processed securely by Google Play.",
+        "donateAndroidOnly": "Donations are available on Android only.",
+        "retry": "Retry"
     }
 }
